@@ -134,5 +134,5 @@ def test_explorations_list(rf, monkeypatch):
             'description': None
         }
     ]
-    actual_explorations_list = explorations.list_(database_id=11)
+    actual_explorations_list = explorations.list_(database_id=11, request=request)
     assert actual_explorations_list == expect_explorations_list

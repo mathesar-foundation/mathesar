@@ -13,15 +13,12 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import {
-    type UserModel,
-    getUsersStoreFromContext,
-  } from '@mathesar/stores/users';
+  import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
   import { PasswordChangeForm, UserDetailsForm } from '@mathesar/systems/users';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
-  const usersStore = getUsersStoreFromContext();
+  const usersStore = getGlobalUsersStore();
 
   export let userId: number;
 

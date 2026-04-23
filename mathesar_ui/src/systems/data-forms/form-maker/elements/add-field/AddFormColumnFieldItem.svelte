@@ -20,8 +20,9 @@
   $: ({ column } = fieldColumn);
 
   $: canInsert = columnDefaultAllowsInsertion(column);
+  $: isUserColumn = column.metadata?.user_display_field != null;
   $: columnAlreadyAdded = $parentHasColumn;
-  $: disabled = columnAlreadyAdded || !canInsert;
+  $: disabled = columnAlreadyAdded || !canInsert || isUserColumn;
 </script>
 
 <ButtonMenuItem {disabled} on:click>
@@ -47,6 +48,8 @@
           <div slot="content">
             {#if columnAlreadyAdded}
               {$_('cannot_add_field_column_is_already_added')}
+            {:else if isUserColumn}
+              {$_('cannot_add_field_column_user_display')}
             {:else if !canInsert}
               {$_('cannot_add_field_column_value_is_dynamic_pk')}
             {/if}

@@ -1,35 +1,31 @@
 import { z } from 'zod';
-import { defineTest } from '../../framework/src';
+import { defineTask } from '../../framework/src';
 import { LoginPage } from '../interactions/regions/login.page';
 import { install } from './install';
 import { expect } from '@playwright/test';
+import { AuthSession } from '../resources/auth';
 
 const loginParams = z.object({
   user: z.string(),
   password: z.string(),
 });
 
-const loginOutcome = z.object({
-  username: z.string(),
-  password: z.string(),
-});
-
-export const login = defineTest({
+export const login = defineTask({
   code: 'login',
   params: loginParams,
-  outcome: loginOutcome,
+  outcome: z.object({
+    session: AuthSession.schema,
+  }),
 
   restore: async ({ page, baseURL }, outcome) => {
-    // GET login page to obtain CSRF cookie
     await page.request.get(`${baseURL}/auth/login/`);
     const cookies = await page.context().cookies();
     const csrfToken = cookies.find((c) => c.name === 'csrftoken')?.value;
 
-    // POST with credentials to establish a fresh session
     const response = await page.request.post(`${baseURL}/auth/login/`, {
       form: {
-        username: outcome.username,
-        password: outcome.password,
+        username: outcome.session.username,
+        password: outcome.session.password,
         csrfmiddlewaretoken: csrfToken ?? '',
       },
       headers: {
@@ -41,23 +37,28 @@ export const login = defineTest({
     }
   },
 
-  scenario: async (t, params) => {
-    await t.step('Install Mathesar', install, {});
+  task: async (t, params) => {
+    await t.ensure(install, {});
 
     return await t.action(
       'Fill credentials and log in',
-      loginOutcome,
-      async ({ page }) => {
-        const loginPage = new LoginPage(page);
-        await loginPage.goto();
-        await loginPage.login(params.user, params.password);
+      {
+        schema: z.object({ session: AuthSession.schema }),
+        resource: AuthSession.creates('session'),
+        fn: async ({ page }) => {
+          const loginPage = new LoginPage(page);
+          await loginPage.goto();
+          await loginPage.login(params.user, params.password);
 
-        await expect(page).not.toHaveURL(/login/);
+          await expect(page).not.toHaveURL(/login/);
 
-        return {
-          username: params.user,
-          password: params.password,
-        };
+          return {
+            session: {
+              username: params.user,
+              password: params.password,
+            },
+          };
+        },
       },
     );
   },

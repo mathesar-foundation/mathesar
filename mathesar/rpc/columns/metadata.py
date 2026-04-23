@@ -32,6 +32,9 @@ class ColumnMetaDataRecord(TypedDict):
         duration_max: The largest unit for displaying durations.
         display_width: The pixel width of the column
         file_backend: The name of a backend for storing file attachments.
+        user_display_field: Which user field to display for user columns (full_name, email, or username).
+            If non-null, the column is treated as a user column and values are displayed as user
+            references. If null, the column displays as a plain integer.
     """
     database_id: int
     table_oid: int
@@ -50,6 +53,8 @@ class ColumnMetaDataRecord(TypedDict):
     duration_min: Optional[str]
     duration_max: Optional[str]
     display_width: Optional[int]
+    file_backend: Optional[str]
+    user_display_field: Optional[Literal["full_name", "email", "username"]]
 
     @classmethod
     def from_model(cls, model):
@@ -72,6 +77,7 @@ class ColumnMetaDataRecord(TypedDict):
             duration_max=model.duration_max,
             display_width=model.display_width,
             file_backend=model.file_backend,
+            user_display_field=model.user_display_field,
         )
 
 
@@ -96,6 +102,9 @@ class ColumnMetaDataBlob(TypedDict):
         duration_max: The largest unit for displaying durations.
         display_width: The pixel width of the column.
         file_backend: The name of a backend for storing file attachments.
+        user_display_field: Which user field to display for user columns (full_name, email, or username).
+            If non-null, the column is treated as a user column and values are displayed as user
+            references. If null, the column displays as a plain integer.
     """
     attnum: int
     bool_input: Optional[Literal["dropdown", "checkbox"]]
@@ -112,6 +121,8 @@ class ColumnMetaDataBlob(TypedDict):
     duration_min: Optional[str]
     duration_max: Optional[str]
     display_width: Optional[int]
+    file_backend: Optional[str]
+    user_display_field: Optional[Literal["full_name", "email", "username"]]
 
     @classmethod
     def from_model(cls, model):
@@ -132,6 +143,7 @@ class ColumnMetaDataBlob(TypedDict):
             duration_max=model.duration_max,
             display_width=model.display_width,
             file_backend=model.file_backend,
+            user_display_field=model.user_display_field,
         )
 
 

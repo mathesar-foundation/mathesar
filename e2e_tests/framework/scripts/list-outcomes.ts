@@ -1,5 +1,5 @@
 /**
- * List all registered tests with their composition structure.
+ * List all registered tasks and scenarios with their composition structure.
  *
  * Usage: npx tsx framework/scripts/list-outcomes.ts
  */
@@ -20,14 +20,16 @@ async function main() {
   }
 
   const { registry } = await import('../src/store/registry');
-  const { buildDag } = await import('../src/engine/dag');
+  const { buildTaskDag } = await import('../src/engine/task-dag');
 
   const entries = registry.getAll();
-  const dag = await buildDag();
+  const scenarios = registry.getAllScenarios();
+  const dag = await buildTaskDag();
 
-  // Print table
+  // Print tasks table
   const header = [
-    'TEST CODE'.padEnd(30),
+    'CODE'.padEnd(30),
+    'TYPE'.padEnd(12),
     'STANDALONE'.padEnd(12),
     'COMPOSES',
   ].join(' ');
@@ -38,16 +40,29 @@ async function main() {
 
   for (const entry of entries) {
     const node = dag.nodes.get(entry.handle.code);
-    const composed = node?.composedTests.join(', ') || '-';
+    const composed = node?.composedTasks.join(', ') || '-';
     const row = [
       entry.handle.code.padEnd(30),
+      'task'.padEnd(12),
       (entry.standaloneParams !== undefined ? 'yes' : 'no').padEnd(12),
       composed,
     ].join(' ');
     console.log(row);
   }
 
-  console.log(`\nTotal: ${entries.length} test(s)`);
+  for (const entry of scenarios) {
+    const node = dag.nodes.get(entry.handle.code);
+    const composed = node?.composedTasks.join(', ') || '-';
+    const row = [
+      entry.handle.code.padEnd(30),
+      'scenario'.padEnd(12),
+      'yes'.padEnd(12),
+      composed,
+    ].join(' ');
+    console.log(row);
+  }
+
+  console.log(`\nTotal: ${entries.length} task(s), ${scenarios.length} scenario(s)`);
 }
 
 main().catch((err) => {

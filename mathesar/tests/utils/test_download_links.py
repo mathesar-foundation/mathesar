@@ -58,7 +58,10 @@ def test_get_download_links(monkeypatch):
     # Since this is the first call, this should also create DownloadLinks under
     # the hood.
 
-    actual_output = dl.get_download_links(request, results, ["files"])
+    mock_col_meta = MagicMock()
+    mock_col_meta.attnum = "files"
+    mock_col_meta.file_backend = BACKEND_KEY
+    actual_output = dl.get_download_links(request, results, [mock_col_meta])
     assert actual_output == {
         "files": {
             expect_pdf_mash: {
@@ -94,7 +97,7 @@ def test_get_download_links(monkeypatch):
     )
 
     # Test with another session.
-    actual_output = dl.get_download_links(request, results, ["files"])
+    actual_output = dl.get_download_links(request, results, [mock_col_meta])
     assert actual_output == {
         "files": {
             expect_pdf_mash: {

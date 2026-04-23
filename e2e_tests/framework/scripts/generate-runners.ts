@@ -25,6 +25,8 @@ export interface RunnerGeneratorConfig {
   levels?: Map<string, number>;
   /** Set of test codes that have standalone params. Only these get runners. */
   standaloneCodes?: Set<string>;
+  /** Set of test codes that are ScenarioHandle. Uses runScenarioFlow. */
+  scenarioCodes?: Set<string>;
 }
 
 function generateRunner(
@@ -35,13 +37,23 @@ function generateRunner(
   const frameworkImport = toRelativePosix(phaseDir, path.resolve(config.generatedDir, config.frameworkImport));
   const testsImport = toRelativePosix(phaseDir, path.resolve(config.generatedDir, config.testsImport));
 
+  const isScenario = config.scenarioCodes?.has(testCode) ?? false;
+  const runFn = isScenario ? 'runScenarioFlow' : 'runTaskFlow';
+
+  // Scenarios compose many tasks and can run for several minutes. Give them
+  // a generous ceiling so they don't hit Playwright's 30s default.
+  const timeoutMs = isScenario ? 20 * 60 * 1000 : undefined;
+  const timeoutLine = timeoutMs !== undefined
+    ? `\n  test.setTimeout(${timeoutMs});`
+    : '';
+
   return `// Auto-generated from ${testCode}.ts — do not edit
 import { test } from '@playwright/test';
-import { runFlow } from '${frameworkImport}';
+import { ${runFn} } from '${frameworkImport}';
 import '${testsImport}/${testCode}';
 
-test('${testCode}', async ({ page, baseURL, request }) => {
-  await runFlow({ page, baseURL: baseURL!, request }, '${testCode}');
+test('${testCode}', async ({ page, baseURL, request }) => {${timeoutLine}
+  await ${runFn}({ page, baseURL: baseURL!, request }, '${testCode}');
 });
 `;
 }
