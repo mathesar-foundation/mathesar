@@ -175,7 +175,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.10.0
+  mathesar_version: 0.10.1
   version:
     provider: mike
     alias: true
