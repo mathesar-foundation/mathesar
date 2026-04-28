@@ -1,12 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
     iconDatabase,
     iconDeleteMajor,
     iconEdit,
     iconMoreActions,
     iconReinstall,
+    iconRequiresAttention,
     iconRequiresUpgrade,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -16,6 +19,7 @@
     ButtonMenuItem,
     DropdownMenu,
     Icon,
+    Tooltip,
   } from '@mathesar-component-library';
 
   export let database: Database;
@@ -68,6 +72,35 @@
           <Button on:click={() => onTriggerUpgrade?.(database)}>
             {$_('upgrade')}
           </Button>
+        </div>
+      {/if}
+      {#if database.isPostgresDeprecated && database.postgresqlVersion}
+        <div class="postgres-deprecated">
+          <Tooltip allowHover>
+            <div slot="trigger" class="indicator">
+              <Icon {...iconRequiresAttention} />
+              {$_('deprecated')}
+            </div>
+            <span slot="content">
+              <RichText
+                text={$_('postgres_deprecation_warning')}
+                let:slotName
+                let:translatedArg
+              >
+                {#if slotName === 'bold'}
+                  <b>{translatedArg}</b>
+                {/if}
+                {#if slotName === 'postgresqlVersion'}
+                  <b>{Math.floor(database.postgresqlVersion / 10000)}</b>
+                {/if}
+                {#if slotName === 'versionSupportLink'}
+                  <DocsLink page="versionSupport">
+                    {translatedArg}
+                  </DocsLink>
+                {/if}
+              </RichText>
+            </span>
+          </Tooltip>
         </div>
       {/if}
       {#if isMathesarAdmin}
@@ -206,6 +239,10 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    z-index: var(--z-index-menu-trigger);
+  }
+
+  .postgres-deprecated {
     z-index: var(--z-index-menu-trigger);
   }
 
