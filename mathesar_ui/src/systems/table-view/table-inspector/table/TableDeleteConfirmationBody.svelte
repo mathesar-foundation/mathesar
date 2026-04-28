@@ -13,7 +13,8 @@
   let value = '';
 
   const { canProceed } = confirmationController;
-  $: $canProceed = value.trim().toLowerCase() === tableName.toLowerCase();
+  $: $canProceed =
+    value.trim().toLowerCase() === tableName.trim().toLowerCase();
 </script>
 
 <div class="table-delete-confirmation-body">
