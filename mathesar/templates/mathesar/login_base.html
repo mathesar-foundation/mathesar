@@ -23,6 +23,19 @@
     .logo img {
       width: 13.25rem;
       display: block;
+      object-fit: contain;
+    }
+    .logo .custom-logo {
+      max-height: 10rem;
+    }
+    .powered-by-tag {
+      margin-top: var(--lg2);
+      font-size: var(--sm2);
+      color: var(--color-fg-subtle);
+    }
+    .powered-by-tag a {
+      color: inherit;
+      text-decoration: underline;
     }
     .tutorial {
       max-width: 48rem;
@@ -120,7 +133,11 @@
 
 {% block content %}
   <div class="logo">
-    <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
+    {% if common_data.custom_logo_url %}
+      <img src="{{ common_data.custom_logo_url }}" alt="Custom Logo" class="align-center custom-logo"/>
+    {% else %}
+      <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
+    {% endif %}
   </div>
 
   <div class="login-card align-center">
@@ -142,4 +159,9 @@
     </form>
    
   </div>
+  {% if common_data.custom_logo_url %}
+    <div class="powered-by-tag align-center">
+      Powered by <a href="https://mathesar.org" target="_blank">Mathesar</a>
+    </div>
+  {% endif %}
 {% endblock %}
