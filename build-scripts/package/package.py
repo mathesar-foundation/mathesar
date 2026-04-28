@@ -230,6 +230,29 @@ def package_mathesar(base_dir: Path, dist_dir: Path) -> None:
     run_command(["npm", "ci"], cwd=base_dir / "mathesar_ui")
     run_command(["npm", "run", "build"], cwd=base_dir / "mathesar_ui")
 
+    # Precompress static files (Brotli and gzip)
+    static_dir = base_dir / "mathesar" / "static" / "mathesar"
+    if static_dir.exists():
+        logger.info(f"Precompressing static files in {static_dir}")
+        brotli_available = shutil.which("brotli") is not None
+        if not brotli_available:
+            logger.warning("Brotli is not installed. Brotli precompression will be skipped!")
+        for path in static_dir.rglob("*"):
+            if path.is_file() and path.suffix not in {".br", ".gz"}:
+                # Brotli
+                if brotli_available:
+                    try:
+                        run_command(["brotli", "-f", "-q", "11", str(path)])
+                    except Exception as e:
+                        logger.warning(f"Brotli compression failed for {path}: {e}")
+                # Gzip
+                try:
+                    run_command(["gzip", "-kf9", str(path)])
+                except Exception as e:
+                    logger.warning(f"Gzip compression failed for {path}: {e}")
+    else:
+        logger.warning(f"Static directory {static_dir} does not exist, skipping precompression.")
+
     logger.info("Compiling Django translations")
     run_command([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], cwd=base_dir)
     run_command([sys.executable, "manage.py", "compilemessages"], cwd=base_dir)
