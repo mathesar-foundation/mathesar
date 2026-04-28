@@ -21,10 +21,12 @@
   export let fileManifestsForSheet: AssociatedCellValuesForSheet<FileManifest>;
 
   $: ({ columnIds, preprocIds } = grouping);
+
   $: preProcFunctionsForColumn = columnIds.map(
     (columnId) =>
       processedColumnsMap.get(String(columnId))?.preprocFunctions ?? [],
   );
+
   $: preprocNames = preprocIds.map((preprocId, index) =>
     preprocId
       ? preProcFunctionsForColumn[index].find(
@@ -34,27 +36,26 @@
   );
 </script>
 
-<SheetPositionableCell index={0} columnSpan={processedColumnsMap.size + 1}>
+<SheetPositionableCell index={0} columnSpan={columnIds.length + 1}>
   <div class="group-header">
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
         {@const stringColumnId = String(columnId)}
-        <GroupHeaderCellValue
-          {processedColumnsMap}
-          cellValue={row.groupValues
-            ? row.groupValues[stringColumnId]
-            : undefined}
-          {recordSummariesForSheet}
-          columnId={stringColumnId}
-          preprocName={preprocNames[index]}
-          {fileManifestsForSheet}
-          totalColumns={columnIds.length}
-        />
+        <div class="group-header-item">
+          <GroupHeaderCellValue
+            {processedColumnsMap}
+            cellValue={row.groupValues?.[stringColumnId]}
+            {recordSummariesForSheet}
+            columnId={stringColumnId}
+            preprocName={preprocNames[index]}
+            {fileManifestsForSheet}
+            totalColumns={columnIds.length}
+          />
+        </div>
       {/each}
+
       <div class="count-container">
-        <Badge>
-          {group.count}
-        </Badge>
+        <Badge>{group.count}</Badge>
       </div>
     </div>
   </div>
@@ -68,19 +69,32 @@
     border-bottom: 1px solid var(--color-border-grid);
     border-right: 1px solid var(--color-border-grid);
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 
-    .groups-data {
-      align-items: start;
-      display: flex;
-      gap: 1rem;
-      overflow: hidden;
-    }
+  .groups-data {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+    overflow: hidden;
+    min-width: 0;
+  }
 
-    .count-container {
-      --badge-font-size: var(--sm1);
-      --badge-text-color: var(--color-fg-subtle-1);
-      --badge-background-color: var(--color-bg-sunken-1-hover);
-      height: 100%;
-    }
+  .group-header-item {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .count-container {
+    flex-shrink: 0;
+    --badge-font-size: var(--sm1);
+    --badge-text-color: var(--color-fg-subtle-1);
+    --badge-background-color: var(--color-bg-sunken-1-hover);
+    max-width: 100%;
   }
 </style>
