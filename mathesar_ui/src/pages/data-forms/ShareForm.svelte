@@ -162,7 +162,7 @@
       <div>
         <SpinnerButton
           disabled={$hasChanges}
-          appearance="default"
+          appearance="control"
           onClick={shareForm}
           label={$_('create_public_link')}
         />

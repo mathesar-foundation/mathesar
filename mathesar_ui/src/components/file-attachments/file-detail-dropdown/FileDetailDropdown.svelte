@@ -61,7 +61,7 @@
         <Icon {...iconDeleteMajor} />
         <span class="button-label">{$_('remove')}</span>
       </Button>
-      <a class="btn btn-default" href={downloadUrl}>
+      <a class="btn btn-control" href={downloadUrl}>
         <Icon {...iconDownload} />
         <span class="button-label">{$_('download')}</span>
       </a>
