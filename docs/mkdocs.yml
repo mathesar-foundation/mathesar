@@ -40,6 +40,7 @@ nav:
           - File data type: user-guide/files.md
           - Form builder: user-guide/forms.md
           - Data Explorer: user-guide/data-explorer.md
+          - User data type: user-guide/user-type.md
       - Data management:
           - Importing data: user-guide/importing-data.md
           - Exporting data: user-guide/exporting-data.md
@@ -49,8 +50,11 @@ nav:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
-      - '0.8.0': releases/0.8.0.md
+      - '0.10.1': releases/0.10.1.md
       - Previous releases:
+          - '0.10.0': releases/0.10.0.md
+          - '0.9.0': releases/0.9.0.md
+          - '0.8.0': releases/0.8.0.md
           - '0.7.1': releases/0.7.1.md
           - '0.7.0': releases/0.7.0.md
           - '0.6.0': releases/0.6.0.md
@@ -172,7 +176,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.9.0
+  mathesar_version: 0.10.1
   version:
     provider: mike
     alias: true

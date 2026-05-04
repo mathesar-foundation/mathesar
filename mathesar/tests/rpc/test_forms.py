@@ -179,7 +179,7 @@ def test_forms_add(rf, monkeypatch):
     request = rf.post('/api/rpc/v0', data={})
     request.user = User(username='alice', password='pass1234')
 
-    def mock_create_form(form_def, user):
+    def mock_create_form(form_def, user, database_id):
         return mock_forms_info()
 
     monkeypatch.setattr(forms, 'create_form', mock_create_form)
@@ -187,7 +187,6 @@ def test_forms_add(rf, monkeypatch):
     form_def = {
         "name": "form1",
         "version": 1,
-        "database_id": 1,
         "schema_oid": 18145,
         "base_table_oid": 18152,
         "associated_role_id": 121,
@@ -220,7 +219,7 @@ def test_forms_add(rf, monkeypatch):
             }
         ]
     }
-    actual_form_info = forms.add(form_def=form_def, request=request)
+    actual_form_info = forms.add(database_id=1, form_def=form_def, request=request)
     assert actual_form_info == expect_form_info
 
 

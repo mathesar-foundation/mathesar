@@ -86,6 +86,7 @@ import {
   faStopwatch,
   faSync,
   faT,
+  faTags,
   faTimes,
   faTrashAlt,
   faTriangleExclamation,
@@ -301,3 +302,4 @@ export const iconUiTypeUnknown: IconProps = { data: faQuestion };
 export const iconUiTypeUri: IconProps = { data: faGlobe };
 export const iconUiTypeArray: IconProps = { data: arrayIcon };
 export const iconUiTypeUuid: IconProps = { data: faFingerprint };
+export const iconUiTypeEnum: IconProps = { data: faTags };

@@ -15,6 +15,8 @@ interface Window {
     | {
         translations: {
           en?: LanguageDictionary;
+          es?: LanguageDictionary;
+          fr?: LanguageDictionary;
           ja?: LanguageDictionary;
         };
       }

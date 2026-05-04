@@ -128,6 +128,15 @@ This is a custom type implemented in Mathesar's UI. To enable this data type, yo
 
 Learn more about [Mathesar's file feature](./files.md).
 
+### User
+
+- **PostgreSQL types**
+    - `integer`
+
+This is a custom type implemented in Mathesar's UI. User columns store Mathesar user IDs, allowing you to reference Mathesar users directly in your database tables.
+
+Learn more about [working with user columns](./user-type.md).
+
 ## Other PostgreSQL types
 
 Mathesar has rudimentary support for other PostgreSQL types such as: `array`, `bytea`, `point`, `line`, `lseg`, `box`, `path`, `path`, `polygon`, `circle`, `cidr`, `inet`, `macaddr`, `macaddr8`, `bit`, `bit varying`, `tsquery`, `tsvector`, `json`, `jsonb`, `xml`, `pg_lsn`, `pg_snapshot`, `txid_snapshot`, `int4range`, `int8range`, `numrange`, `tsrange`, `tstzrange`, `daterange`.

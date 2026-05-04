@@ -102,7 +102,7 @@
     }
 
     queryLoadPromise?.cancel();
-    queryLoadPromise = getExploration(_queryId);
+    queryLoadPromise = getExploration(database.id, _queryId);
     try {
       const queryInstance = await queryLoadPromise;
       createQueryManager(queryInstance);
