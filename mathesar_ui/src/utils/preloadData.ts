@@ -19,7 +19,7 @@ type WithStatus<D> =
       };
     };
 
-export type DeploymentType = 'SELF_HOSTED' | 'HOSTED_WORKSPACE';
+export type DeploymentType = 'SELF_HOSTED' | 'MANAGED_SAAS';
 
 export interface BaseCommonData {
   current_release_tag_name: string;
