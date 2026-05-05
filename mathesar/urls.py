@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.views import LoginView
 from django.urls import include, path, re_path
 
@@ -6,16 +7,44 @@ from mathesar.views.installation.decorators import installation_complete, instal
 from mathesar.views.installation.complete_installation import CompleteInstallationFormView
 from mathesar.views.users.password_reset import MathesarPasswordResetConfirmView
 
+
+_is_managed_saas = settings.MATHESAR_DEPLOYMENT_TYPE == settings.DEPLOYMENT_TYPE_MANAGED_SAAS
+
+if _is_managed_saas:
+    # Managed-SaaS uses an SSO-only login page rendered from a dedicated
+    # template. Sign-in is open as long as the deployment has been
+    # provisioned, so the installation_complete decorator (which gates on
+    # superuser presence) is not applied here.
+    _login_view = LoginView.as_view(
+        redirect_authenticated_user=True,
+        template_name='registration/login_managed_saas.html',
+    )
+    _auth_routes = [
+        path('auth/login/', _login_view, name='login'),
+        path('auth/3rdparty/<path:rest>/', _login_view, name='oidc'),
+    ]
+else:
+    # Self-hosted: gate the login routes on installation completion and
+    # register the complete-installation form for the bootstrap flow.
+    _login_view = installation_complete(LoginView.as_view(redirect_authenticated_user=True))
+    _auth_routes = [
+        path(
+            'complete_installation/',
+            installation_incomplete(CompleteInstallationFormView.as_view()),
+            name='complete_installation',
+        ),
+        path('auth/login/', _login_view, name='login'),
+        path('auth/3rdparty/<path:rest>/', _login_view, name='oidc'),
+    ]
+
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/data_files/', views.data_files.list_or_create_data_file, name='list_or_create_data_file'),
     path('api/db/v0/data_files/<int:data_file_id>/', views.data_files.get_or_patch_data_file, name='get_or_patch_data_file'),
     path('api/export/v0/explorations/', views.export.export_exploration, name='export_exploration'),
     path('api/export/v0/tables/', views.export.export_table, name='export_table'),
-    path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
     path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('auth/login/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
-    path('auth/3rdparty/<path:rest>/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='oidc'),  # hack to redirect '/login/cancelled', 'login/error/' 'signup/' and '' to login page
+    *_auth_routes,
     path('auth/', include('django.contrib.auth.urls')),  # default auth/
     path('auth/', include('allauth.urls')),  # catch any urls that are not available in default auth/
     path('bulk_insert/', views.bulk_insert.bulk_insert, name='bulk_insert'),

@@ -211,7 +211,12 @@ if MATHESAR_DEPLOYMENT_TYPE == DEPLOYMENT_TYPE_MANAGED_SAAS:
     # Email is enforced verified at the provider by the adapter; skip
     # allauth's local verification machinery entirely.
     ACCOUNT_EMAIL_VERIFICATION = 'none'
-    ACCOUNT_EMAIL_REQUIRED = True
+
+    # Mark email as required at the framework level (defense-in-depth
+    # alongside the adapter's pre_social_login check). Using the modern
+    # ACCOUNT_SIGNUP_FIELDS API; the legacy ACCOUNT_EMAIL_REQUIRED
+    # setting is deprecated in allauth >= 65.
+    ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*']
 else:
     SOCIALACCOUNT_PROVIDERS = {
         "openid_connect": {

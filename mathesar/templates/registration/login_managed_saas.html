@@ -1,0 +1,36 @@
+{% extends 'mathesar/login_base.html' %}
+{% load i18n static socialaccount %}
+
+{% block h1 %}{% translate "Sign in to Mathesar" %}{% endblock %}
+
+{% block box_content %}
+  <div class="footer">
+    <p class="subtitle">
+      {% translate "Continue with one of the following providers." %}
+    </p>
+
+    {% get_providers as socialaccount_providers %}
+    {% for provider in socialaccount_providers %}
+      <a class="btn btn-secondary" href="{% provider_login_url provider process='login' %}">
+        <img
+          src="{% static 'images/sso/' %}{{ provider }}.svg"
+          alt="{{ provider|capfirst }} logo"
+          style="height:1em; vertical-align:middle; margin-right:0.5em"
+          onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"
+        />
+        {% blocktranslate with provider_name=provider|capfirst %}Continue with {{ provider_name }}{% endblocktranslate %}
+      </a>
+    {% endfor %}
+
+    {% if messages %}
+      {% for message in messages %}
+        {% if 'error' in message.tags %}
+          <div class="message-box error-message">
+            <div class="icon">&#9888;</div>
+            <div>{{ message }}</div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+{% endblock %}
