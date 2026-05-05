@@ -27,6 +27,8 @@ from config.database_config import PostgresConfig, parse_port
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Deployment type — read early because INSTALLED_APPS branches on it.
+# See MANAGED_SAAS.md for the operator-facing description of how
+# managed-SaaS differs from self-hosted.
 DEPLOYMENT_TYPE_SELF_HOSTED = 'SELF_HOSTED'
 DEPLOYMENT_TYPE_MANAGED_SAAS = 'MANAGED_SAAS'
 _raw_deployment_type = os.environ.get('MATHESAR_DEPLOYMENT_TYPE', '').strip()

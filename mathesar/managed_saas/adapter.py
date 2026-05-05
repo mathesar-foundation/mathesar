@@ -21,6 +21,9 @@ class SaasSocialAccountAdapter(DefaultSocialAccountAdapter):
 
     Sign-ups that violate (1) or (2) are rejected with a user-facing
     error message; the user is redirected back to the login page.
+
+    See MANAGED_SAAS.md for the operator-facing description of how
+    managed-SaaS differs from self-hosted.
     """
 
     def pre_social_login(self, request, sociallogin):

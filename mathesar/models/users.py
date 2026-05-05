@@ -16,6 +16,12 @@ class User(AbstractUser):
             'unique': 'A user with that username already exists.',
         },
     )
+    # `email` (inherited from AbstractUser) is intentionally optional
+    # at the model layer (`blank=True`) — self-hosted admins sometimes
+    # create local users with no email. The managed-SaaS deployment
+    # enforces email-required-and-verified at the SSO adapter level
+    # instead. See MANAGED_SAAS.md.
+    #
     # Name fields are changed to mitigate some of the issues in
     # https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/
     # We can get by with a "full name" and "short name" to display in different contexts
