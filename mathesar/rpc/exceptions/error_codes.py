@@ -538,6 +538,7 @@ mathesar_error_map = frozendict({
     "NoAdminConnectionAvailable": -28029,
     "NoConnectionAvailable": -28030,
     "NotFoundAPIException": -28031,
+    "OperationNotSupportedInManagedSaas": -28038,
     "ProgrammingAPIException": -28032,
     "TypeErrorAPIException": -28033,
     "UnknownDatabaseTypeIdentifier": -28034,

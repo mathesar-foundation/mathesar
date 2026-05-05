@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
@@ -8,13 +9,24 @@
   import { iconAddUser } from '@mathesar/icons';
   import {
     ADMIN_USERS_PAGE_ADD_NEW_URL,
+    ADMIN_USERS_PAGE_URL,
     getEditUsersPageUrl,
   } from '@mathesar/routes/urls';
   import { getGlobalUsersStore } from '@mathesar/stores/users';
   import { UserDetailsForm } from '@mathesar/systems/users';
+  import { isManagedSaas } from '@mathesar/utils/preloadData';
   import { Icon } from '@mathesar-component-library';
 
   const usersStore = getGlobalUsersStore();
+
+  // Direct-URL navigation guard: managed-SaaS does not support
+  // admin-created local users (sign-up is SSO-only), so redirect away
+  // from this page even if the user typed the URL directly.
+  onMount(() => {
+    if (isManagedSaas()) {
+      router.goto(ADMIN_USERS_PAGE_URL, true);
+    }
+  });
 
   function onUserCreate(user: User) {
     void usersStore?.fetchUsers();

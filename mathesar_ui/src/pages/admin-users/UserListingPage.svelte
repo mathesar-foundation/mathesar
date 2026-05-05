@@ -8,7 +8,10 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
   import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
+  import { isManagedSaas } from '@mathesar/utils/preloadData';
   import { AnchorButton, Icon } from '@mathesar-component-library';
+
+  const showAddUserButton = !isManagedSaas();
 
   import UserRow from './UserRow.svelte';
   import UserSkeleton from './UserSkeleton.svelte';
@@ -55,10 +58,12 @@
       on:clear={handleClearFilterQuery}
     >
       <svelte:fragment slot="action">
-        <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
-          <Icon {...iconAddNew} />
-          <span>{$_('add_user')}</span>
-        </AnchorButton>
+        {#if showAddUserButton}
+          <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
+            <Icon {...iconAddNew} />
+            <span>{$_('add_user')}</span>
+          </AnchorButton>
+        {/if}
       </svelte:fragment>
       <svelte:fragment slot="resultInfo">
         <p>

@@ -94,3 +94,13 @@ export function getDefaultFileStorageBackend() {
   }
   return null;
 }
+
+/**
+ * True when the running deployment is the managed-SaaS variant. Used to
+ * gate UI controls (e.g. the "Add User" button and password change forms)
+ * that don't apply when sign-up is SSO-only and users have no local
+ * password.
+ */
+export function isManagedSaas(): boolean {
+  return preloadCommonData().deployment_type === 'MANAGED_SAAS';
+}

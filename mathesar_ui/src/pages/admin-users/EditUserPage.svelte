@@ -15,10 +15,12 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
   import { PasswordChangeForm, UserDetailsForm } from '@mathesar/systems/users';
+  import { isManagedSaas } from '@mathesar/utils/preloadData';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
   const usersStore = getGlobalUsersStore();
+  const showPasswordChangeForm = !isManagedSaas();
 
   export let userId: number;
 
@@ -70,9 +72,11 @@
     <FormBox>
       <UserDetailsForm user={userModel.getUser()} on:update={onUserUpdate} />
     </FormBox>
-    <FormBox>
-      <PasswordChangeForm {userId} />
-    </FormBox>
+    {#if showPasswordChangeForm}
+      <FormBox>
+        <PasswordChangeForm {userId} />
+      </FormBox>
+    {/if}
     {#if !userIsLoggedInUser}
       <FormBox>
         <SpinnerButton

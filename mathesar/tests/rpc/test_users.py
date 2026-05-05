@@ -260,3 +260,54 @@ def test_users_revoke(rf, monkeypatch):
 
     monkeypatch.setattr(users, 'revoke', mock_revoke_password)
     users.revoke(user_id=_user_id, new_password=_new_password)
+
+
+def test_users_add_rejected_in_managed_saas(rf, settings):
+    """users.add must refuse when running on a managed-SaaS deployment.
+
+    The RPC handler wraps the underlying OperationNotSupportedInManagedSaas
+    exception into an RPCException with the mapped error code.
+    """
+    import pytest
+    from modernrpc.exceptions import RPCException
+    from mathesar.rpc.exceptions.error_codes import mathesar_error_map
+
+    settings.MATHESAR_DEPLOYMENT_TYPE = settings.DEPLOYMENT_TYPE_MANAGED_SAAS
+
+    user_def = {
+        'username': 'eve',
+        'password': 'secret',
+        'is_superuser': False,
+        'email': 'eve@example.com',
+        'full_name': 'Eve',
+        'display_language': 'en',
+    }
+    with pytest.raises(RPCException) as exc_info:
+        users.add(user_def=user_def)
+    assert exc_info.value.code == mathesar_error_map['OperationNotSupportedInManagedSaas']
+
+
+def test_users_password_replace_own_rejected_in_managed_saas(rf, settings):
+    import pytest
+    from modernrpc.exceptions import RPCException
+    from mathesar.rpc.exceptions.error_codes import mathesar_error_map
+
+    settings.MATHESAR_DEPLOYMENT_TYPE = settings.DEPLOYMENT_TYPE_MANAGED_SAAS
+
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(id=1, username='alice')
+    with pytest.raises(RPCException) as exc_info:
+        users.replace_own(old_password='x', new_password='y', request=request)
+    assert exc_info.value.code == mathesar_error_map['OperationNotSupportedInManagedSaas']
+
+
+def test_users_password_revoke_rejected_in_managed_saas(rf, settings):
+    import pytest
+    from modernrpc.exceptions import RPCException
+    from mathesar.rpc.exceptions.error_codes import mathesar_error_map
+
+    settings.MATHESAR_DEPLOYMENT_TYPE = settings.DEPLOYMENT_TYPE_MANAGED_SAAS
+
+    with pytest.raises(RPCException) as exc_info:
+        users.revoke(user_id=2, new_password='y')
+    assert exc_info.value.code == mathesar_error_map['OperationNotSupportedInManagedSaas']

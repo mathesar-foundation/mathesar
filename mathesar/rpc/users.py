@@ -2,8 +2,11 @@
 Classes and functions exposed to the RPC endpoint for managing mathesar users.
 """
 from typing import Optional, TypedDict
+
+from django.conf import settings
 from modernrpc.core import REQUEST_KEY
 
+from mathesar.managed_saas.exceptions import OperationNotSupportedInManagedSaas
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.utils.users import (
     get_user,
@@ -15,6 +18,16 @@ from mathesar.utils.users import (
     change_password,
     revoke_password
 )
+
+
+def _reject_in_managed_saas(operation):
+    """
+    Raise OperationNotSupportedInManagedSaas when the deployment is
+    managed-SaaS. Used to gate password and local-user-creation RPC
+    endpoints whose semantics don't apply when sign-up is SSO-only.
+    """
+    if settings.MATHESAR_DEPLOYMENT_TYPE == settings.DEPLOYMENT_TYPE_MANAGED_SAAS:
+        raise OperationNotSupportedInManagedSaas(operation)
 
 
 class UserInfo(TypedDict):
@@ -81,7 +94,11 @@ def add(*, user_def: UserDef) -> UserInfo:
 
     Returns:
         The information of the created user.
+
+    Note:
+        Not supported on managed-SaaS deployments — sign-up is SSO-only.
     """
+    _reject_in_managed_saas('users.add')
     user = add_user(user_def)
     return UserInfo.from_model(user)
 
@@ -210,7 +227,12 @@ def replace_own(
     Args:
         old_password: Old password of the currently logged in user.
         new_password: New password of the user to set.
+
+    Note:
+        Not supported on managed-SaaS deployments — SSO users have no
+        local password.
     """
+    _reject_in_managed_saas('users.password.replace_own')
     user = kwargs.get(REQUEST_KEY).user
     if not user.check_password(old_password):
         raise Exception('Old password is incorrect')
@@ -232,5 +254,10 @@ def revoke(
 
     Privileges:
         This endpoint requires the caller to be a superuser.
+
+    Note:
+        Not supported on managed-SaaS deployments — SSO users have no
+        local password.
     """
+    _reject_in_managed_saas('users.password.revoke')
     revoke_password(user_id, new_password)

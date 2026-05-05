@@ -7,8 +7,10 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { PasswordChangeForm, UserDetailsForm } from '@mathesar/systems/users';
+  import { isManagedSaas } from '@mathesar/utils/preloadData';
 
   const userProfileStore = getUserProfileStoreFromContext();
+  const showPasswordChangeForm = !isManagedSaas();
 
   $: userProfile = $userProfileStore;
 </script>
@@ -32,9 +34,11 @@
         <h2 slot="header">{$_('account_details')}</h2>
         <UserDetailsForm user={userProfile.getUser()} />
       </InsetPageSection>
-      <InsetPageSection>
-        <PasswordChangeForm userId={userProfile.id} />
-      </InsetPageSection>
+      {#if showPasswordChangeForm}
+        <InsetPageSection>
+          <PasswordChangeForm userId={userProfile.id} />
+        </InsetPageSection>
+      {/if}
 
       {#if !userProfile.isMathesarAdmin}
         <InsetPageSection>
