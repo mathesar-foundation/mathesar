@@ -19,8 +19,11 @@ type WithStatus<D> =
       };
     };
 
+export type DeploymentType = 'SELF_HOSTED' | 'HOSTED_WORKSPACE';
+
 export interface BaseCommonData {
   current_release_tag_name: string;
+  deployment_type: DeploymentType;
   supported_languages: Record<string, string>;
   is_authenticated: boolean;
   file_backends: { backend: string; anonymous_access: boolean }[] | null;

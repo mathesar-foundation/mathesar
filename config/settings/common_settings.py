@@ -17,6 +17,7 @@ import traceback
 from pathlib import Path
 import yaml
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 
 from config.database_config import PostgresConfig, parse_port
@@ -311,6 +312,17 @@ MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/stati
 MATHESAR_ANALYTICS_URL = os.environ.get('MATHESAR_ANALYTICS_URL', default='https://example.com/collector')
 MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='https://example.com/hello')
 MATHESAR_FEEDBACK_URL = os.environ.get('MATHESAR_FEEDBACK_URL', default='https://example.com/feedback')
+
+DEPLOYMENT_TYPE_SELF_HOSTED = 'SELF_HOSTED'
+DEPLOYMENT_TYPE_HOSTED_WORKSPACE = 'HOSTED_WORKSPACE'
+_raw_deployment_type = os.environ.get('MATHESAR_DEPLOYMENT_TYPE', '').strip()
+MATHESAR_DEPLOYMENT_TYPE = _raw_deployment_type or DEPLOYMENT_TYPE_SELF_HOSTED
+
+if MATHESAR_DEPLOYMENT_TYPE not in {DEPLOYMENT_TYPE_SELF_HOSTED, DEPLOYMENT_TYPE_HOSTED_WORKSPACE}:
+    raise ImproperlyConfigured(
+        f"Invalid MATHESAR_DEPLOYMENT_TYPE: {MATHESAR_DEPLOYMENT_TYPE!r}. "
+        f"Allowed values: {DEPLOYMENT_TYPE_SELF_HOSTED!r}, {DEPLOYMENT_TYPE_HOSTED_WORKSPACE!r}."
+    )
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 

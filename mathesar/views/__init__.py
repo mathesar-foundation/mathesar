@@ -95,6 +95,7 @@ def _get_internal_db_meta():
 def get_base_common_data(request):
     return {
         'current_release_tag_name': __version__,
+        'deployment_type': settings.MATHESAR_DEPLOYMENT_TYPE,
         'is_authenticated': not request.user.is_anonymous,
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'file_backends': get_file_backends(public_info=True),
