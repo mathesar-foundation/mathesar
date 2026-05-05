@@ -26,6 +26,18 @@ from config.database_config import PostgresConfig, parse_port
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# Deployment type — read early because INSTALLED_APPS branches on it.
+DEPLOYMENT_TYPE_SELF_HOSTED = 'SELF_HOSTED'
+DEPLOYMENT_TYPE_MANAGED_SAAS = 'MANAGED_SAAS'
+_raw_deployment_type = os.environ.get('MATHESAR_DEPLOYMENT_TYPE', '').strip()
+MATHESAR_DEPLOYMENT_TYPE = _raw_deployment_type or DEPLOYMENT_TYPE_SELF_HOSTED
+
+if MATHESAR_DEPLOYMENT_TYPE not in {DEPLOYMENT_TYPE_SELF_HOSTED, DEPLOYMENT_TYPE_MANAGED_SAAS}:
+    raise ImproperlyConfigured(
+        f"Invalid MATHESAR_DEPLOYMENT_TYPE: {MATHESAR_DEPLOYMENT_TYPE!r}. "
+        f"Allowed values: {DEPLOYMENT_TYPE_SELF_HOSTED!r}, {DEPLOYMENT_TYPE_MANAGED_SAAS!r}."
+    )
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,8 +53,22 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.socialaccount.providers.openid_connect",
 ]
+
+if MATHESAR_DEPLOYMENT_TYPE == DEPLOYMENT_TYPE_MANAGED_SAAS:
+    # Managed-SaaS uses native OAuth2 providers for Google and GitHub.
+    # The generic OpenID Connect provider is not loaded — managed-SaaS
+    # ignores any sso.yml / OIDC_CONFIG_DICT configuration.
+    INSTALLED_APPS += [
+        "allauth.socialaccount.providers.google",
+        "allauth.socialaccount.providers.github",
+    ]
+else:
+    # Self-hosted uses the generic OpenID Connect provider, configured
+    # via sso.yml or the OIDC_CONFIG_DICT env var.
+    INSTALLED_APPS += [
+        "allauth.socialaccount.providers.openid_connect",
+    ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -61,78 +87,138 @@ MIDDLEWARE = [
 
 OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
 OIDC_CONFIG_DICT = {}
-# Try loading OIDC_CONFIG_DICT from env, iff it doesn't exist, try loading from sso.yml
-try:
-    OIDC_CONFIG_DICT = json.loads(os.getenv('OIDC_CONFIG_DICT', "{}"))
-except Exception as e:
-    traceback.print_exception(type(e), e, e.__traceback__)
-try:
-    if OIDC_CONFIG_DICT in [None, {}] and OIDC_CONFIG_FILE.exists():
-        with open(OIDC_CONFIG_FILE, "rb") as f:
-            OIDC_CONFIG_DICT = yaml.full_load(f)
-except Exception as e:
-    traceback.print_exception(type(e), e, e.__traceback__)
 OIDC_CONFIG = []
 OIDC_ALLOWED_EMAIL_DOMAINS = {}
 OIDC_DEFAULT_PG_ROLE_MAP = defaultdict(list)
 
-try:
-    for providers, config in OIDC_CONFIG_DICT['oidc_providers'].items():
-        if not config:
-            continue
-        provider_name = config.get("provider_name")
-        client_id = config.get("client_id")
-        secret = config.get("secret")
-        server_url = config.get("server_url")
-        allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
-        default_pg_role = config.get("default_pg_role", {})
-        if all([provider_name, client_id, secret, server_url]):
-            OIDC_CONFIG.append(
-                {
-                    "provider_id": provider_name.lower(),
-                    "name": provider_name.lower(),
-                    "client_id": client_id,
-                    "secret": secret,
-                    "settings": {
-                        "server_url": server_url
-                    }
-                }
-            )
+if MATHESAR_DEPLOYMENT_TYPE == DEPLOYMENT_TYPE_SELF_HOSTED:
+    # Try loading OIDC_CONFIG_DICT from env, iff it doesn't exist, try loading from sso.yml
+    try:
+        OIDC_CONFIG_DICT = json.loads(os.getenv('OIDC_CONFIG_DICT', "{}"))
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
+    try:
+        if OIDC_CONFIG_DICT in [None, {}] and OIDC_CONFIG_FILE.exists():
+            with open(OIDC_CONFIG_FILE, "rb") as f:
+                OIDC_CONFIG_DICT = yaml.full_load(f)
+    except Exception as e:
+        traceback.print_exception(type(e), e, e.__traceback__)
 
-        if isinstance(allowed_email_domains, list):
-            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
-        elif isinstance(allowed_email_domains, str):
-            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
-
-        for role_info in default_pg_role.values():
-            if not role_info:
+    try:
+        for providers, config in OIDC_CONFIG_DICT['oidc_providers'].items():
+            if not config:
                 continue
-            db_name = role_info.get("name")
-            host = role_info.get("host")
-            port = role_info.get("port")
-            role_name = role_info.get("role")
-            if all([db_name, host, port, role_name]):
-                OIDC_DEFAULT_PG_ROLE_MAP[provider_name].append(
+            provider_name = config.get("provider_name")
+            client_id = config.get("client_id")
+            secret = config.get("secret")
+            server_url = config.get("server_url")
+            allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
+            default_pg_role = config.get("default_pg_role", {})
+            if all([provider_name, client_id, secret, server_url]):
+                OIDC_CONFIG.append(
                     {
-                        "db_name": db_name,
-                        "host": host,
-                        "port": port,
-                        "role_name": role_name
+                        "provider_id": provider_name.lower(),
+                        "name": provider_name.lower(),
+                        "client_id": client_id,
+                        "secret": secret,
+                        "settings": {
+                            "server_url": server_url
+                        }
                     }
                 )
-except Exception as e:
-    # We swallow any exceptions when SSO is misconfigured in sso.yml so that the django server doesn't fail to start.
-    if OIDC_CONFIG_DICT not in [None, {}]:
-        traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
+
+            if isinstance(allowed_email_domains, list):
+                OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
+            elif isinstance(allowed_email_domains, str):
+                OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
+
+            for role_info in default_pg_role.values():
+                if not role_info:
+                    continue
+                db_name = role_info.get("name")
+                host = role_info.get("host")
+                port = role_info.get("port")
+                role_name = role_info.get("role")
+                if all([db_name, host, port, role_name]):
+                    OIDC_DEFAULT_PG_ROLE_MAP[provider_name].append(
+                        {
+                            "db_name": db_name,
+                            "host": host,
+                            "port": port,
+                            "role_name": role_name
+                        }
+                    )
+    except Exception as e:
+        # We swallow any exceptions when SSO is misconfigured in sso.yml so that the django server doesn't fail to start.
+        if OIDC_CONFIG_DICT not in [None, {}]:
+            traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
 
 
-SOCIALACCOUNT_PROVIDERS = {
-    "openid_connect": {
-        "APPS": OIDC_CONFIG
+if MATHESAR_DEPLOYMENT_TYPE == DEPLOYMENT_TYPE_MANAGED_SAAS:
+    # OAuth credentials are injected via environment variables. Missing
+    # values are a hard startup failure — silently broken auth is worse
+    # than a loud error pointing at the missing variable.
+    _required_oauth_env = {
+        'GOOGLE_OAUTH_CLIENT_ID': os.environ.get('GOOGLE_OAUTH_CLIENT_ID', '').strip(),
+        'GOOGLE_OAUTH_SECRET': os.environ.get('GOOGLE_OAUTH_SECRET', '').strip(),
+        'GITHUB_OAUTH_CLIENT_ID': os.environ.get('GITHUB_OAUTH_CLIENT_ID', '').strip(),
+        'GITHUB_OAUTH_SECRET': os.environ.get('GITHUB_OAUTH_SECRET', '').strip(),
     }
-}
+    _missing_oauth_env = [name for name, value in _required_oauth_env.items() if not value]
+    if _missing_oauth_env:
+        raise ImproperlyConfigured(
+            "Managed-SaaS deployment requires the following environment "
+            f"variables to be set: {', '.join(_missing_oauth_env)}."
+        )
 
-SOCIALACCOUNT_ADAPTER = "mathesar.self_hosted.adapter.SelfHostedSocialAccountAdapter"
+    SOCIALACCOUNT_PROVIDERS = {
+        "google": {
+            "APPS": [
+                {
+                    "provider_id": "google",
+                    "name": "Google",
+                    "client_id": _required_oauth_env['GOOGLE_OAUTH_CLIENT_ID'],
+                    "secret": _required_oauth_env['GOOGLE_OAUTH_SECRET'],
+                }
+            ],
+            "SCOPE": ["openid", "email", "profile"],
+        },
+        "github": {
+            "APPS": [
+                {
+                    "provider_id": "github",
+                    "name": "GitHub",
+                    "client_id": _required_oauth_env['GITHUB_OAUTH_CLIENT_ID'],
+                    "secret": _required_oauth_env['GITHUB_OAUTH_SECRET'],
+                }
+            ],
+            "SCOPE": ["user:email"],
+        },
+    }
+
+    SOCIALACCOUNT_ADAPTER = "mathesar.managed_saas.adapter.SaasSocialAccountAdapter"
+
+    # Don't persist per-user OAuth tokens — we only need the user's
+    # identity at sign-up. Not storing tokens minimizes blast radius if
+    # the database leaks.
+    SOCIALACCOUNT_STORE_TOKENS = False
+
+    # Auto-create the User on first social login (no interstitial
+    # signup form). Adapter rejects sign-ups missing a verified email
+    # before reaching this point.
+    SOCIALACCOUNT_AUTO_SIGNUP = True
+
+    # Email is enforced verified at the provider by the adapter; skip
+    # allauth's local verification machinery entirely.
+    ACCOUNT_EMAIL_VERIFICATION = 'none'
+    ACCOUNT_EMAIL_REQUIRED = True
+else:
+    SOCIALACCOUNT_PROVIDERS = {
+        "openid_connect": {
+            "APPS": OIDC_CONFIG
+        }
+    }
+    SOCIALACCOUNT_ADAPTER = "mathesar.self_hosted.adapter.SelfHostedSocialAccountAdapter"
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
@@ -313,16 +399,9 @@ MATHESAR_ANALYTICS_URL = os.environ.get('MATHESAR_ANALYTICS_URL', default='https
 MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='https://example.com/hello')
 MATHESAR_FEEDBACK_URL = os.environ.get('MATHESAR_FEEDBACK_URL', default='https://example.com/feedback')
 
-DEPLOYMENT_TYPE_SELF_HOSTED = 'SELF_HOSTED'
-DEPLOYMENT_TYPE_MANAGED_SAAS = 'MANAGED_SAAS'
-_raw_deployment_type = os.environ.get('MATHESAR_DEPLOYMENT_TYPE', '').strip()
-MATHESAR_DEPLOYMENT_TYPE = _raw_deployment_type or DEPLOYMENT_TYPE_SELF_HOSTED
-
-if MATHESAR_DEPLOYMENT_TYPE not in {DEPLOYMENT_TYPE_SELF_HOSTED, DEPLOYMENT_TYPE_MANAGED_SAAS}:
-    raise ImproperlyConfigured(
-        f"Invalid MATHESAR_DEPLOYMENT_TYPE: {MATHESAR_DEPLOYMENT_TYPE!r}. "
-        f"Allowed values: {DEPLOYMENT_TYPE_SELF_HOSTED!r}, {DEPLOYMENT_TYPE_MANAGED_SAAS!r}."
-    )
+# MATHESAR_DEPLOYMENT_TYPE and the DEPLOYMENT_TYPE_* constants are
+# defined near the top of this file because INSTALLED_APPS and the
+# allauth configuration branch on the deployment type.
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
