@@ -11,7 +11,7 @@ from allauth.core.exceptions import ImmediateHttpResponse
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
 
 
-class SocialAccountAdapter(DefaultSocialAccountAdapter):
+class SelfHostedSocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         allowed_email_domains = [domain.lower() for domain in settings.OIDC_ALLOWED_EMAIL_DOMAINS.get(str(sociallogin.provider), [])]
         if (

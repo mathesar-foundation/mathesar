@@ -132,7 +132,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-SOCIALACCOUNT_ADAPTER = "mathesar.oidc.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "mathesar.self_hosted.adapter.SelfHostedSocialAccountAdapter"
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
