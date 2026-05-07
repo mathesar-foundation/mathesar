@@ -1,0 +1,30 @@
+{
+  "name": "mathesar-e2e-tests",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "tsx framework/scripts/generate-runners.ts",
+    "test": "tsx framework/scripts/screenwriter.ts",
+    "test:headed": "tsx framework/scripts/screenwriter.ts --headed",
+    "test:debug": "tsx framework/scripts/screenwriter.ts --debug",
+    "report": "playwright show-report",
+    "validate-dag": "tsx framework/scripts/validate-dag.ts",
+    "list-outcomes": "tsx framework/scripts/list-outcomes.ts",
+    "visualize-dag": "tsx framework/scripts/visualize-dag.ts",
+    "scaffold": "tsx framework/scripts/scaffold-test.ts",
+    "test:framework": "vitest run --config framework/vitest.config.ts",
+    "test:framework:watch": "vitest --config framework/vitest.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@types/node": "^25.5.0",
+    "@types/pg": "^8.15.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "pg": "^8.16.0",
+    "zod": "^4.3.6"
+  }
+}
