@@ -10,7 +10,6 @@
     iconSelectRecord,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import {
     getImportPreviewPageUrl,
@@ -39,7 +38,6 @@
 
   export let table: Table;
   export let database: Database;
-  export let schema: Schema;
   export let openEditTableModal: (_table: Table) => void;
   export let openTablePermissionsModal: (_table: Table) => void;
   export let condensed = false;
@@ -49,13 +47,13 @@
   $: tableIcon = getTableIcon(table);
   $: accentColor = getTableAccentColor(table);
   $: tablePageUrl = requiresImportConfirmation
-    ? getImportPreviewPageUrl(database.id, schema.oid, table.oid, {
+    ? getImportPreviewPageUrl(database.id, table.schema.oid, table.oid, {
         useColumnTypeInference: true,
       })
-    : getTablePageUrl(database.id, schema.oid, table.oid);
+    : getTablePageUrl(database.id, table.schema.oid, table.oid);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.id,
-    schema.oid,
+    table.schema.oid,
     table,
   );
   $: pendingMessage = requiresImportConfirmation
@@ -74,7 +72,7 @@
         },
       },
       onProceed: async () => {
-        await deleteTable(schema, table.oid);
+        await deleteTable(table.schema, table.oid);
       },
     });
   }

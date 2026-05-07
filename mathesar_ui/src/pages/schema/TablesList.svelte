@@ -3,10 +3,10 @@
 
   import { iconTable } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
-  import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { modal } from '@mathesar/stores/modal';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
 
   import EditTableModal from './EditTableModal.svelte';
@@ -18,7 +18,6 @@
 
   export let tables: Table[];
   export let database: Database;
-  export let schema: Schema;
 
   let tableForEditing: Table | undefined;
   let tableForPermissions: Table | undefined;
@@ -43,14 +42,15 @@
       }}
     >
       {#each tables as table (table.oid)}
-        <TableCard
-          {table}
-          {database}
-          {schema}
-          {openEditTableModal}
-          {openTablePermissionsModal}
-          condensed={containerWidth < 400}
-        />
+        {#if table.schema === $currentSchema}
+          <TableCard
+            {table}
+            {database}
+            {openEditTableModal}
+            {openTablePermissionsModal}
+            condensed={containerWidth < 400}
+          />
+        {/if}
       {/each}
     </div>
   {:else}
