@@ -188,6 +188,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
 
 def exploration_chunker(
     conn,
+    database_id,
     exploration_id,
     limit=None,
     offset=None,
@@ -195,7 +196,7 @@ def exploration_chunker(
 ):
     limit = min(limit or 50000, 50000)  # We cap limit at 50000
     # so that we can avoid loading explorations > 50000 rows into memory.
-    exp_model = get_exploration(exploration_id)
+    exp_model = get_exploration(exploration_id, database_id)
     exploration_def = {
         "database_id": exp_model.database.id,
         "base_table_oid": exp_model.base_table_oid,
