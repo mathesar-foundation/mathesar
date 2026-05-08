@@ -1,9 +1,13 @@
+import secrets
+import string
+
 from django.db import transaction
 from psycopg.errors import DuplicateSchema
 
 from config.database_config import get_internal_database_config
 from db.databases import create_database
 from db.connection import mathesar_connection
+from db.roles import create_init_login_role
 from mathesar.examples.bike_shop_dataset import load_bike_shop_dataset
 from mathesar.examples.hardware_store_dataset import load_hardware_store_dataset
 from mathesar.examples.ice_cream_employees_dataset import (
@@ -24,6 +28,74 @@ class BadInstallationTarget(Exception):
 
 
 @transaction.atomic
+def set_up_home_role_and_db_for_user(user, sample_data=[]):
+    """
+    Create a role on the internal server for User.
+    Create a database on the internal server and install Mathesar.
+
+    This database will be set up to be accessible for the given user
+    using the created role.
+
+    No attempt is made to avoid collisions with preexisting DBs or roles!
+    """
+    conn_info = get_internal_database_config()
+    if user.username == conn_info.dbname:
+        raise BadInstallationTarget(
+            "Mathesar can't be installed in the internal database."
+        )
+
+    new_password = ''.join(
+        secrets.choice(string.ascii_letters + string.digits) for i in range(16)
+    )
+
+    user_database_role = _setup_connection_models(
+        conn_info.host,
+        conn_info.port,
+        user.username,
+        user.username,
+        user.username,
+        new_password,
+        user,
+        sslmode=conn_info.sslmode,
+    )
+    with mathesar_connection(
+        host=conn_info.host,
+        port=conn_info.port,
+        dbname=conn_info.dbname,
+        user=conn_info.role,
+        password=conn_info.password,
+        sslmode=conn_info.sslmode,
+        application_name="mathesar.utils.permissions.set_up_home_role_and_db_for_user",
+    ) as root_conn:
+        create_init_login_role(
+            user_database_role.configured_role.name,
+            user_database_role.configured_role.password,
+            root_conn,
+        )
+    with mathesar_connection(
+        host=conn_info.host,
+        port=conn_info.port,
+        dbname=conn_info.dbname,
+        user=conn_info.role,
+        password=conn_info.password,
+        sslmode=conn_info.sslmode,
+        application_name="mathesar.utils.permissions.set_up_home_role_and_db_for_user",
+    ) as root_conn:
+        create_database(
+            user_database_role.database.name,
+            root_conn,
+            owner=user_database_role.configured_role.name,
+        )
+    user_database_role.database.install_sql(
+        username=user_database_role.configured_role.name,
+        password=user_database_role.configured_role.password,
+    )
+    with user_database_role.connection as conn:
+        _load_sample_data(conn, sample_data)
+    return user_database_role
+
+
+@transaction.atomic
 def set_up_new_database_for_user_on_internal_server(
     database_name, nickname, user, sample_data=[]
 ):
@@ -37,7 +109,7 @@ def set_up_new_database_for_user_on_internal_server(
         raise BadInstallationTarget(
             "Mathesar can't be installed in the internal database."
         )
-    sslmode = conn_info.sslmode
+    
     user_database_role = _setup_connection_models(
         conn_info.host,
         conn_info.port,
@@ -46,7 +118,7 @@ def set_up_new_database_for_user_on_internal_server(
         conn_info.role,
         conn_info.password,
         user,
-        sslmode=sslmode,
+        sslmode=conn_info.sslmode,
     )
     with mathesar_connection(
         host=conn_info.host,
@@ -54,7 +126,7 @@ def set_up_new_database_for_user_on_internal_server(
         dbname=conn_info.dbname,
         user=conn_info.role,
         password=conn_info.password,
-        sslmode=sslmode,
+        sslmode=conn_info.sslmode,
         application_name="mathesar.utils.permissions.set_up_new_database_for_user_on_internal_server",
     ) as root_conn:
         create_database(database_name, root_conn)
