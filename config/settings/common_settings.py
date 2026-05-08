@@ -343,3 +343,5 @@ LANGUAGE_COOKIE_NAME = 'display_language'
 FALLBACK_LANGUAGE = 'en'
 
 SALT_KEY = SECRET_KEY
+
+AUTO_HOME_DB_AND_ROLE = os.environ.get('AUTO_HOME_DB_AND_ROLE') in ['t', 'true', 'True']
