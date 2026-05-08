@@ -15,9 +15,13 @@
     iconModalRecordView,
     iconSetToNull,
   } from '@mathesar/icons';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
-  import { currentTablesMap } from '@mathesar/stores/tables';
+  import {
+    currentTablesMap,
+    getTableFromStoreOrApi,
+  } from '@mathesar/stores/tables';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import {
     ButtonMenuItem,
@@ -54,13 +58,14 @@
   ]);
   const labelController = new LabelController();
   const modalRecordView = modalRecordViewContext.get();
+  const linkedTableFetch = new AsyncStore(getTableFromStoreOrApi);
 
   export let record: RecordStore;
   export let processedColumn: ProcessedColumn;
   export let field: FieldStore;
   export let canUpdateTableRecords = true;
 
-  $: ({ recordSummaries, fileManifests } = record);
+  $: ({ recordSummaries, fileManifests, table } = record);
   $: ({ column, abstractType, linkFk } = processedColumn);
   $: canUpdateColumn = processedColumn.currentRolePrivileges.has('UPDATE');
   $: value = $field;
@@ -74,7 +79,16 @@
   $: shouldDisplayNullOverlay = !cellDataTypesThatUsePlaceholderText.has(
     abstractType.cellInfo.type,
   );
-  $: getRecordUrl = $storeToGetRecordPageUrl;
+  $: linkFk?.referent_table_oid
+    ? void linkedTableFetch.run({
+        database: table.schema.database,
+        tableOid: linkFk.referent_table_oid,
+      })
+    : linkedTableFetch.reset();
+  $: linkedTable = $linkedTableFetch.resolvedValue;
+  $: linkedRecordUrl = linkedTable
+    ? getRecordPageUrlByTable(linkedTable, value)
+    : undefined;
   $: fileManifest = (() => {
     if (!column.metadata?.file_backend) return undefined;
     const fileReference = parseFileReference(value);
@@ -129,17 +143,13 @@
           })}
           icon={iconExpandDown}
         >
-          {#if linkFk}
+          {#if linkedTable}
             <ButtonMenuItem
               icon={iconModalRecordView}
               on:click={quickViewRecord}
             >
               {$_('quick_view_linked_record')}
             </ButtonMenuItem>
-            {@const linkedRecordUrl = getRecordUrl({
-              tableId: linkFk.referent_table_oid,
-              recordId: value,
-            })}
             {#if linkedRecordUrl}
               <LinkMenuItem href={linkedRecordUrl} icon={iconLinkToRecordPage}>
                 {$_('open_linked_record')}

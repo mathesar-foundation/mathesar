@@ -4,7 +4,7 @@ import { _ } from 'svelte-i18n';
 import type { ResultValue } from '@mathesar/api/rpc/records';
 import type { ModalController } from '@mathesar/component-library';
 import { iconLinkToRecordPage, iconModalRecordView } from '@mathesar/icons';
-import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
 import type { ProcessedColumn, TabularData } from '@mathesar/stores/table-data';
 import { currentTablesMap } from '@mathesar/stores/tables';
 import RecordStore from '@mathesar/systems/record-view/RecordStore';
@@ -31,11 +31,7 @@ export function* viewLinkedRecord(p: {
   if (!canViewLinkedEntities) return;
   const linkedTable = get(currentTablesMap).get(linkFk.referent_table_oid);
   if (!linkedTable) return;
-  const getRecordUrl = get(storeToGetRecordPageUrl);
-  const href = getRecordUrl({
-    tableId: linkedTable.oid,
-    recordId: p.cellValue,
-  });
+  const href = getRecordPageUrlByTable(linkedTable, p.cellValue);
   if (!href) return;
   const linkedRecordSummaries = get(
     p.tabularData.recordsData.linkedRecordSummaries,

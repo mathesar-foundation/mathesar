@@ -27,6 +27,7 @@
   $: schemaRouteContext = schema
     ? SchemaRouteContext.construct(schema)
     : ensureReadable(undefined);
+  $: console.log('schema route context set', $schemaRouteContext?.schema);
 
   function handleUnmount() {
     $currentSchemaId = undefined;

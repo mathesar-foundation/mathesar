@@ -6,8 +6,8 @@
     iconLinkToRecordPage,
     iconModalRecordView,
   } from '@mathesar/icons';
+  import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     extractPrimaryKeyValue,
     getTabularDataStoreFromContext,
@@ -39,10 +39,7 @@
       return undefined;
     }
   })();
-  $: recordPageLink = $storeToGetRecordPageUrl({
-    tableId: table.oid,
-    recordId,
-  });
+  $: recordPageLink = getRecordPageUrlByTable(table, recordId);
 
   function quickViewRecord() {
     if (!modalRecordView) return;
