@@ -9,6 +9,7 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.core.exceptions import ImmediateHttpResponse
 
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
+from mathesar.utils.permissions import set_up_home_role_and_db_for_user
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -55,4 +56,6 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
             messages.error(request, "Failed to automatically provision default postgres roles.")
             raise ImmediateHttpResponse(redirect("account_login"))
+        if settings.AUTO_HOME_DB_AND_ROLE is True:
+            set_up_home_role_and_db_for_user(saved_user)
         return saved_user
