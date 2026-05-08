@@ -4,10 +4,12 @@
 
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
-  import { currentTablesMap } from '@mathesar/stores/tables';
+  import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
-  import { Window, defined, portal } from '@mathesar-component-library';
+  import { Window, portal } from '@mathesar-component-library';
 
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
@@ -20,6 +22,7 @@
    * add more UI within that area, we'll need to update this value.
    */
   const nestedSelectorVerticalOffset = '2rem';
+  const tableFetch = new AsyncStore(getTableFromStoreOrApi);
 
   export let controller: RecordSelectorController;
   export let windowPositionerElement: HTMLElement;
@@ -31,7 +34,11 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableOid, purpose } = controller);
-  $: table = defined($tableOid, (oid) => $currentTablesMap.get(oid));
+  $: database = databasesStore.currentDatabase;
+  $: $tableOid && $database
+    ? void tableFetch.run({ database: $database, tableOid: $tableOid })
+    : tableFetch.reset();
+  $: table = $tableFetch.resolvedValue;
   $: tabularData =
     $tableOid && table
       ? new TabularData({
