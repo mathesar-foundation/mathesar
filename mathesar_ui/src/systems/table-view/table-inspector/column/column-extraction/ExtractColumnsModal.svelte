@@ -175,7 +175,7 @@
           .run();
         followUps.push(
           getTableFromStoreOrApi({
-            schema: currentTable.schema,
+            database: currentTable.schema.database,
             tableOid: response.extracted_table_oid,
           }),
         );

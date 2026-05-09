@@ -14,7 +14,7 @@
     ImperativeFilterController,
     imperativeFilterControllerContext,
   } from '@mathesar/pages/table/ImperativeFilterController';
-  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getTablePageUrlByTable } from '@mathesar/routes/urls';
   import {
     Meta,
     TabularData,
@@ -51,8 +51,7 @@
   $: tabularDataStore.set(tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: canViewTable = $currentRolePrivileges.has('SELECT');
-  $: getTablePageUrl = $storeToGetTablePageUrl;
-  $: href = isInModal ? undefined : getTablePageUrl({ tableId: table.oid });
+  $: href = isInModal ? undefined : getTablePageUrlByTable(table);
 </script>
 
 <div class="table-widget">
