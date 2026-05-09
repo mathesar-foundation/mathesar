@@ -12,7 +12,6 @@
     extractPrimaryKeyValue,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { currentTablesMap } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import RecordStore from '@mathesar/systems/record-view/RecordStore';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
@@ -44,10 +43,8 @@
   function quickViewRecord() {
     if (!modalRecordView) return;
     if (recordId === undefined) return;
-    const containingTable = $currentTablesMap.get(table.oid);
-    if (!containingTable) return;
     const recordStore = new RecordStore({
-      table: containingTable,
+      table,
       recordPk: String(recordId),
     });
     modalRecordView.open(recordStore);

@@ -18,10 +18,7 @@
   import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
-  import {
-    currentTablesMap,
-    getTableFromStoreOrApi,
-  } from '@mathesar/stores/tables';
+  import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
   import {
     ButtonMenuItem,
@@ -98,13 +95,9 @@
 
   function quickViewRecord() {
     if (!modalRecordView) return;
-    if (value === undefined) return;
-    const tableOid = linkFk?.referent_table_oid;
-    if (!tableOid) return;
-    const containingTable = $currentTablesMap.get(tableOid);
-    if (!containingTable) return;
+    if (!linkedTable) return;
     const recordStore = new RecordStore({
-      table: containingTable,
+      table: linkedTable,
       recordPk: String(value),
     });
     modalRecordView.open(recordStore);
