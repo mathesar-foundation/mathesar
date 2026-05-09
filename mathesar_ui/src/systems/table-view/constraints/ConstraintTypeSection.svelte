@@ -115,7 +115,10 @@
       </span>
       <div slot="content">
         {#if constraintType === 'foreignkey'}
-          <ForeignKeyConstraintDetails {constraint} />
+          <ForeignKeyConstraintDetails
+            database={table.schema.database}
+            {constraint}
+          />
         {:else}
           <ConstraintDetails {constraint} />
         {/if}
