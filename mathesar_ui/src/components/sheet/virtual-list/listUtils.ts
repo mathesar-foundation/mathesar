@@ -169,7 +169,7 @@ function getStopIndexForStartIndex(props: Props, startIndex: number): number {
 }
 
 function getRangeToRender(props: Props): number[] {
-  const { isScrolling, scrollDirection, itemCount, overscanCount } = props;
+  const { itemCount, overscanCount } = props;
 
   if (itemCount === 0) {
     return [0, 0, 0, 0];
@@ -178,20 +178,16 @@ function getRangeToRender(props: Props): number[] {
   const startIndex = findNearestItem(props);
   const stopIndex = getStopIndexForStartIndex(props, startIndex);
 
-  // Overscan by one item in each direction so that tab/focus works.
-  // If there isn't at least one extra item, tab loops back around.
-  const overscanBackward =
-    !isScrolling || scrollDirection === 'backward'
-      ? Math.max(1, overscanCount)
-      : 1;
-  const overscanForward =
-    !isScrolling || scrollDirection === 'forward'
-      ? Math.max(1, overscanCount)
-      : 1;
+  // Symmetric overscan in both directions, always. The previous
+  // asymmetric implementation (1 in idle direction during scroll, full in
+  // scroll direction) caused the rendered window size to oscillate between
+  // renders, which prevents the slot recycling in Body.svelte from reusing
+  // DOM nodes across scroll steps.
+  const overscan = Math.max(1, overscanCount);
 
   return [
-    Math.max(0, startIndex - overscanBackward),
-    Math.max(0, Math.min(itemCount - 1, stopIndex + overscanForward)),
+    Math.max(0, startIndex - overscan),
+    Math.max(0, Math.min(itemCount - 1, stopIndex + overscan)),
     startIndex,
     stopIndex,
   ];
