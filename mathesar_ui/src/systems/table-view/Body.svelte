@@ -172,30 +172,35 @@
     );
     poolRef.current = newPool;
 
-    const slotByRowId = new Map<string, number>();
-    for (const entry of newPool) slotByRowId.set(entry.rowId, entry.slot);
+    // Phase 3: emit pool entries in stable slot-index order so Svelte never
+    // re-orders DOM children of the keyed each. Without this, the active row
+    // moves position when its row transitions between in-items and ghost,
+    // and Svelte's insertBefore drops focus / interrupts edit mode.
+    const liveItemByRowId = new Map<string, RenderItem>();
+    for (const item of liveItems) {
+      const row = descriptors[item.index]?.row;
+      if (row && isPoolRow(row)) liveItemByRowId.set(row.identifier, item);
+    }
 
-    // Phase 3: emit live entries and ghost entries in one keyed each.
     const renderItems: RenderItem[] = [];
     const keys: string[] = [];
 
-    for (const item of liveItems) {
-      const row = descriptors[item.index]?.row;
-      if (!row) continue;
-      renderItems.push(item);
-      if (isPoolRow(row)) {
-        keys.push(`slot:${slotByRowId.get(row.identifier) ?? -1}`);
-      } else {
-        keys.push(row.identifier);
-      }
+    const sortedPool = [...newPool].sort((a, b) => a.slot - b.slot);
+    for (const entry of sortedPool) {
+      const live = liveItemByRowId.get(entry.rowId);
+      renderItems.push(live ?? makeOffscreenItem(entry.index));
+      keys.push(`slot:${entry.slot}`);
     }
 
-    // Ghosts: pool entries whose rowId is not in liveRowIds. Render offscreen
-    // at their natural index so the slot key stays in the each block.
-    for (const entry of newPool) {
-      if (liveRowIds.has(entry.rowId)) continue;
-      renderItems.push(makeOffscreenItem(entry.index));
-      keys.push(`slot:${entry.slot}`);
+    // Non-pool live items (placeholder, group, help) emitted last. Their
+    // keys / DOM may churn across derives — that's existing behavior we don't
+    // touch here.
+    for (const item of liveItems) {
+      const row = descriptors[item.index]?.row;
+      if (row && !isPoolRow(row)) {
+        renderItems.push(item);
+        keys.push(row.identifier);
+      }
     }
 
     if (DEBUG_SLOTS) {
