@@ -29,10 +29,14 @@ export function reconcilePool(
   const live: PoolEntry[] = [];
   const ghosts: PoolEntry[] = [];
   const usedSlots = new Set<number>();
+  const droppedByMissing: PoolEntry[] = [];
 
   for (const entry of prev) {
     const currentIndex = descriptorIndexByRowId.get(entry.rowId);
-    if (currentIndex === undefined) continue; // row deleted; release slot
+    if (currentIndex === undefined) {
+      droppedByMissing.push(entry);
+      continue; // row deleted; release slot
+    }
 
     const updated: PoolEntry = { ...entry, index: currentIndex };
     if (liveRowIds.has(entry.rowId)) {
@@ -41,6 +45,22 @@ export function reconcilePool(
       ghosts.push(updated);
     }
     usedSlots.add(entry.slot);
+  }
+
+  if (droppedByMissing.length > 0) {
+    // eslint-disable-next-line no-console
+    console.log(
+      '[reconcilePool] dropped',
+      droppedByMissing.length,
+      'entries (rowId vanished). Sample dropped rowIds:',
+      droppedByMissing.slice(0, 3).map((e) => `${e.slot}:${e.rowId}`),
+      '— prev liveRowIds count:',
+      prev.length,
+      'new liveRowIds count:',
+      liveRowIds.size,
+      'descriptorIndex size:',
+      descriptorIndexByRowId.size,
+    );
   }
 
   const claimed = new Set<string>();
@@ -71,4 +91,77 @@ export function reconcilePool(
   }
 
   return [...live, ...newLive, ...ghosts];
+}
+
+/**
+ * Pad the pool up to `targetSize` with ghost entries pulled from descriptor
+ * indices immediately outside the live range. Used to:
+ *   - pre-mount overscan-side rows at top/bottom boundaries (so the rendered
+ *     window doesn't grow row-by-row as the user scrolls off the boundary), and
+ *   - hold the pool at its high-water size across events that would otherwise
+ *     shrink it (e.g. refresh re-fetches all row identifiers).
+ *
+ * Candidates are picked alternately from above and below the live range,
+ * starting closest to the range and expanding outward. Skips:
+ *   - indices outside `[0, totalCount)`,
+ *   - rows for which `isPoolEligible` returns false (placeholder, group
+ *     header, help text — they're keyed separately, not by slot),
+ *   - rowIds already in the pool (live or ghost).
+ *
+ * Slots taken are the smallest unused integers, never colliding with existing
+ * pool slots.
+ */
+export function padPool<R>(
+  pool: Pool,
+  targetSize: number,
+  liveStart: number,
+  liveEnd: number,
+  totalCount: number,
+  getRowAt: (index: number) => R | undefined,
+  getIdentifier: (row: R) => string,
+  isPoolEligible: (row: R) => boolean,
+): Pool {
+  if (pool.length >= targetSize) return pool;
+  if (totalCount <= 0) return pool;
+
+  const usedRowIds = new Set(pool.map((e) => e.rowId));
+  const usedSlots = new Set(pool.map((e) => e.slot));
+  const padded: PoolEntry[] = [];
+
+  function nextSlot(): number {
+    let slot = 0;
+    while (usedSlots.has(slot)) slot += 1;
+    usedSlots.add(slot);
+    return slot;
+  }
+
+  function tryAdd(index: number): void {
+    if (index < 0 || index >= totalCount) return;
+    const row = getRowAt(index);
+    if (row === undefined) return;
+    if (!isPoolEligible(row)) return;
+    const rowId = getIdentifier(row);
+    if (usedRowIds.has(rowId)) return;
+    usedRowIds.add(rowId);
+    padded.push({ slot: nextSlot(), rowId, index });
+  }
+
+  let above = liveStart - 1;
+  let below = liveEnd + 1;
+  while (
+    pool.length + padded.length < targetSize &&
+    (above >= 0 || below < totalCount)
+  ) {
+    if (above >= 0) {
+      tryAdd(above);
+      above -= 1;
+    }
+    if (pool.length + padded.length >= targetSize) break;
+    if (below < totalCount) {
+      tryAdd(below);
+      below += 1;
+    }
+  }
+
+  return [...pool, ...padded];
 }

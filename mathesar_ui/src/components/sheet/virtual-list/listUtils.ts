@@ -185,9 +185,34 @@ function getRangeToRender(props: Props): number[] {
   // DOM nodes across scroll steps.
   const overscan = Math.max(1, overscanCount);
 
+  // Rebalance the overscan budget. When one side is clamped at the dataset
+  // boundary (rows we wanted to overscan but don't exist), give the leftover
+  // to the other side. Without this, scrolling near a boundary makes the
+  // rendered window size fluctuate as `stopIndex` walks downward while
+  // `renderedStart` stays clamped at 0 — that fluctuation is the source of
+  // the slot-pool churn fixed by this rebalance.
+  //
+  // Three passes:
+  //   1. Try to give `overscan` to the above side. Note any deficit.
+  //   2. Try to give `overscan + above-deficit` to the below side. Note any
+  //      deficit.
+  //   3. Try to absorb the below-deficit back into the above side.
+  // Result: rendered window size is `(stopIndex - startIndex + 1) +
+  // 2*overscan`, clamped to the dataset.
+  const overscanAboveAvail = startIndex;
+  const overscanBelowAvail = itemCount - 1 - stopIndex;
+  const overscanAbove1 = Math.min(overscan, overscanAboveAvail);
+  const aboveDeficit = overscan - overscanAbove1;
+  const overscanBelow = Math.min(overscanBelowAvail, overscan + aboveDeficit);
+  const belowDeficit = overscan + aboveDeficit - overscanBelow;
+  const overscanAbove = Math.min(
+    overscanAboveAvail,
+    overscanAbove1 + belowDeficit,
+  );
+
   return [
-    Math.max(0, startIndex - overscan),
-    Math.max(0, Math.min(itemCount - 1, stopIndex + overscan)),
+    startIndex - overscanAbove,
+    stopIndex + overscanBelow,
     startIndex,
     stopIndex,
   ];
