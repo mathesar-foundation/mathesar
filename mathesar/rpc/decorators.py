@@ -36,7 +36,6 @@ def mathesar_rpc_method(*, name, auth="superuser"):
             'analytics.upload_feedback',
             'databases.configured.list',
             'servers.configured.list',
-            'users.list',
             'users.patch_self',
             'users.password.replace_own'
         ]

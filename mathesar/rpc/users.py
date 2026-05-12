@@ -115,7 +115,7 @@ def get(*, user_id: int) -> UserInfo:
     return UserInfo.from_model(user)
 
 
-@mathesar_rpc_method(name='users.list', auth="login")
+@mathesar_rpc_method(name='users.list')
 def list_() -> list[UserInfo]:
     """
     List information about all mathesar users. Exposed as `list`.

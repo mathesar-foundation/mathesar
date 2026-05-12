@@ -535,7 +535,7 @@ METHODS = [
     (
         users.list_,
         "users.list",
-        [user_is_authenticated]
+        [user_is_superuser]
     ),
     (
         users.patch_self,
