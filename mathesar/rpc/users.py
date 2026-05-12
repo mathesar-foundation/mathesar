@@ -100,7 +100,7 @@ def delete(*, user_id: int) -> None:
     delete_user(user_id)
 
 
-@mathesar_rpc_method(name="users.get", auth="login")
+@mathesar_rpc_method(name="users.get")
 def get(*, user_id: int) -> UserInfo:
     """
     Get information about a mathesar user.

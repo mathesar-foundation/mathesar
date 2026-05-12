@@ -530,7 +530,7 @@ METHODS = [
     (
         users.get,
         "users.get",
-        [user_is_authenticated]
+        [user_is_superuser]
     ),
     (
         users.list_,
