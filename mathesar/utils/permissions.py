@@ -109,7 +109,7 @@ def set_up_new_database_for_user_on_internal_server(
         raise BadInstallationTarget(
             "Mathesar can't be installed in the internal database."
         )
-    
+
     user_database_role = _setup_connection_models(
         conn_info.host,
         conn_info.port,
