@@ -31,7 +31,7 @@
   }
 
   $: void (async () => {
-    const table = (await tableFetch.run({ schema, tableOid: tableId }))
+    const table = (await tableFetch.run({ database, tableOid: tableId }))
       .resolvedValue;
     if (!table) {
       return;
@@ -62,7 +62,7 @@
     {renamedIdColumn}
     refreshTable={async () => {
       // Need to re-fetch the table in order to get the updated metadata
-      await tableFetch.run({ schema, tableOid: tableId, clearCache: true });
+      await tableFetch.run({ database, tableOid: tableId, clearCache: true });
     }}
   />
 {:else if $tableFetch.isLoading || $dataFileFetch.isLoading}
