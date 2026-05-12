@@ -7,25 +7,8 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.utils.csv import is_valid_csv, get_file_encoding, get_sv_dialect
-from mathesar.errors import URLDownloadError, UnsupportedFileFormat
+from mathesar.errors import UnsupportedFileFormat
 from mathesar.models.base import DataFile
-
-
-def _download_datafile(url):
-    name = 'file_from_url'
-    if '/' in url:
-        name = url.split('/')[-1]
-
-    with requests.get(url, allow_redirects=True, stream=True) as r:
-        temp_file = TemporaryUploadedFile(
-            name, r.headers.get('content-type'), r.headers.get('content-length'), None,
-        )
-        if not r.ok:
-            raise URLDownloadError
-        for chunk in r.iter_content(chunk_size=8192):
-            temp_file.write(chunk)
-    temp_file.seek(0)
-    return temp_file
 
 
 def create_datafile(data, user=None):
@@ -37,11 +20,6 @@ def create_datafile(data, user=None):
         raw_file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
         base_name = ''
-        type = _get_file_type(raw_file)
-    elif 'url' in data:
-        raw_file = _download_datafile(data['url'])
-        created_from = 'url'
-        base_name = raw_file.name
         type = _get_file_type(raw_file)
     elif 'file' in data:
         raw_file = data['file']
