@@ -68,6 +68,11 @@ x-config: &config
   SSO_CONFIG_DICT: ${SSO_CONFIG_DICT:-{}}
   OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}} # deprecated, use SSO_CONFIG_DICT
 
+  # (Optional) Set to 'true' to disable password-based login and require all
+  # users to sign in via a configured SSO provider. Has no effect unless at
+  # least one SSO provider is configured.
+  REQUIRE_SSO_LOGIN: ${REQUIRE_SSO_LOGIN:-false}
+
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
 #
@@ -123,6 +128,15 @@ x-config: &config
 #   GitHub). This is an optional, alternative approach to configuring SSO
 #   via a configuration file. OIDC_CONFIG_DICT is the legacy name and is
 #   still accepted.
+#
+# REQUIRE_SSO_LOGIN:
+#   Default: false
+#   Info: When set to 'true', Mathesar disables password-based login and only
+#   allows users to sign in via a configured SSO provider. Users will not be
+#   able to update their own passwords or email addresses. Administrators can
+#   still reset another user's password and edit other users' emails as a
+#   break-glass mechanism. Has no effect unless at least one SSO provider is
+#   configured.
 #
 #-------------------------------------------------------------------------------
 # INFO ABOUT VOLUMES

@@ -311,6 +311,13 @@ Visit your Mathesar installation and you should see your IdP as a log in option:
 Mathesar's login screen with Okta SSO enabled.
 ///
 
+## How to require SSO-only login
+
+Once SSO is configured, you can optionally disable password-based login entirely so that all users must sign in via SSO. Set the [`REQUIRE_SSO_LOGIN`](./environment-variables.md#require_sso_login) environment variable to `true` and restart Mathesar.
+
+!!! warning "Misconfiguration is handled gracefully"
+    `REQUIRE_SSO_LOGIN` only takes effect when at least one SSO provider is configured. If you set it without configuring a provider, Mathesar logs a warning and continues to allow password login, so you cannot accidentally lock everyone out.
+
 ## How to transition existing users to SSO
 
 When a user logs in via SSO, Mathesar checks if their email address matches an existing user. If it does, they will be logged into the that existing account, with roles and access intact.

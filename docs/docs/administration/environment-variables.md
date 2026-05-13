@@ -126,6 +126,14 @@ The database specified in this section is used to store Mathesar's internal data
 
 - **Description**: A backwards-compatible alias for `SSO_CONFIG_DICT`. Existing installations can continue to use this name with no changes. If both are set, `SSO_CONFIG_DICT` takes precedence.
 
+### `REQUIRE_SSO_LOGIN` (optional) {: #require_sso_login}
+
+- **Description**: When enabled, Mathesar disables password-based login and only allows users to sign in via a configured SSO provider. Users will not be able to update passwords or email addresses. Administrators can still reset another user's password and edit other users' emails as a break-glass mechanism.
+- **Format**: `true` or `false`
+- **Default value**: `false`
+- **Additional information**:
+    - This setting only takes effect when at least one SSO provider is configured. If `REQUIRE_SSO_LOGIN=true` but no provider is configured in `sso.yml`/`SSO_CONFIG_DICT`, Mathesar logs a warning and continues to allow password login (so administrators can never accidentally lock everyone out).
+
 ## File backend configuration
 
 !!! info "**OPTIONAL**"
