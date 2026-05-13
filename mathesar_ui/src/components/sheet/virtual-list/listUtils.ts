@@ -145,7 +145,7 @@ function findNearestItem<Row>(props: Props<Row>): number {
   const { itemMetadataMap, lastMeasuredIndex } = instanceProps;
 
   const lastMeasuredItemOffset =
-    lastMeasuredIndex > 0 ? itemMetadataMap[lastMeasuredIndex].offset : 0;
+    lastMeasuredIndex >= 0 ? itemMetadataMap[lastMeasuredIndex].offset : 0;
 
   if (lastMeasuredItemOffset >= scrollOffset) {
     // If we've already measured items within this range just use a binary search as it's faster.
