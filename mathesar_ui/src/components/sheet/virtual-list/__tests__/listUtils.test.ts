@@ -24,7 +24,6 @@ function makeProps<Row>(opts: {
       itemMetadataMap,
       styleCache: {},
     },
-    isScrolling: false,
     rows: opts.rows,
     overscanCount: opts.overscanCount,
     scrollOffset: opts.scrollOffset,

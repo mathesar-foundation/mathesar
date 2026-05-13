@@ -20,8 +20,7 @@ export interface Item<Row> {
   key: ItemKey;
   index: number;
   row: Row;
-  isScrolling: boolean;
-  style: { [key: string]: string | number };
+  style: Record<string, string | number>;
 }
 
 interface ItemMetaData {
@@ -37,7 +36,6 @@ export interface Props<Row> {
     itemMetadataMap: Record<number, ItemMetaData>;
     styleCache: Record<number, Item<Row>['style']>;
   };
-  isScrolling: boolean;
   rows: Row[];
   overscanCount: number;
   scrollOffset: number;
@@ -224,7 +222,17 @@ function getRangeToRender<Row>(props: Props<Row>): number[] {
     overscanAbove1 + belowDeficit,
   );
 
-  return [startIndex - overscanAbove, stopIndex + overscanBelow];
+  // Defensive clamp on the upper bound. In practice the rebalance above
+  // already keeps the range within [0, rows.length - 1] — even when
+  // `instanceProps.lastMeasuredIndex` is stale past the dataset end
+  // (e.g. `rows` shrank without a `recalculateHeightsAfterIndex` call),
+  // the negative `overscanBelowAvail` feeds back through `belowDeficit`
+  // into `overscanAbove` and pulls the window back inside. That clamp
+  // is load-bearing but subtle, so guard against a future refactor of
+  // the rebalance breaking it and letting `getItemsInfo` read past the
+  // end of `rows`.
+  const renderedStop = Math.min(stopIndex + overscanBelow, rows.length - 1);
+  return [startIndex - overscanAbove, renderedStop];
 }
 
 export function getItemStyle<Row>(
@@ -254,7 +262,7 @@ export function getItemStyle<Row>(
 }
 
 export function getItemsInfo<Row>(props: Props<Row>): ItemInfo<Row> {
-  const { rowKey, rows, isScrolling } = props;
+  const { rowKey, rows } = props;
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item<Row>[] = [];
   if (rows.length > 0) {
@@ -263,7 +271,6 @@ export function getItemsInfo<Row>(props: Props<Row>): ItemInfo<Row> {
         key: rowKey(rows[index], index),
         index,
         row: rows[index],
-        isScrolling,
         style: getItemStyle(props, index),
       });
     }

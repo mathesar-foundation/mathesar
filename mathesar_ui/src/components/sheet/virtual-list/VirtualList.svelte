@@ -62,7 +62,7 @@
     itemMetadataMap: {},
     styleCache: {},
   };
-  let isScrolling: Props<Row>['isScrolling'] = false;
+  let isScrolling = false;
 
   let outerRef: HTMLElement;
 
