@@ -65,15 +65,22 @@
         {% translate "Log In" %}
       </button>
 
-
       {% load socialaccount %}
       {% get_providers as socialaccount_providers %}
-      {% for provider in socialaccount_providers %}
-        <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
-        <img src="{% static 'images/sso/' %}{{ provider }}.svg" alt="{{ provider|capfirst }} logo"
-          style="height:1em; vertical-align:middle; margin-right:0.5em" onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
-        Login with {{provider|capfirst}}</a>
-      {% endfor %}
+        <div class="sso_providers">
+          {% for provider in socialaccount_providers %}
+            <div class="sso_provider">
+              <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
+                <span>
+                  <img src="{% static 'images/sso/' %}{{ provider }}.svg" alt="{{ provider|capfirst }} logo"
+                    style="height:1em; vertical-align:middle; margin-right:0.5em"
+                    onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
+                  <span>Login with {{provider|capfirst}}</span>
+                </span>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
       {% if messages %}
         {% for message in messages %}
           {% if 'error' in message.tags %}

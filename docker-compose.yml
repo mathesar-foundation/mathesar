@@ -63,8 +63,10 @@ x-config: &config
   # (Optional) Can be used to configure single-sign on (sso) instead of an
   # sso.yml configuration file.
   # See https://docs.mathesar.org/administration/single-sign-on/ for additional
-  # details on how to configure this variable.
-  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}}
+  # details on how to configure this variable. OIDC_CONFIG_DICT is the legacy
+  # name, kept for backwards compatibility.
+  SSO_CONFIG_DICT: ${SSO_CONFIG_DICT:-{}}
+  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}} # deprecated, use SSO_CONFIG_DICT
 
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
@@ -114,11 +116,13 @@ x-config: &config
 #     Info: Specifies the settings necessary to configure an S3-complaint
 #           filestorage backend.
 #
-# OIDC_CONFIG_DICT:
+# SSO_CONFIG_DICT (alias: OIDC_CONFIG_DICT):
 #   Default: {}
-#   Info: Specifies the settings necessary to configure Single Sign-on (SS0)
-#   identity providers for Mathesar login. This is an optional, alternative
-#   approach to configuring SSO via a configuration file.
+#   Info: Specifies the settings necessary to configure Single Sign-on (SSO)
+#   identity providers for Mathesar login (including OIDC providers and
+#   GitHub). This is an optional, alternative approach to configuring SSO
+#   via a configuration file. OIDC_CONFIG_DICT is the legacy name and is
+#   still accepted.
 #
 #-------------------------------------------------------------------------------
 # INFO ABOUT VOLUMES
