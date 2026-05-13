@@ -94,12 +94,19 @@
   // For direct updates on horizontalScrollOffset
   $: onHscrollChange(horizontalScrollOffset);
 
-  // Update scrollbar when size changes
   async function updateScrollbar() {
     await tick();
     psRef?.update();
   }
-  $: estimatedTotalSize, rows, height, width, void updateScrollbar();
+
+  const {
+    debounced: debounceUpdateScrollbar,
+    cancel: cancelUpdateScrollbarDebounder,
+  } = createDebounce(() => {
+    void updateScrollbar();
+  }, SCROLLING_DEBOUNCE_INTERVAL);
+
+  $: estimatedTotalSize, rows, height, width, debounceUpdateScrollbar();
 
   const {
     debounced: debounceSetIsScrollingPropToFalse,
@@ -154,6 +161,7 @@
 
   onDestroy(() => {
     cancelIsScrollingPropDebouncer();
+    cancelUpdateScrollbarDebounder();
   });
 
   export function recalculateHeightsAfterIndex(index: number): void {
