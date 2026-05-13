@@ -129,7 +129,7 @@
       </SheetHeader>
 
       <SheetVirtualRows
-        itemCount={sheetItemCount}
+        {rows}
         paddingBottom={30}
         itemSize={() => ROW_HEIGHT_PX}
         let:items

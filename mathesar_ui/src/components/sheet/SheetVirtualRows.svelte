@@ -2,31 +2,44 @@
   import { ROW_HEIGHT_PX } from '@mathesar/geometry';
 
   import { getSheetContext } from './utils';
-  import type { Props as VirtualListProps } from './virtual-list/listUtils';
-  import Resizer from './virtual-list/Resizer.svelte';
-  import VirtualList from './virtual-list/VirtualList.svelte';
+  import {
+    type ItemKey,
+    type ItemKeyForSlotPooling,
+    Resizer,
+    type VirtualListProps,
+    VirtualListWithSlotPooling,
+  } from './virtual-list';
 
   const { stores, api } = getSheetContext();
   const { rowWidth, horizontalScrollOffset, scrollOffset } = stores;
 
-  export let itemCount: VirtualListProps['itemCount'];
+  type Row = $$Generic;
+
+  export let rows: Row[];
   export let itemSize: VirtualListProps['itemSize'];
   export let paddingBottom = 0;
-  export let itemKey: VirtualListProps['itemKey'] | undefined = undefined;
+  export let itemKeyForSlotPooling:
+    | ((index: number) => ItemKeyForSlotPooling)
+    | undefined = undefined;
+  export let alwaysRenderRows: ItemKey[] = [];
+  export let indexByKey: ((id: ItemKey) => number | undefined) | undefined =
+    undefined;
 </script>
 
 <div data-sheet-element="body" tabindex="-1">
   <Resizer let:height>
-    <VirtualList
+    <VirtualListWithSlotPooling
       horizontalScrollOffset={$horizontalScrollOffset}
       scrollOffset={$scrollOffset}
       {height}
       width={$rowWidth}
-      {itemCount}
+      {rows}
       {paddingBottom}
       {itemSize}
       estimatedItemSize={ROW_HEIGHT_PX}
-      {itemKey}
+      {itemKeyForSlotPooling}
+      {alwaysRenderRows}
+      {indexByKey}
       let:items
       let:api={virtualListApi}
       on:scroll={(e) => {
@@ -37,7 +50,7 @@
       }}
     >
       <slot {items} api={virtualListApi} />
-    </VirtualList>
+    </VirtualListWithSlotPooling>
   </Resizer>
 </div>
 

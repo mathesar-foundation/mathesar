@@ -13,9 +13,6 @@
    * 2. Stripped down to vertical variable size list essentials
    * 3. Added perfect scrollbar, utilized it's event instead of native
    */
-
-  const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
-  const DEFAULT_ESTIMATED_ITEM_SIZE = 30;
 </script>
 
 <script lang="ts">
@@ -29,7 +26,16 @@
 
   import type { SheetVirtualRowsApi } from '../types';
 
-  import listUtils, { type ItemInfo, type Props } from './listUtils';
+  import {
+    DEFAULT_ESTIMATED_ITEM_SIZE,
+    IS_SCROLLING_DEBOUNCE_INTERVAL,
+    type ItemInfo,
+    type Props,
+    defaultItemKey,
+    getEstimatedTotalSize,
+    getItemStyle,
+    getItemsInfo,
+  } from './listUtils';
   import { type Timeout, cancelTimeout, requestTimeout } from './timer';
 
   const dispatch = createEventDispatcher();
@@ -38,15 +44,18 @@
   export { classes as class };
   $: outerClass = ['virtual-list', 'outerElement', classes].join(' ');
 
+  type Row = $$Generic;
+
+  export let rows: Row[];
+
   export let estimatedItemSize: number = DEFAULT_ESTIMATED_ITEM_SIZE;
   export let height: Props['height'];
   export let scrollOffset: Props['scrollOffset'] = 0;
-  export let itemCount: Props['itemCount'];
-  export let overscanCount: Props['overscanCount'] = 2;
+  export let overscanCount: Props['overscanCount'] = 3;
   export let itemSize: Props['itemSize'] = (): number => estimatedItemSize;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
-  export let itemKey: Props['itemKey'] = listUtils.defaultItemKey;
+  export let itemKey: Props['itemKey'] = defaultItemKey;
   export let width: number | undefined = undefined;
 
   let instanceProps: Props['instanceProps'] = {
@@ -56,7 +65,6 @@
   };
   let isScrolling: Props['isScrolling'] = false;
   let scrollDirection: Props['scrollDirection'] = 'forward';
-  let lastHeight: Props['height'] = height;
 
   let items: ItemInfo['items'] = [];
   let estimatedTotalSize: number;
@@ -72,33 +80,27 @@
   let itemInfo: ItemInfo;
 
   function recalc(opts: Props) {
-    itemInfo = listUtils.getItemsInfo(opts);
+    itemInfo = getItemsInfo(opts);
     items = itemInfo.items;
-    estimatedTotalSize = listUtils.getEstimatedTotalSize(opts);
-
-    // Refetch when container resizes
-    if (lastHeight !== height) {
-      lastHeight = height;
-      dispatch('refetch', itemInfo);
-    }
+    estimatedTotalSize = getEstimatedTotalSize(opts);
   }
 
-  $: recalc({
+  $: props = {
     itemSize,
     instanceProps,
     isScrolling,
     scrollDirection,
-    itemCount,
+    itemCount: rows.length,
     overscanCount,
     scrollOffset,
     height,
     itemKey,
     estimatedItemSize,
-  });
+  };
+  $: recalc(props);
 
   $: innerStyle =
     `height:${estimatedTotalSize + paddingBottom}px;` +
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `width:${width ? `${width}px` : '100%'};` +
     `${isScrolling ? 'pointer-events:none;' : ''}`;
 
@@ -166,8 +168,6 @@
       onHorizontalScroll(ev);
     };
 
-    dispatch('refetch', itemInfo);
-
     outerRef.addEventListener('ps-scroll-y', callback);
     outerRef.addEventListener('ps-scroll-x', hCallback);
 
@@ -182,7 +182,6 @@
     resetIsScrollingTimeoutId = undefined;
     isScrolling = false;
     requestGetItemStyleCache = true;
-    dispatch('refetch', itemInfo);
   };
 
   function resetIsScrollingDebounced() {
@@ -264,11 +263,16 @@
     }
   }
 
+  function getStyle(index: number) {
+    return getItemStyle(props, index);
+  }
+
   const api: SheetVirtualRowsApi = {
     scrollToTop,
     scrollToBottom,
     scrollToPosition,
     recalculateHeightsAfterIndex,
+    getStyle,
   };
 </script>
 

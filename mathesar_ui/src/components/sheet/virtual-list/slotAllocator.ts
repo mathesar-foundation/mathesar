@@ -8,22 +8,35 @@
  * props rather than create+destroy. Ghosts are bounded by `capSize`; when
  * exceeded, the oldest ghost is evicted (its DOM is unmounted).
  *
- * Entries whose `rowId` is no longer present in `descriptorIndexByRowId`
- * (rows truly deleted) are dropped — their slots return to the integer pool.
+ * Entries whose `rowId` is no longer present in the data (neither live nor
+ * resolvable by `getGhostIndex`) are dropped — their slots return to the
+ * integer pool.
  */
+
+import type { ItemKey } from './listUtils';
 
 export type PoolEntry = {
   slot: number;
-  rowId: string;
+  key: ItemKey;
   index: number;
 };
 
 export type Pool = PoolEntry[];
 
+/**
+ * Reconcile the slot pool against the current render's live items.
+ *
+ * Live items always get slotted: the caller passes their indices directly in
+ * `liveItems`, so no lookup callback is consulted for them. The lookup is
+ * only used to validate ghost entries — rows that were in the pool last
+ * render but aren't live this render. If the lookup returns a current index
+ * for a ghost's rowId, the ghost is kept (DOM preserved, index updated).
+ * Otherwise the ghost is dropped.
+ */
 export function reconcilePool(
   prev: Pool,
-  liveRowIds: ReadonlySet<string>,
-  descriptorIndexByRowId: ReadonlyMap<string, number>,
+  liveItems: ReadonlyMap<ItemKey, number>,
+  getGhostIndex: (key: ItemKey) => number | undefined,
   capSize: number,
 ): Pool {
   const live: PoolEntry[] = [];
@@ -32,18 +45,20 @@ export function reconcilePool(
   const droppedByMissing: PoolEntry[] = [];
 
   for (const entry of prev) {
-    const currentIndex = descriptorIndexByRowId.get(entry.rowId);
-    if (currentIndex === undefined) {
+    const liveIndex = liveItems.get(entry.key);
+    if (liveIndex !== undefined) {
+      live.push({ ...entry, index: liveIndex });
+      usedSlots.add(entry.slot);
+      continue;
+    }
+
+    const ghostIndex = getGhostIndex(entry.key);
+    if (ghostIndex === undefined) {
       droppedByMissing.push(entry);
       continue; // row deleted; release slot
     }
 
-    const updated: PoolEntry = { ...entry, index: currentIndex };
-    if (liveRowIds.has(entry.rowId)) {
-      live.push(updated);
-    } else {
-      ghosts.push(updated);
-    }
+    ghosts.push({ ...entry, index: ghostIndex });
     usedSlots.add(entry.slot);
   }
 
@@ -53,25 +68,20 @@ export function reconcilePool(
       '[reconcilePool] dropped',
       droppedByMissing.length,
       'entries (rowId vanished). Sample dropped rowIds:',
-      droppedByMissing.slice(0, 3).map((e) => `${e.slot}:${e.rowId}`),
-      '— prev liveRowIds count:',
+      droppedByMissing.slice(0, 3).map((e) => `${e.slot}:${e.key}`),
+      '— prev pool size:',
       prev.length,
-      'new liveRowIds count:',
-      liveRowIds.size,
-      'descriptorIndex size:',
-      descriptorIndexByRowId.size,
+      'live count:',
+      liveItems.size,
     );
   }
 
-  const claimed = new Set<string>();
-  for (const e of live) claimed.add(e.rowId);
-  for (const e of ghosts) claimed.add(e.rowId);
+  const claimed = new Set<ItemKey>();
+  for (const e of live) claimed.add(e.key);
 
   const newLive: PoolEntry[] = [];
-  for (const rowId of liveRowIds) {
-    if (claimed.has(rowId)) continue;
-    const index = descriptorIndexByRowId.get(rowId);
-    if (index === undefined) continue;
+  for (const [rowKey, index] of liveItems) {
+    if (claimed.has(rowKey)) continue;
 
     let slot: number;
     const ghost = ghosts.shift();
@@ -82,7 +92,7 @@ export function reconcilePool(
       while (usedSlots.has(slot)) slot += 1;
       usedSlots.add(slot);
     }
-    newLive.push({ slot, rowId, index });
+    newLive.push({ slot, key: rowKey, index });
   }
 
   while (live.length + newLive.length + ghosts.length > capSize) {
@@ -104,27 +114,26 @@ export function reconcilePool(
  * Candidates are picked alternately from above and below the live range,
  * starting closest to the range and expanding outward. Skips:
  *   - indices outside `[0, totalCount)`,
- *   - rows for which `isPoolEligible` returns false (placeholder, group
+ *   - rows for which `isRecyclable` returns false (placeholder, group
  *     header, help text — they're keyed separately, not by slot),
  *   - rowIds already in the pool (live or ghost).
  *
  * Slots taken are the smallest unused integers, never colliding with existing
  * pool slots.
  */
-export function padPool<R>(
+export function padPool(
   pool: Pool,
   targetSize: number,
   liveStart: number,
   liveEnd: number,
   totalCount: number,
-  getRowAt: (index: number) => R | undefined,
-  getIdentifier: (row: R) => string,
-  isPoolEligible: (row: R) => boolean,
+  getIdentifierAt: (index: number) => ItemKey,
+  isRecyclableAt: (index: number) => boolean,
 ): Pool {
   if (pool.length >= targetSize) return pool;
   if (totalCount <= 0) return pool;
 
-  const usedRowIds = new Set(pool.map((e) => e.rowId));
+  const usedRowIds = new Set(pool.map((e) => e.key));
   const usedSlots = new Set(pool.map((e) => e.slot));
   const padded: PoolEntry[] = [];
 
@@ -137,13 +146,11 @@ export function padPool<R>(
 
   function tryAdd(index: number): void {
     if (index < 0 || index >= totalCount) return;
-    const row = getRowAt(index);
-    if (row === undefined) return;
-    if (!isPoolEligible(row)) return;
-    const rowId = getIdentifier(row);
+    if (!isRecyclableAt(index)) return;
+    const rowId = getIdentifierAt(index);
     if (usedRowIds.has(rowId)) return;
     usedRowIds.add(rowId);
-    padded.push({ slot: nextSlot(), rowId, index });
+    padded.push({ slot: nextSlot(), key: rowId, index });
   }
 
   let above = liveStart - 1;

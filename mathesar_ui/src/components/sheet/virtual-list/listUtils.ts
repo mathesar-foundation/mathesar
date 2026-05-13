@@ -10,10 +10,14 @@
  * This fork contains the following changes:
  * 1. Ported to TS
  * 2. Stripped down to essentials
+ * 3. Additional features for slot based pooling
  */
 
-interface Item {
-  key: number | string;
+export type ItemKey = string;
+export type ItemKeyForSlotPooling = { key: ItemKey; recyclable: boolean };
+
+export interface Item {
+  key: ItemKey;
   index: number;
   isScrolling: boolean;
   style: { [key: string]: string | number };
@@ -37,7 +41,7 @@ export interface Props {
   overscanCount: number;
   scrollOffset: number;
   height: number;
-  itemKey: (index: number) => number | string;
+  itemKey: (index: number) => ItemKey;
   estimatedItemSize: number;
 }
 
@@ -47,7 +51,16 @@ export interface ItemInfo {
   stopIndex: number;
 }
 
-const defaultItemKey: Props['itemKey'] = (index: number) => index;
+export const defaultItemKey: Props['itemKey'] = (index: number) => String(index);
+export const defaultItemKeyForSlotPooling: (
+  index: number,
+) => ItemKeyForSlotPooling = (index) => ({
+  key: String(index),
+  recyclable: true,
+});
+
+export const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
+export const DEFAULT_ESTIMATED_ITEM_SIZE = 30;
 
 function getItemMetadata(props: Props, index: number): ItemMetaData {
   const { itemSize, instanceProps } = props;
@@ -177,12 +190,6 @@ function getRangeToRender(props: Props): number[] {
 
   const startIndex = findNearestItem(props);
   const stopIndex = getStopIndexForStartIndex(props, startIndex);
-
-  // Symmetric overscan in both directions, always. The previous
-  // asymmetric implementation (1 in idle direction during scroll, full in
-  // scroll direction) caused the rendered window size to oscillate between
-  // renders, which prevents the slot recycling in Body.svelte from reusing
-  // DOM nodes across scroll steps.
   const overscan = Math.max(1, overscanCount);
 
   // Rebalance the overscan budget. When one side is clamped at the dataset
@@ -218,7 +225,7 @@ function getRangeToRender(props: Props): number[] {
   ];
 }
 
-function getItemStyle(props: Props, index: number): Item['style'] {
+export function getItemStyle(props: Props, index: number): Item['style'] {
   const { instanceProps } = props;
   const { styleCache } = instanceProps;
   let style: Item['style'];
@@ -241,7 +248,7 @@ function getItemStyle(props: Props, index: number): Item['style'] {
   return style;
 }
 
-function getItemsInfo(props: Props): ItemInfo {
+export function getItemsInfo(props: Props): ItemInfo {
   const { itemKey, itemCount, isScrolling } = props;
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item[] = [];
@@ -262,7 +269,7 @@ function getItemsInfo(props: Props): ItemInfo {
   };
 }
 
-function getEstimatedTotalSize(props: Props): number {
+export function getEstimatedTotalSize(props: Props): number {
   const { instanceProps, itemCount, estimatedItemSize } = props;
   const { lastMeasuredIndex, itemMetadataMap } = instanceProps;
 
@@ -285,9 +292,3 @@ function getEstimatedTotalSize(props: Props): number {
 
   return totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;
 }
-
-export default {
-  defaultItemKey,
-  getItemsInfo,
-  getEstimatedTotalSize,
-};
