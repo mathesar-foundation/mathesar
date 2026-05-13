@@ -11,31 +11,27 @@
    * This fork contains the following changes:
    * 1. Ported to Svelte, TS
    * 2. Stripped down to vertical variable size list essentials
-   * 3. Added perfect scrollbar, utilized it's event instead of native
+   * 3. Added perfect scrollbar
    */
 </script>
 
 <script lang="ts">
   import PerfectScrollbar from 'perfect-scrollbar';
-  import {
-    afterUpdate,
-    createEventDispatcher,
-    onDestroy,
-    onMount,
-  } from 'svelte';
+  import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte';
+
+  import { createDebounce } from '@mathesar-component-library';
 
   import type { SheetVirtualRowsApi } from '../types';
 
   import {
     DEFAULT_ESTIMATED_ITEM_SIZE,
-    IS_SCROLLING_DEBOUNCE_INTERVAL,
     type Props,
+    SCROLLING_DEBOUNCE_INTERVAL,
     defaultRowKey,
     getEstimatedTotalSize,
     getItemStyle,
     getItemsInfo,
   } from './listUtils';
-  import { type Timeout, cancelTimeout, requestTimeout } from './timer';
 
   const dispatch = createEventDispatcher();
 
@@ -65,16 +61,11 @@
   let isScrolling = false;
 
   let outerRef: HTMLElement;
-
-  let requestResetIsScrolling = false;
-  let resetIsScrollingTimeoutId: Timeout | undefined;
-
   let psRef: PerfectScrollbar | undefined;
 
   $: props = {
     rowSize,
     instanceProps,
-    isScrolling,
     rows,
     overscanCount,
     scrollOffset,
@@ -103,10 +94,27 @@
   // For direct updates on horizontalScrollOffset
   $: onHscrollChange(horizontalScrollOffset);
 
+  // Update scrollbar when size changes
+  async function updateScrollbar() {
+    await tick();
+    psRef?.update();
+  }
+  $: estimatedTotalSize, rows, height, width, void updateScrollbar();
+
+  const {
+    debounced: debounceSetIsScrollingPropToFalse,
+    cancel: cancelIsScrollingPropDebouncer,
+  } = createDebounce(() => {
+    isScrolling = false;
+  }, SCROLLING_DEBOUNCE_INTERVAL);
+
   function onScroll(event: Event): void {
+    isScrolling = true;
+    debounceSetIsScrollingPropToFalse();
+
     const { clientHeight, scrollHeight, scrollTop, scrollLeft } =
       event.target as HTMLElement;
-    requestResetIsScrolling = true;
+
     if (horizontalScrollOffset !== scrollLeft) {
       horizontalScrollOffset = scrollLeft;
       dispatch('h-scroll', horizontalScrollOffset);
@@ -121,7 +129,6 @@
         0,
         Math.min(scrollTop, scrollHeight - clientHeight),
       );
-      isScrolling = true;
       scrollOffset = newScrollOffset;
       dispatch('scroll', scrollOffset);
     }
@@ -137,49 +144,16 @@
       minScrollbarLength: 40,
       wheelPropagation: false,
     });
-
-    const callback = (ev: Event) => {
-      onScroll(ev);
-    };
-
-    outerRef.addEventListener('scroll', callback);
+    outerRef.addEventListener('scroll', onScroll);
 
     return () => {
-      outerRef.removeEventListener('scroll', callback);
+      outerRef.removeEventListener('scroll', onScroll);
       psRef?.destroy();
     };
   });
 
-  const scrollStopped = () => {
-    resetIsScrollingTimeoutId = undefined;
-    isScrolling = false;
-  };
-
-  function resetIsScrollingDebounced() {
-    if (resetIsScrollingTimeoutId !== undefined) {
-      cancelTimeout(resetIsScrollingTimeoutId);
-    }
-    resetIsScrollingTimeoutId = requestTimeout(
-      scrollStopped,
-      IS_SCROLLING_DEBOUNCE_INTERVAL,
-    );
-  }
-
-  // For updates that need to run after the tick, and dom is updated
-  afterUpdate(() => {
-    if (requestResetIsScrolling) {
-      requestResetIsScrolling = false;
-      resetIsScrollingDebounced();
-    }
-    if (psRef) {
-      psRef.update();
-    }
-  });
-
   onDestroy(() => {
-    if (resetIsScrollingTimeoutId !== undefined) {
-      cancelTimeout(resetIsScrollingTimeoutId);
-    }
+    cancelIsScrollingPropDebouncer();
   });
 
   export function recalculateHeightsAfterIndex(index: number): void {

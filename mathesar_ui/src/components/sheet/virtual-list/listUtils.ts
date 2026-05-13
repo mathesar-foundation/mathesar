@@ -58,7 +58,7 @@ export const defaultRowKeyForSlotPooling: <Row>(
   recyclable: true,
 });
 
-export const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
+export const SCROLLING_DEBOUNCE_INTERVAL = 150;
 export const DEFAULT_ESTIMATED_ITEM_SIZE = 30;
 
 function getItemMetadata<Row>(props: Props<Row>, index: number): ItemMetaData {
@@ -186,7 +186,7 @@ function getStopIndexForStartIndex<Row>(
   return stopIndex;
 }
 
-function getRangeToRender<Row>(props: Props<Row>): number[] {
+function getRangeToRender<Row>(props: Props<Row>): [number, number] {
   const { rows, overscanCount } = props;
 
   if (rows.length === 0) {
