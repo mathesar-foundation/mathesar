@@ -2,9 +2,7 @@ import os
 from time import time
 from io import TextIOWrapper
 
-import requests
 from django.core.files.base import ContentFile
-from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.utils.csv import is_valid_csv, get_file_encoding, get_sv_dialect
 from mathesar.errors import UnsupportedFileFormat
