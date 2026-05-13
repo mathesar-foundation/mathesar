@@ -69,7 +69,6 @@
   let requestResetIsScrolling = false;
   let resetIsScrollingTimeoutId: Timeout | undefined;
 
-  let requestGetItemStyleCache = false;
   let psRef: PerfectScrollbar | undefined;
 
   $: props = {
@@ -128,14 +127,6 @@
     }
   }
 
-  function onHorizontalScroll(event: Event): void {
-    const { scrollLeft } = event.target as HTMLElement;
-    if (horizontalScrollOffset !== scrollLeft) {
-      horizontalScrollOffset = scrollLeft;
-      dispatch('h-scroll', horizontalScrollOffset);
-    }
-  }
-
   onMount(() => {
     if (typeof scrollOffset === 'number') {
       outerRef.scrollTop = scrollOffset;
@@ -150,16 +141,11 @@
     const callback = (ev: Event) => {
       onScroll(ev);
     };
-    const hCallback = (ev: Event) => {
-      onHorizontalScroll(ev);
-    };
 
-    outerRef.addEventListener('ps-scroll-y', callback);
-    outerRef.addEventListener('ps-scroll-x', hCallback);
+    outerRef.addEventListener('scroll', callback);
 
     return () => {
-      outerRef.removeEventListener('ps-scroll-y', callback);
-      outerRef.removeEventListener('ps-scroll-x', hCallback);
+      outerRef.removeEventListener('scroll', callback);
       psRef?.destroy();
     };
   });
@@ -167,7 +153,6 @@
   const scrollStopped = () => {
     resetIsScrollingTimeoutId = undefined;
     isScrolling = false;
-    requestGetItemStyleCache = true;
   };
 
   function resetIsScrollingDebounced() {
@@ -185,10 +170,6 @@
     if (requestResetIsScrolling) {
       requestResetIsScrolling = false;
       resetIsScrollingDebounced();
-    }
-    if (requestGetItemStyleCache) {
-      requestGetItemStyleCache = false;
-      instanceProps.styleCache = {};
     }
     if (psRef) {
       psRef.update();

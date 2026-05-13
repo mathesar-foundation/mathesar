@@ -29,7 +29,6 @@
     function update() {
       const newHeight = readContentBoxHeight(parentNode);
       if (height !== newHeight) height = newHeight;
-      console.log(height);
     }
 
     update();

@@ -71,7 +71,6 @@
       key: '', // filled by buildRender (slot:N or natural id)
       row: rows[index],
       index,
-      isScrolling: false,
       style: getStyle(index),
     };
   }
