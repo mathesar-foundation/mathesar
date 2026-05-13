@@ -16,9 +16,10 @@
 export type ItemKey = string;
 export type ItemKeyForSlotPooling = { key: ItemKey; recyclable: boolean };
 
-export interface Item {
+export interface Item<Row> {
   key: ItemKey;
   index: number;
+  row: Row;
   isScrolling: boolean;
   style: { [key: string]: string | number };
 }
@@ -28,31 +29,31 @@ interface ItemMetaData {
   size: number;
 }
 
-export interface Props {
-  itemSize: (index: number) => number;
+export interface Props<Row> {
+  rowSize: (row: Row) => number;
+  rowKey: (row: Row, index: number) => ItemKey;
   instanceProps: {
     lastMeasuredIndex: number;
     itemMetadataMap: Record<number, ItemMetaData>;
-    styleCache: Record<number, Item['style']>;
+    styleCache: Record<number, Item<Row>['style']>;
   };
   isScrolling: boolean;
-  scrollDirection: 'forward' | 'backward';
-  itemCount: number;
+  rows: Row[];
   overscanCount: number;
   scrollOffset: number;
   height: number;
-  itemKey: (index: number) => ItemKey;
   estimatedItemSize: number;
 }
 
-export interface ItemInfo {
-  items: Item[];
+export interface ItemInfo<Row> {
+  items: Item<Row>[];
   startIndex: number;
   stopIndex: number;
 }
 
-export const defaultItemKey: Props['itemKey'] = (index: number) => String(index);
-export const defaultItemKeyForSlotPooling: (
+export const defaultRowKey = <Row>(row: Row, index: number) => String(index);
+export const defaultRowKeyForSlotPooling: <Row>(
+  row: Row,
   index: number,
 ) => ItemKeyForSlotPooling = (index) => ({
   key: String(index),
@@ -62,8 +63,8 @@ export const defaultItemKeyForSlotPooling: (
 export const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 export const DEFAULT_ESTIMATED_ITEM_SIZE = 30;
 
-function getItemMetadata(props: Props, index: number): ItemMetaData {
-  const { itemSize, instanceProps } = props;
+function getItemMetadata<Row>(props: Props<Row>, index: number): ItemMetaData {
+  const { rowSize, instanceProps } = props;
   const { itemMetadataMap, lastMeasuredIndex } = instanceProps;
 
   if (index > lastMeasuredIndex) {
@@ -74,7 +75,7 @@ function getItemMetadata(props: Props, index: number): ItemMetaData {
     }
 
     for (let i = lastMeasuredIndex + 1; i <= index; i += 1) {
-      const size = itemSize(i);
+      const size = rowSize(props.rows[i]);
       itemMetadataMap[i] = {
         offset,
         size,
@@ -88,8 +89,8 @@ function getItemMetadata(props: Props, index: number): ItemMetaData {
   return itemMetadataMap[index];
 }
 
-function findNearestItemBinarySearch(
-  props: Props,
+function findNearestItemBinarySearch<Row>(
+  props: Props<Row>,
   initialHigh: number,
   initialLow: number,
 ): number {
@@ -118,13 +119,16 @@ function findNearestItemBinarySearch(
   return 0;
 }
 
-function findNearestItemExponentialSearch(props: Props, index: number): number {
-  const { itemCount, scrollOffset } = props;
+function findNearestItemExponentialSearch<Row>(
+  props: Props<Row>,
+  index: number,
+): number {
+  const { rows, scrollOffset } = props;
   let interval = 1;
   let itemIndex = index;
 
   while (
-    itemIndex < itemCount &&
+    itemIndex < rows.length &&
     getItemMetadata(props, itemIndex).offset < scrollOffset
   ) {
     itemIndex += interval;
@@ -133,12 +137,12 @@ function findNearestItemExponentialSearch(props: Props, index: number): number {
 
   return findNearestItemBinarySearch(
     props,
-    Math.min(itemIndex, itemCount - 1),
+    Math.min(itemIndex, rows.length - 1),
     Math.floor(itemIndex / 2),
   );
 }
 
-function findNearestItem(props: Props): number {
+function findNearestItem<Row>(props: Props<Row>): number {
   const { instanceProps, scrollOffset } = props;
   const { itemMetadataMap, lastMeasuredIndex } = instanceProps;
 
@@ -164,8 +168,11 @@ function findNearestItem(props: Props): number {
   );
 }
 
-function getStopIndexForStartIndex(props: Props, startIndex: number): number {
-  const { height, itemCount, scrollOffset } = props;
+function getStopIndexForStartIndex<Row>(
+  props: Props<Row>,
+  startIndex: number,
+): number {
+  const { height, rows, scrollOffset } = props;
 
   const itemMetadata = getItemMetadata(props, startIndex);
   const maxOffset = scrollOffset + height;
@@ -173,7 +180,7 @@ function getStopIndexForStartIndex(props: Props, startIndex: number): number {
   let offset = itemMetadata.offset + itemMetadata.size;
   let stopIndex = startIndex;
 
-  while (stopIndex < itemCount - 1 && offset < maxOffset) {
+  while (stopIndex < rows.length - 1 && offset < maxOffset) {
     stopIndex += 1;
     offset += getItemMetadata(props, stopIndex).size;
   }
@@ -181,11 +188,11 @@ function getStopIndexForStartIndex(props: Props, startIndex: number): number {
   return stopIndex;
 }
 
-function getRangeToRender(props: Props): number[] {
-  const { itemCount, overscanCount } = props;
+function getRangeToRender<Row>(props: Props<Row>): number[] {
+  const { rows, overscanCount } = props;
 
-  if (itemCount === 0) {
-    return [0, 0, 0, 0];
+  if (rows.length === 0) {
+    return [0, 0];
   }
 
   const startIndex = findNearestItem(props);
@@ -207,7 +214,7 @@ function getRangeToRender(props: Props): number[] {
   // Result: rendered window size is `(stopIndex - startIndex + 1) +
   // 2*overscan`, clamped to the dataset.
   const overscanAboveAvail = startIndex;
-  const overscanBelowAvail = itemCount - 1 - stopIndex;
+  const overscanBelowAvail = rows.length - 1 - stopIndex;
   const overscanAbove1 = Math.min(overscan, overscanAboveAvail);
   const aboveDeficit = overscan - overscanAbove1;
   const overscanBelow = Math.min(overscanBelowAvail, overscan + aboveDeficit);
@@ -217,18 +224,16 @@ function getRangeToRender(props: Props): number[] {
     overscanAbove1 + belowDeficit,
   );
 
-  return [
-    startIndex - overscanAbove,
-    stopIndex + overscanBelow,
-    startIndex,
-    stopIndex,
-  ];
+  return [startIndex - overscanAbove, stopIndex + overscanBelow];
 }
 
-export function getItemStyle(props: Props, index: number): Item['style'] {
+export function getItemStyle<Row>(
+  props: Props<Row>,
+  index: number,
+): Item<Row>['style'] {
   const { instanceProps } = props;
   const { styleCache } = instanceProps;
-  let style: Item['style'];
+  let style: Item<Row>['style'];
   if (Object.prototype.hasOwnProperty.call(styleCache, index)) {
     style = styleCache[index];
   } else {
@@ -248,15 +253,16 @@ export function getItemStyle(props: Props, index: number): Item['style'] {
   return style;
 }
 
-export function getItemsInfo(props: Props): ItemInfo {
-  const { itemKey, itemCount, isScrolling } = props;
+export function getItemsInfo<Row>(props: Props<Row>): ItemInfo<Row> {
+  const { rowKey, rows, isScrolling } = props;
   const [startIndex, stopIndex] = getRangeToRender(props);
-  const items: Item[] = [];
-  if (itemCount > 0) {
+  const items: Item<Row>[] = [];
+  if (rows.length > 0) {
     for (let index = startIndex; index <= stopIndex; index += 1) {
       items.push({
-        key: itemKey(index),
+        key: rowKey(rows[index], index),
         index,
+        row: rows[index],
         isScrolling,
         style: getItemStyle(props, index),
       });
@@ -269,8 +275,8 @@ export function getItemsInfo(props: Props): ItemInfo {
   };
 }
 
-export function getEstimatedTotalSize(props: Props): number {
-  const { instanceProps, itemCount, estimatedItemSize } = props;
+export function getEstimatedTotalSize<Row>(props: Props<Row>): number {
+  const { instanceProps, rows, estimatedItemSize } = props;
   const { lastMeasuredIndex, itemMetadataMap } = instanceProps;
 
   let lastIndex = lastMeasuredIndex;
@@ -278,8 +284,8 @@ export function getEstimatedTotalSize(props: Props): number {
 
   // Edge case check for when the number of items decreases while a scroll is in progress.
   // https://github.com/bvaughn/react-window/pull/138
-  if (lastIndex >= itemCount) {
-    lastIndex = itemCount - 1;
+  if (lastIndex >= rows.length) {
+    lastIndex = rows.length - 1;
   }
 
   if (lastIndex >= 0) {
@@ -287,7 +293,7 @@ export function getEstimatedTotalSize(props: Props): number {
     totalSizeOfMeasuredItems = itemMetadata.offset + itemMetadata.size;
   }
 
-  const numUnmeasuredItems = itemCount - lastIndex - 1;
+  const numUnmeasuredItems = rows.length - lastIndex - 1;
   const totalSizeOfUnmeasuredItems = numUnmeasuredItems * estimatedItemSize;
 
   return totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;

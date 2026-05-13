@@ -4,32 +4,31 @@ import { type Props, getItemsInfo } from '../listUtils';
  * Build a Props object with a fixed-height item list. Item metadata is
  * pre-populated so getRangeToRender / getItemsInfo doesn't need to walk it.
  */
-function makeProps(opts: {
-  itemCount: number;
+function makeProps<Row>(opts: {
+  rows: Row[];
   scrollOffset: number;
   height: number;
   overscanCount: number;
   rowSize?: number;
-}): Props {
+}): Props<Row> {
   const rowSize = opts.rowSize ?? 30;
   const itemMetadataMap: Record<number, { offset: number; size: number }> = {};
-  for (let i = 0; i < opts.itemCount; i += 1) {
+  for (let i = 0; i < opts.rows.length; i += 1) {
     itemMetadataMap[i] = { offset: i * rowSize, size: rowSize };
   }
   return {
-    itemSize: () => rowSize,
+    rowSize: () => rowSize,
+    rowKey: (_row: Row, index: number) => String(index),
     instanceProps: {
-      lastMeasuredIndex: opts.itemCount - 1,
+      lastMeasuredIndex: opts.rows.length - 1,
       itemMetadataMap,
       styleCache: {},
     },
     isScrolling: false,
-    scrollDirection: 'forward',
-    itemCount: opts.itemCount,
+    rows: opts.rows,
     overscanCount: opts.overscanCount,
     scrollOffset: opts.scrollOffset,
     height: opts.height,
-    itemKey: (index: number) => String(index),
     estimatedItemSize: rowSize,
   };
 }
@@ -39,7 +38,7 @@ describe('getItemsInfo / getRangeToRender (rebalanced overscan)', () => {
     // viewport height 300px / row 30px = 10 visible rows starting around row 50
     const info = getItemsInfo(
       makeProps({
-        itemCount: 200,
+        rows: new Array(200).fill(0),
         scrollOffset: 50 * 30, // start at row 50
         height: 300,
         overscanCount: 6,
@@ -56,7 +55,7 @@ describe('getItemsInfo / getRangeToRender (rebalanced overscan)', () => {
   test('top boundary at scrollOffset=0: above-overscan deficit shifts to below', () => {
     const info = getItemsInfo(
       makeProps({
-        itemCount: 200,
+        rows: new Array(200).fill(0),
         scrollOffset: 0,
         height: 300,
         overscanCount: 6,
@@ -76,7 +75,7 @@ describe('getItemsInfo / getRangeToRender (rebalanced overscan)', () => {
     const lengths = [0, 30, 60, 90, 120, 150, 180].map((scrollOffset) => {
       const info = getItemsInfo(
         makeProps({
-          itemCount: 200,
+          rows: new Array(200).fill(0),
           scrollOffset,
           height: 300,
           overscanCount: 6,
@@ -94,7 +93,7 @@ describe('getItemsInfo / getRangeToRender (rebalanced overscan)', () => {
     // 200 items; scroll to the very bottom. visible 190..199.
     const info = getItemsInfo(
       makeProps({
-        itemCount: 200,
+        rows: new Array(200).fill(0),
         scrollOffset: 190 * 30,
         height: 300,
         overscanCount: 6,
@@ -112,7 +111,7 @@ describe('getItemsInfo / getRangeToRender (rebalanced overscan)', () => {
     // only have 8.
     const info = getItemsInfo(
       makeProps({
-        itemCount: 8,
+        rows: new Array(8).fill(0),
         scrollOffset: 0,
         height: 300,
         overscanCount: 6,
@@ -126,7 +125,7 @@ describe('getItemsInfo / getRangeToRender (rebalanced overscan)', () => {
   test('itemCount = 0: returns empty items', () => {
     const info = getItemsInfo(
       makeProps({
-        itemCount: 0,
+        rows: new Array(0),
         scrollOffset: 0,
         height: 300,
         overscanCount: 6,
@@ -139,7 +138,7 @@ describe('getItemsInfo / getRangeToRender (rebalanced overscan)', () => {
     // scrollOffset that puts startIndex past overscan — fully mid-data.
     const info = getItemsInfo(
       makeProps({
-        itemCount: 200,
+        rows: new Array(200).fill(0),
         scrollOffset: 10 * 30, // startIndex = 10 (past overscan=6)
         height: 300,
         overscanCount: 6,

@@ -15,11 +15,13 @@
 
   type Row = $$Generic;
 
+  const VLComponent = VirtualListWithSlotPooling<Row>;
+
   export let rows: Row[];
-  export let itemSize: VirtualListProps['itemSize'];
+  export let rowSize: VirtualListProps<Row>['rowSize'];
   export let paddingBottom = 0;
-  export let itemKeyForSlotPooling:
-    | ((index: number) => ItemKeyForSlotPooling)
+  export let rowKeyForSlotPooling:
+    | ((row: Row, index: number) => ItemKeyForSlotPooling)
     | undefined = undefined;
   export let alwaysRenderRows: ItemKey[] = [];
   export let indexByKey: ((id: ItemKey) => number | undefined) | undefined =
@@ -28,16 +30,16 @@
 
 <div data-sheet-element="body" tabindex="-1">
   <Resizer let:height>
-    <VirtualListWithSlotPooling
+    <VLComponent
       horizontalScrollOffset={$horizontalScrollOffset}
       scrollOffset={$scrollOffset}
       {height}
       width={$rowWidth}
       {rows}
       {paddingBottom}
-      {itemSize}
+      {rowSize}
+      {rowKeyForSlotPooling}
       estimatedItemSize={ROW_HEIGHT_PX}
-      {itemKeyForSlotPooling}
       {alwaysRenderRows}
       {indexByKey}
       let:items
@@ -50,7 +52,7 @@
       }}
     >
       <slot {items} api={virtualListApi} />
-    </VirtualListWithSlotPooling>
+    </VLComponent>
   </Resizer>
 </div>
 

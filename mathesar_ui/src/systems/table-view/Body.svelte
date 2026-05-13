@@ -28,7 +28,10 @@
   $: ({ oid } = table);
   $: ({ displayRowDescriptors, placeholderRowId } = display);
 
-  function getItemSizeFromRow(row: RowType) {
+  const SheetVirtualRowsForTable = SheetVirtualRows<DisplayRowDescriptor>;
+
+  function getRowSize(desc: DisplayRowDescriptor) {
+    const { row } = desc;
     if (isHelpTextRow(row)) {
       return HELP_TEXT_ROW_HEIGHT_PX;
     }
@@ -39,19 +42,12 @@
   }
 
   /** See notes in `records.ts.README.md` about different row identifiers */
-  function getIterationKey(
-    index: number,
-    rowDescriptor: DisplayRowDescriptor | undefined,
-  ): string {
-    if (rowDescriptor) {
-      return rowDescriptor.row.identifier;
+  function getIterationKey(rowDescriptor: DisplayRowDescriptor): string {
+    if (!rowDescriptor) {
+      // Should ideally never happen
+      throw new Error('Row descriptor missing');
     }
-    return `__index_${index}`;
-  }
-
-  function getItemSizeFromIndex(index: number) {
-    const row = $displayRowDescriptors?.[index].row;
-    return row ? getItemSizeFromRow(row) : ROW_HEIGHT_PX;
+    return rowDescriptor.row.identifier;
   }
 
   function isPoolRow(row: RowType): boolean {
@@ -64,7 +60,7 @@
     : undefined;
 
   $: rowIndexByKey = new Map(
-    $displayRowDescriptors.map((d, i) => [getIterationKey(i, d), i]),
+    $displayRowDescriptors.map((d, i) => [getIterationKey(d), i]),
   );
 
   $: alwaysRenderRows = (() => {
@@ -82,17 +78,14 @@
 
 {#key oid}
   {#if usesVirtualList}
-    <SheetVirtualRows
+    <SheetVirtualRowsForTable
       rows={$displayRowDescriptors}
       paddingBottom={30}
-      itemSize={getItemSizeFromIndex}
-      itemKeyForSlotPooling={(index) => {
-        const desc = $displayRowDescriptors[index];
-        return {
-          key: getIterationKey(index, desc),
-          recyclable: desc ? isPoolRow(desc.row) : false,
-        };
-      }}
+      rowSize={getRowSize}
+      rowKeyForSlotPooling={(desc) => ({
+        key: getIterationKey(desc),
+        recyclable: desc ? isPoolRow(desc.row) : false,
+      })}
       {alwaysRenderRows}
       indexByKey={(key) => rowIndexByKey.get(key)}
       let:items
@@ -100,23 +93,22 @@
     >
       <ScrollAndRowHeightHandler {api} />
       {#each items as item (item.key)}
-        {@const desc = $displayRowDescriptors[item.index]}
         {@const shouldRender = !(
-          desc &&
-          isPlaceholderRecordRow(desc.row) &&
+          item.row &&
+          isPlaceholderRecordRow(item.row.row) &&
           !$canInsertRecords
         )}
-        {#if desc && shouldRender}
-          <Row style={item.style} row={desc.row} rowDescriptor={desc} />
+        {#if item.row && shouldRender}
+          <Row style={item.style} row={item.row.row} rowDescriptor={item.row} />
         {/if}
       {/each}
-    </SheetVirtualRows>
+    </SheetVirtualRowsForTable>
   {:else}
     {#each $displayRowDescriptors as displayRowDescriptor (displayRowDescriptor)}
       <Row
         style={{
           position: 'relative',
-          height: getItemSizeFromRow(displayRowDescriptor.row),
+          height: getRowSize(displayRowDescriptor),
         }}
         row={displayRowDescriptor.row}
         rowDescriptor={displayRowDescriptor}

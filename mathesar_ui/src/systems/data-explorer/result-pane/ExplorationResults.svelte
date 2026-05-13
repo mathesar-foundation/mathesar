@@ -15,7 +15,6 @@
   import { SheetClipboardHandler } from '@mathesar/components/sheet/clipboard';
   import { ROW_HEADER_WIDTH_PX, ROW_HEIGHT_PX } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
-  import { arrayIndex } from '@mathesar/utils/typeUtils';
   import { ImmutableMap } from '@mathesar-component-library';
 
   import { getCustomColumnWidths } from '../displayOptions';
@@ -68,7 +67,7 @@
   $: showDummyGhostRow =
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
-  $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
+  $: rowsToDisplay = showDummyGhostRow ? [...rows, undefined] : rows;
 
   async function persistColumnWidths(widthsMap: [string, number | null][]) {
     for (const [columnId, width] of widthsMap) {
@@ -129,16 +128,16 @@
       </SheetHeader>
 
       <SheetVirtualRows
-        {rows}
+        rows={rowsToDisplay}
         paddingBottom={30}
-        itemSize={() => ROW_HEIGHT_PX}
+        rowSize={() => ROW_HEIGHT_PX}
         let:items
       >
         {#each items as item (item.key)}
-          {@const row = arrayIndex(rows, item.index)}
-          {@const rowSelectionId = (row && getRowSelectionId(row)) ?? ''}
+          {@const rowSelectionId =
+            (item.row && getRowSelectionId(item.row)) ?? ''}
           {@const isSelected = $selection.rowIds.has(rowSelectionId)}
-          {#if row || showDummyGhostRow}
+          {#if item.row || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div
                 class="row"
@@ -163,7 +162,7 @@
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
                   <ResultRowCell
-                    {row}
+                    row={item.row}
                     {rowSelectionId}
                     column={processedQueryColumn}
                     {recordRunState}

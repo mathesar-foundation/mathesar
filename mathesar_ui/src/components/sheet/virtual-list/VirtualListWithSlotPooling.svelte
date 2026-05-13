@@ -5,7 +5,7 @@
     type ItemKey,
     type ItemKeyForSlotPooling,
     type Props,
-    defaultItemKeyForSlotPooling,
+    defaultRowKeyForSlotPooling,
   } from './listUtils';
   import { type Pool, padPool, reconcilePool } from './slotAllocator';
   import VirtualList from './VirtualList.svelte';
@@ -24,17 +24,19 @@
   let classes = 'default';
   export { classes as class };
   export let estimatedItemSize: number = DEFAULT_ESTIMATED_ITEM_SIZE;
-  export let height: Props['height'];
-  export let scrollOffset: Props['scrollOffset'] = 0;
-  export let overscanCount: Props['overscanCount'] = 2;
-  export let itemSize: Props['itemSize'] = (): number => estimatedItemSize;
+  export let height: Props<Row>['height'];
+  export let scrollOffset: Props<Row>['scrollOffset'] = 0;
+  export let overscanCount: Props<Row>['overscanCount'] = 2;
+  export let rowSize: Props<Row>['rowSize'] = (): number => estimatedItemSize;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
   export let width: number | undefined = undefined;
 
   // Pool-specific props
-  export let itemKeyForSlotPooling: (index: number) => ItemKeyForSlotPooling =
-    defaultItemKeyForSlotPooling;
+  export let rowKeyForSlotPooling: (
+    row: Row,
+    index: number,
+  ) => ItemKeyForSlotPooling = defaultRowKeyForSlotPooling;
   export let alwaysRenderRows: ItemKey[] = [];
   export let indexByKey: ((id: ItemKey) => number | undefined) | undefined =
     undefined;
@@ -42,7 +44,8 @@
   const poolRef: { current: Pool } = { current: [] };
   const maxPoolSizeRef: { current: number } = { current: 0 };
 
-  $: virtualListItemKey = (index: number) => itemKeyForSlotPooling(index).key;
+  $: virtualListItemKey = (row: Row, index: number) =>
+    rowKeyForSlotPooling(row, index).key;
 
   $: internalIndexByKey = (() => {
     if (indexByKey !== undefined) return indexByKey;
@@ -51,21 +54,22 @@
       if (cache === undefined) {
         cache = new Map();
         for (let i = 0; i < rows.length; i += 1) {
-          cache.set(itemKeyForSlotPooling(i).key, i);
+          cache.set(rowKeyForSlotPooling(rows[i], i).key, i);
         }
       }
       return cache.get(id);
     };
   })();
 
-  type Style = Item['style'];
+  type Style = Item<Row>['style'];
 
   function makeOffscreenItem(
     index: number,
     getStyle: (i: number) => Style,
-  ): Item {
+  ): Item<Row> {
     return {
       key: '', // filled by buildRender (slot:N or natural id)
+      row: rows[index],
       index,
       isScrolling: false,
       style: getStyle(index),
@@ -73,12 +77,12 @@
   }
 
   function buildRender(
-    liveFromVirtual: readonly Item[],
+    liveFromVirtual: readonly Item<Row>[],
     getStyle: (i: number) => Style,
-  ): Item[] {
+  ): Item<Row>[] {
     // Phase 1: live items from the virtual list, plus offscreen synthetics
     // for any always-render ids that aren't already live.
-    const liveItems: Item[] = [...liveFromVirtual];
+    const liveItems: Item<Row>[] = [...liveFromVirtual];
     const liveIndexes = new Set(liveFromVirtual.map((it) => it.index));
 
     for (const key of alwaysRenderRows) {
@@ -94,7 +98,7 @@
     const liveByKey = new Map<ItemKey, number>();
     const itemKeyByIndex = new Map<number, ItemKeyForSlotPooling>();
     for (const item of liveItems) {
-      const key = itemKeyForSlotPooling(item.index);
+      const key = rowKeyForSlotPooling(item.row, item.index);
       itemKeyByIndex.set(item.index, key);
       if (key.recyclable) {
         liveByKey.set(key.key, item.index);
@@ -139,8 +143,8 @@
       liveStart,
       liveEnd,
       rows.length,
-      (i) => itemKeyForSlotPooling(i).key,
-      (i) => itemKeyForSlotPooling(i).recyclable,
+      (i) => rowKeyForSlotPooling(rows[i], i).key,
+      (i) => rowKeyForSlotPooling(rows[i], i).recyclable,
     );
     poolRef.current = newPool;
 
@@ -148,7 +152,7 @@
     // re-orders DOM children of the keyed each. Without this, items move
     // position when their row transitions between live and ghost, and
     // Svelte's insertBefore drops focus / interrupts edit mode.
-    const liveItemByRowKey = new Map<ItemKey, Item>();
+    const liveItemByRowKey = new Map<ItemKey, Item<Row>>();
     for (const item of liveItems) {
       const key = itemKeyByIndex.get(item.index);
       if (key && key.recyclable) {
@@ -156,7 +160,7 @@
       }
     }
 
-    const result: Item[] = [];
+    const result: Item<Row>[] = [];
     const keys: ItemKey[] = [];
 
     const sortedPool = [...newPool].sort((a, b) => a.slot - b.slot);
@@ -222,10 +226,10 @@
   {scrollOffset}
   {rows}
   {overscanCount}
-  {itemSize}
+  {rowSize}
   {paddingBottom}
   {horizontalScrollOffset}
-  itemKey={virtualListItemKey}
+  rowKey={virtualListItemKey}
   {width}
   let:items
   let:api

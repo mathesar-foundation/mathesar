@@ -29,9 +29,8 @@
   import {
     DEFAULT_ESTIMATED_ITEM_SIZE,
     IS_SCROLLING_DEBOUNCE_INTERVAL,
-    type ItemInfo,
     type Props,
-    defaultItemKey,
+    defaultRowKey,
     getEstimatedTotalSize,
     getItemStyle,
     getItemsInfo,
@@ -49,25 +48,21 @@
   export let rows: Row[];
 
   export let estimatedItemSize: number = DEFAULT_ESTIMATED_ITEM_SIZE;
-  export let height: Props['height'];
-  export let scrollOffset: Props['scrollOffset'] = 0;
-  export let overscanCount: Props['overscanCount'] = 3;
-  export let itemSize: Props['itemSize'] = (): number => estimatedItemSize;
+  export let height: Props<Row>['height'];
+  export let scrollOffset: Props<Row>['scrollOffset'] = 0;
+  export let overscanCount: Props<Row>['overscanCount'] = 3;
+  export let rowSize: Props<Row>['rowSize'] = (): number => estimatedItemSize;
+  export let rowKey: Props<Row>['rowKey'] = defaultRowKey;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
-  export let itemKey: Props['itemKey'] = defaultItemKey;
   export let width: number | undefined = undefined;
 
-  let instanceProps: Props['instanceProps'] = {
+  let instanceProps: Props<Row>['instanceProps'] = {
     lastMeasuredIndex: -1,
     itemMetadataMap: {},
     styleCache: {},
   };
-  let isScrolling: Props['isScrolling'] = false;
-  let scrollDirection: Props['scrollDirection'] = 'forward';
-
-  let items: ItemInfo['items'] = [];
-  let estimatedTotalSize: number;
+  let isScrolling: Props<Row>['isScrolling'] = false;
 
   let outerRef: HTMLElement;
 
@@ -77,27 +72,19 @@
   let requestGetItemStyleCache = false;
   let psRef: PerfectScrollbar | undefined;
 
-  let itemInfo: ItemInfo;
-
-  function recalc(opts: Props) {
-    itemInfo = getItemsInfo(opts);
-    items = itemInfo.items;
-    estimatedTotalSize = getEstimatedTotalSize(opts);
-  }
-
   $: props = {
-    itemSize,
+    rowSize,
     instanceProps,
     isScrolling,
-    scrollDirection,
-    itemCount: rows.length,
+    rows,
     overscanCount,
     scrollOffset,
     height,
-    itemKey,
+    rowKey,
     estimatedItemSize,
   };
-  $: recalc(props);
+  $: items = getItemsInfo(props).items;
+  $: estimatedTotalSize = getEstimatedTotalSize(props);
 
   $: innerStyle =
     `height:${estimatedTotalSize + paddingBottom}px;` +
@@ -136,7 +123,6 @@
         Math.min(scrollTop, scrollHeight - clientHeight),
       );
       isScrolling = true;
-      scrollDirection = scrollOffset < newScrollOffset ? 'forward' : 'backward';
       scrollOffset = newScrollOffset;
       dispatch('scroll', scrollOffset);
     }
