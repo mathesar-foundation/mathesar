@@ -25,7 +25,7 @@ def add_user(user_def):
     )
     user.set_password(user_def["password"])
     user.save()
-    if settings.AUTO_HOME_DB_AND_ROLE is True:
+    if settings.PER_USER_DATABASES_ENABLED is True:
         set_up_home_role_and_db_for_user(user)
     return user
 

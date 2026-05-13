@@ -344,4 +344,4 @@ FALLBACK_LANGUAGE = 'en'
 
 SALT_KEY = SECRET_KEY
 
-AUTO_HOME_DB_AND_ROLE = os.environ.get('AUTO_HOME_DB_AND_ROLE') in ['t', 'true', 'True']
+PER_USER_DATABASES_ENABLED =  os.environ.get('PER_USER_DATABASES_ENABLED') in ['t', 'true', 'True']

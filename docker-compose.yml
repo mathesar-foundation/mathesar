@@ -187,7 +187,7 @@ services:
       # If this is set to true, each new use in Mathesar will receive a role
       # with the same name as their username on the internal DB server, and a
       # database owned by that role will be created and connected for that user.
-      AUTO_HOME_DB_AND_ROLE: ${AUTO_HOME_DB_AND_ROLE-}
+      PER_USER_DATABASES_ENABLED: ${PER_USER_DATABASES_ENABLED-}
 
     volumes:
       - ./msar/static:/code/static
