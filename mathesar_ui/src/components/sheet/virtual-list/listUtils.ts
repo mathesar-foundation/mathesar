@@ -53,7 +53,7 @@ export const defaultRowKey = <Row>(row: Row, index: number) => String(index);
 export const defaultRowKeyForSlotPooling: <Row>(
   row: Row,
   index: number,
-) => ItemKeyForSlotPooling = (index) => ({
+) => ItemKeyForSlotPooling = (_row, index) => ({
   key: String(index),
   recyclable: true,
 });
