@@ -2,6 +2,8 @@
 Classes and functions exposed to the RPC endpoint for managing mathesar users.
 """
 from typing import Optional, TypedDict
+
+from django.conf import settings
 from modernrpc.core import REQUEST_KEY
 
 from mathesar.rpc.decorators import mathesar_rpc_method
@@ -149,6 +151,8 @@ def patch_self(
         Updated user information of the caller.
     """
     user = kwargs.get(REQUEST_KEY).user
+    if settings.REQUIRE_SSO_LOGIN and email != user.email:
+        raise Exception('Email cannot be changed when SSO-only login is enabled.')
     updated_user_info = update_self_user_info(
         user_id=user.id,
         username=username,
@@ -211,6 +215,8 @@ def replace_own(
         old_password: Old password of the currently logged in user.
         new_password: New password of the user to set.
     """
+    if settings.REQUIRE_SSO_LOGIN:
+        raise Exception('Password authentication is disabled when SSO-only login is enabled.')
     user = kwargs.get(REQUEST_KEY).user
     if not user.check_password(old_password):
         raise Exception('Old password is incorrect')

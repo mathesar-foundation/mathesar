@@ -21,6 +21,19 @@ def load_sso_config(env_value=None, config_file=None):
     return parse_sso_config(_read_raw(env_value, config_file))
 
 
+def resolve_require_sso_login(env_value, sso_config):
+    requested = env_value in ['t', 'true', 'True']
+    if not requested:
+        return False
+    if not (sso_config.oidc_apps or sso_config.github_apps):
+        logger.warning(
+            "REQUIRE_SSO_LOGIN is set but no SSO provider is configured; "
+            "password login remains active."
+        )
+        return False
+    return True
+
+
 def parse_sso_config(raw):
     if not raw:
         return SSOConfig()

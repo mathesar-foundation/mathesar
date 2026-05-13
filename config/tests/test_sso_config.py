@@ -1,7 +1,12 @@
 import json
 import pytest
 
-from config.sso_config import SSOConfig, load_sso_config, parse_sso_config
+from config.sso_config import (
+    SSOConfig,
+    load_sso_config,
+    parse_sso_config,
+    resolve_require_sso_login,
+)
 
 
 def _oidc_provider(**overrides):
@@ -175,3 +180,27 @@ def test_load_env_value_takes_precedence_over_file(tmp_path):
 
 def test_load_missing_file_returns_empty(tmp_path):
     assert load_sso_config(config_file=str(tmp_path / "nope.yml")) == SSOConfig()
+
+
+@pytest.mark.parametrize("env_value", [None, "", "false", "False", "0", "no"])
+def test_resolve_require_sso_login_disabled_when_env_falsey(env_value):
+    sso = parse_sso_config({"version": 1, "oidc_providers": {"p": _oidc_provider()}})
+    assert resolve_require_sso_login(env_value, sso) is False
+
+
+@pytest.mark.parametrize("env_value", ["t", "true", "True"])
+def test_resolve_require_sso_login_true_when_env_truthy_and_provider_configured(env_value):
+    sso = parse_sso_config({"version": 1, "oidc_providers": {"p": _oidc_provider()}})
+    assert resolve_require_sso_login(env_value, sso) is True
+
+
+def test_resolve_require_sso_login_true_with_github_provider():
+    sso = parse_sso_config({"version": 2, "providers": {"gh": _github_provider()}})
+    assert resolve_require_sso_login("true", sso) is True
+
+
+def test_resolve_require_sso_login_false_when_no_provider_configured(caplog):
+    sso = SSOConfig()
+    with caplog.at_level("WARNING"):
+        assert resolve_require_sso_login("true", sso) is False
+    assert any("REQUIRE_SSO_LOGIN" in record.message for record in caplog.records)

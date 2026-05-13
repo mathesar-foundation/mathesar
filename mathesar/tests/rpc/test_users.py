@@ -5,6 +5,8 @@ Fixtures:
     rf(pytest-django): Provides mocked `Request` objects.
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
+import pytest
+
 from mathesar.rpc import users
 from mathesar.models.users import User
 
@@ -260,3 +262,106 @@ def test_users_revoke(rf, monkeypatch):
 
     monkeypatch.setattr(users, 'revoke', mock_revoke_password)
     users.revoke(user_id=_user_id, new_password=_new_password)
+
+
+def test_users_replace_own_blocked_when_sso_required(rf, settings, monkeypatch):
+    settings.REQUIRE_SSO_LOGIN = True
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(id=2, username='bob', password='bobs_old_password')
+    request.user.set_password('bobs_old_password')
+
+    def mock_change_password(user_id, new_password):
+        raise AssertionError('change_password should not be called')
+
+    monkeypatch.setattr(users, 'change_password', mock_change_password)
+    with pytest.raises(Exception, match='Password authentication is disabled'):
+        users.replace_own(
+            old_password='bobs_old_password',
+            new_password='bobs_new_password',
+            request=request,
+        )
+
+
+def test_users_revoke_still_works_when_sso_required(rf, settings, monkeypatch):
+    settings.REQUIRE_SSO_LOGIN = True
+    called = {}
+
+    def mock_revoke_password(user_id, new_password):
+        called['args'] = (user_id, new_password)
+
+    monkeypatch.setattr(users, 'revoke_password', mock_revoke_password)
+    users.revoke(user_id=3, new_password='new')
+    assert called['args'] == (3, 'new')
+
+
+def test_users_patch_self_email_change_blocked_when_sso_required(rf, settings, monkeypatch):
+    settings.REQUIRE_SSO_LOGIN = True
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(id=2, username='alice', email='alice@mathesar.org')
+
+    def mock_patch_self(*args, **kwargs):
+        raise AssertionError('update_self_user_info should not be called')
+
+    monkeypatch.setattr(users, 'update_self_user_info', mock_patch_self)
+    with pytest.raises(Exception, match='Email cannot be changed'):
+        users.patch_self(
+            username='alice',
+            email='new@mathesar.org',
+            full_name='Alice',
+            display_language='en',
+            request=request,
+        )
+
+
+def test_users_patch_self_same_email_allowed_when_sso_required(rf, settings, monkeypatch):
+    settings.REQUIRE_SSO_LOGIN = True
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(id=2, username='alice', email='alice@mathesar.org')
+
+    def mock_patch_self(user_id, username, email, full_name, display_language):
+        return User(
+            id=2,
+            username=username,
+            is_superuser=False,
+            email=email,
+            full_name=full_name,
+            display_language=display_language,
+        )
+
+    monkeypatch.setattr(users, 'update_self_user_info', mock_patch_self)
+    result = users.patch_self(
+        username='alice_l',
+        email='alice@mathesar.org',
+        full_name='Alice L',
+        display_language='en',
+        request=request,
+    )
+    assert result['email'] == 'alice@mathesar.org'
+    assert result['full_name'] == 'Alice L'
+
+
+def test_users_patch_other_email_change_allowed_when_sso_required(rf, settings, monkeypatch):
+    settings.REQUIRE_SSO_LOGIN = True
+    called = {}
+
+    def mock_patch_other(user_id, username, is_superuser, email, full_name, display_language):
+        called['email'] = email
+        return User(
+            id=user_id,
+            username=username,
+            is_superuser=is_superuser,
+            email=email,
+            full_name=full_name,
+            display_language=display_language,
+        )
+
+    monkeypatch.setattr(users, 'update_other_user_info', mock_patch_other)
+    users.patch_other(
+        user_id=3,
+        username='bob',
+        is_superuser=False,
+        email='changed@mathesar.org',
+        full_name='Bob',
+        display_language='en',
+    )
+    assert called['email'] == 'changed@mathesar.org'
