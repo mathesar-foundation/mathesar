@@ -1,13 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import type { SummarizedRecordReference } from '@mathesar/api/rpc/_common/commonTypes';
   import Default from '@mathesar/components/Default.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
+  import { CollaborationFeaturesContext } from '@mathesar/contexts/CollaborationFeaturesContext';
   import { rowSeekerContext } from '@mathesar/systems/row-seeker/AttachableRowSeekerController';
   import {
     type UserDisplayField,
@@ -27,6 +26,7 @@
   import { createUserRecordStore } from './userRecordUtils';
 
   const dispatch = createEventDispatcher();
+  const collabContext = CollaborationFeaturesContext.get();
 
   export let isActive: CellExternalProps['isActive'];
   export let value: CellExternalProps['value'] = undefined;
@@ -43,21 +43,24 @@
   let cellWrapperElement: HTMLElement;
   let wasActiveBeforeClick = false;
 
-  const usersStore = getGlobalUsersStore();
   const rowSeekerController = rowSeekerContext.get();
 
-  // Use proper store subscriptions with readable fallbacks
-  const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
-  const requestStatusReadable =
-    usersStore?.requestStatus ?? readable(undefined);
+  $: collaboratorsApiStore = $collabContext.collaborators;
+  $: void collaboratorsApiStore.runConservatively();
+  $: collaborators = $collaboratorsApiStore.resolvedValue
+    ? [...$collaboratorsApiStore.resolvedValue.values()]
+    : [];
+  $: users = collaborators.map((c) => c.userInfo);
+  $: isLoadingCollaborators = $collaboratorsApiStore.isLoading;
+  $: hasCollaboratorsSettled = $collaboratorsApiStore.hasSettled;
+  $: hasCollaboratorsLoadingFailed = $collaboratorsApiStore.isRejected;
 
-  $: hasValue = value !== undefined && value !== null;
+  $: hasUserIdValue = value !== undefined && value !== null;
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
-  $: users = $usersReadable;
-  $: isLoadingUsers = $requestStatusReadable?.state === 'processing';
-  $: usersLoaded = $requestStatusReadable?.state === 'success';
   $: showBrokenLink =
-    hasValue && usersLoaded && !users.some((u) => u.id === Number(value));
+    hasUserIdValue &&
+    hasCollaboratorsSettled &&
+    !users.some((u) => u.id === Number(value));
 
   // Get previous value for row seeker
   function getPreviousValue(): SummarizedRecordReference | undefined {
@@ -71,10 +74,9 @@
         summary: recordSummary ?? String(value),
       };
     }
-    const userApiFormat = user.getUser();
     return {
       key: user.id,
-      summary: getUserLabel(userApiFormat, userDisplayField),
+      summary: getUserLabel(user, userDisplayField),
     };
   }
 
@@ -82,9 +84,8 @@
     if (disabled || !rowSeekerController) return;
     event?.stopPropagation();
 
-    // Ensure users are loaded
-    if ($requestStatusReadable?.state !== 'success') {
-      await usersStore?.fetchUsers();
+    if (hasCollaboratorsLoadingFailed) {
+      await collaboratorsApiStore?.run();
     }
 
     try {
@@ -97,7 +98,7 @@
           if (v) {
             const user = users.find((u) => u.id === Number(v.key));
             if (user && setRecordSummary) {
-              const userApiFormat = user.getUser();
+              const userApiFormat = user;
               const userDisplayValue = getUserLabel(
                 userApiFormat,
                 userDisplayField,
@@ -113,11 +114,7 @@
         setValue(newValue);
         const user = users.find((u) => u.id === Number(selection.key));
         if (user && setRecordSummary) {
-          const userApiFormat = user.getUser();
-          const userDisplayValue = getUserLabel(
-            userApiFormat,
-            userDisplayField,
-          );
+          const userDisplayValue = getUserLabel(user, userDisplayField);
           setRecordSummary(String(selection.key), userDisplayValue);
         }
       } else {
@@ -185,14 +182,14 @@
 >
   <div class="user-cell" class:disabled>
     <div class="value">
-      {#if isLoadingUsers}
+      {#if isLoadingCollaborators}
         <Spinner />
       {:else if showBrokenLink}
         <span class="broken-link" title={$_('user_not_found')}>
           <Icon {...iconWarning} />
           <span class="broken-value">{value}</span>
         </span>
-      {:else if hasValue}
+      {:else if hasUserIdValue}
         <LinkedRecord
           recordId={value}
           {recordSummary}
@@ -208,7 +205,7 @@
     {#if !disabled && isActive}
       <button
         class="dropdown-button passthrough"
-        on:click|stopPropagation={(e) => launchRowSeeker(e)}
+        on:click|stopPropagation={launchRowSeeker}
         aria-label={$_('select_user')}
         title={$_('select_user')}
         type="button"
