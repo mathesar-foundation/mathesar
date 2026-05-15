@@ -56,17 +56,19 @@
   /**
    * If this LinkedRecordInput in placed inside an AttachableDropdown, we want
    * to tell the dropdown not to close when the user clicks within the Record
-   * Selector UI, so we set the modal element to "accompany" the dropdown.
+   * Selector UI, so we set the modal/rowseeker element to "accompany" the dropdown.
    */
   function setRecordSelectorToAccompanyDropdown(): () => void {
     if (!dropdownAccompanyingElements) {
       return () => {};
     }
-    const modal = document.querySelector<HTMLElement>('.modal-record-selector');
-    if (!modal) {
+    const modalOrRowSeeker = document.querySelector<HTMLElement>(
+      '.modal-record-selector, [data-row-seeker]',
+    );
+    if (!modalOrRowSeeker) {
       return () => {};
     }
-    return dropdownAccompanyingElements.add(modal);
+    return dropdownAccompanyingElements.add(modalOrRowSeeker);
   }
 
   async function launchRecordSelector() {

@@ -3,10 +3,12 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
+  import { ensureReadable } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';
+  import { CollaborationFeaturesContext } from '@mathesar/contexts/CollaborationFeaturesContext';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Database } from '@mathesar/models/Database';
   import DatabasePageWrapper from '@mathesar/pages/database/DatabasePageWrapper.svelte';
@@ -22,9 +24,16 @@
   $: databasesStore.setCurrentDatabaseId(databaseId);
   const { currentDatabase } = databasesStore;
 
-  $: if ($currentDatabase) {
-    DatabaseRouteContext.construct($currentDatabase);
-  }
+  $: collabFeaturesContext = ensureReadable(
+    $currentDatabase
+      ? CollaborationFeaturesContext.construct($currentDatabase)
+      : undefined,
+  );
+  $: databaseRouteContext = ensureReadable(
+    $currentDatabase && $collabFeaturesContext
+      ? DatabaseRouteContext.construct($currentDatabase, $collabFeaturesContext)
+      : undefined,
+  );
 
   function handleUnmount() {
     databasesStore.clearCurrentDatabaseId();
@@ -33,12 +42,14 @@
   onMount(() => handleUnmount);
 </script>
 
-{#if $currentDatabase}
-  <AppendBreadcrumb item={{ type: 'database', database: $currentDatabase }} />
+{#if $databaseRouteContext}
+  <AppendBreadcrumb
+    item={{ type: 'database', database: $databaseRouteContext.database }}
+  />
 
   <Route path="/schemas/:schemaId/*" let:meta firstmatch>
     <SchemaRoute
-      database={$currentDatabase}
+      database={$databaseRouteContext.database}
       schemaId={parseInt(meta.params.schemaId, 10)}
     />
   </Route>

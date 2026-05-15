@@ -63,8 +63,15 @@ x-config: &config
   # (Optional) Can be used to configure single-sign on (sso) instead of an
   # sso.yml configuration file.
   # See https://docs.mathesar.org/administration/single-sign-on/ for additional
-  # details on how to configure this variable.
-  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}}
+  # details on how to configure this variable. OIDC_CONFIG_DICT is the legacy
+  # name, kept for backwards compatibility.
+  SSO_CONFIG_DICT: ${SSO_CONFIG_DICT:-{}}
+  OIDC_CONFIG_DICT: ${OIDC_CONFIG_DICT:-{}} # deprecated, use SSO_CONFIG_DICT
+
+  # (Optional) Set to 'true' to disable password-based login and require all
+  # users to sign in via a configured SSO provider. Has no effect unless at
+  # least one SSO provider is configured.
+  REQUIRE_SSO_LOGIN: ${REQUIRE_SSO_LOGIN:-false}
 
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
@@ -114,11 +121,22 @@ x-config: &config
 #     Info: Specifies the settings necessary to configure an S3-complaint
 #           filestorage backend.
 #
-# OIDC_CONFIG_DICT:
+# SSO_CONFIG_DICT (alias: OIDC_CONFIG_DICT):
 #   Default: {}
-#   Info: Specifies the settings necessary to configure Single Sign-on (SS0)
-#   identity providers for Mathesar login. This is an optional, alternative
-#   approach to configuring SSO via a configuration file.
+#   Info: Specifies the settings necessary to configure Single Sign-on (SSO)
+#   identity providers for Mathesar login (including OIDC providers and
+#   GitHub). This is an optional, alternative approach to configuring SSO
+#   via a configuration file. OIDC_CONFIG_DICT is the legacy name and is
+#   still accepted.
+#
+# REQUIRE_SSO_LOGIN:
+#   Default: false
+#   Info: When set to 'true', Mathesar disables password-based login and only
+#   allows users to sign in via a configured SSO provider. Users will not be
+#   able to update their own passwords or email addresses. Administrators can
+#   still reset another user's password and edit other users' emails as a
+#   break-glass mechanism. Has no effect unless at least one SSO provider is
+#   configured.
 #
 #-------------------------------------------------------------------------------
 # INFO ABOUT VOLUMES

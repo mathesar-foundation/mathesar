@@ -7,6 +7,7 @@
 
   $: enabledStateInfo = abstractType.getEnabledState?.();
   $: isDisabled = enabledStateInfo ? !enabledStateInfo.enabled : false;
+  $: generalHelp = abstractType.getHelpInfo?.();
   $: disabledHelp =
     enabledStateInfo && !enabledStateInfo.enabled
       ? enabledStateInfo.cause
@@ -17,6 +18,13 @@
   <NameWithIcon icon={abstractType.getIcon()}>
     {abstractType.name}
   </NameWithIcon>
+  {#if generalHelp}
+    <span class="help">
+      <Help>
+        <Render arg={generalHelp} />
+      </Help>
+    </span>
+  {/if}
   {#if disabledHelp}
     <span class="help">
       <Help>

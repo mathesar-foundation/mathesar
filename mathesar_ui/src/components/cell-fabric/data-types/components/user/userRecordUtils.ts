@@ -4,27 +4,20 @@ import type {
 } from '@mathesar/api/rpc/_common/commonTypes';
 import type { User } from '@mathesar/api/rpc/users';
 import AsyncStore from '@mathesar/stores/AsyncStore';
-import type { UserModel } from '@mathesar/stores/users';
 import type { RowSeekerRecordStore } from '@mathesar/systems/row-seeker/RowSeekerController';
 import { type UserDisplayField, getUserLabel } from '@mathesar/utils/userUtils';
 
-/**
- * Convert a list of UserModel objects to the RecordsSummaryListResponse format
- * used by the row seeker, with optional search filtering and pagination.
- */
 export function convertUsersToRecords(
-  _users: UserModel[],
+  users: User[],
   userDisplayField: UserDisplayField,
   searchQuery?: string,
   limit?: number,
   offset?: number,
 ): RecordsSummaryListResponse {
-  const usersAsApiFormat: User[] = _users.map((u) => u.getUser());
-
-  let filteredUsers = usersAsApiFormat;
+  let filteredUsers = users;
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
-    filteredUsers = usersAsApiFormat.filter(
+    filteredUsers = users.filter(
       (user) =>
         user.username?.toLowerCase().includes(query) ||
         user.full_name?.toLowerCase().includes(query) ||
@@ -53,7 +46,7 @@ export function convertUsersToRecords(
  * user records from the in-memory users list.
  */
 export function createUserRecordStore(
-  users: UserModel[],
+  users: User[],
   userDisplayField: UserDisplayField,
 ): RowSeekerRecordStore {
   return new AsyncStore<

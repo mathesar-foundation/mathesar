@@ -102,20 +102,37 @@ The database specified in this section is used to store Mathesar's internal data
 !!! info "**OPTIONAL**"
     Only used if [using SSO](./single-sign-on.md) in installations where the local filesystem is inaccessible.
 
-### `OIDC_CONFIG_DICT` (optional)
+### `SSO_CONFIG_DICT` (optional)
 
 - **Description**: The configuration for enabling SSO and configuring providers in Mathesar.
-- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
+- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example). Both schema version 1 (OIDC only) and version 2 (OIDC + GitHub) are accepted.
 
-    !!! example
+    !!! example "Version 2 (OIDC + GitHub)"
         ```env
-         OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
+         SSO_CONFIG_DICT="{\"version\": 2,\"providers\": {\"provider1\": {\"type\": \"oidc\",\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"},\"provider2\": {\"type\": \"github\",\"client_id\": \"github-client-id\",\"secret\": \"github-client-secret\"}}}"
+        ```
+
+    !!! example "Version 1 (OIDC only, legacy)"
+        ```env
+         SSO_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
         ```
 
 
 - **Additional information**: The following tools might help you convert the YAML syntax from `sso.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+
+### `OIDC_CONFIG_DICT` (optional, alias)
+
+- **Description**: A backwards-compatible alias for `SSO_CONFIG_DICT`. Existing installations can continue to use this name with no changes. If both are set, `SSO_CONFIG_DICT` takes precedence.
+
+### `REQUIRE_SSO_LOGIN` (optional) {: #require_sso_login}
+
+- **Description**: When enabled, Mathesar disables password-based login and only allows users to sign in via a configured SSO provider. Users will not be able to update passwords or email addresses. Administrators can still reset another user's password and edit other users' emails as a break-glass mechanism.
+- **Format**: `true` or `false`
+- **Default value**: `false`
+- **Additional information**:
+    - This setting only takes effect when at least one SSO provider is configured. If `REQUIRE_SSO_LOGIN=true` but no provider is configured in `sso.yml`/`SSO_CONFIG_DICT`, Mathesar logs a warning and continues to allow password login (so administrators can never accidentally lock everyone out).
 
 ## File backend configuration
 
