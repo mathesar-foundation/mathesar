@@ -15,6 +15,7 @@
   import {
     Icon,
     Spinner,
+    Tooltip,
     compareWholeValues,
     iconExpandDown,
     iconWarning,
@@ -185,8 +186,13 @@
       {#if isLoadingCollaborators}
         <Spinner />
       {:else if showBrokenLink}
-        <span class="broken-link" title={$_('user_not_found')}>
-          <Icon {...iconWarning} />
+        <span class="broken-link">
+          <Tooltip aria-label={$_('user_not_found_in_user_column')}>
+            <Icon slot="trigger" {...iconWarning} />
+            <span slot="content">
+              {$_('user_not_found_in_user_column')}
+            </span>
+          </Tooltip>
           <span class="broken-value">{value}</span>
         </span>
       {:else if hasUserIdValue}
