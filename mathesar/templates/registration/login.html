@@ -50,30 +50,43 @@
         </span>
       </label>
     </div>
-    {% if form.non_field_errors %}
-      <div class="message-box error-message">
-        <div class="icon">&#9888;</div>
-        <div>
-          {% for error in form.non_field_errors %}
-            <span>{{error|escape}}</span>
-          {% endfor %}
-        </div>
-      </div>
-    {% endif %}
     <div class="footer">
+      {% if form.non_field_errors %}
+        <div class="message-box error-message">
+          <div class="icon">&#9888;</div>
+          <div>
+            {% for error in form.non_field_errors %}
+              <span>{{error|escape}}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
       <button class="btn btn-primary submit-button" type="submit">
         {% translate "Log In" %}
       </button>
 
-
       {% load socialaccount %}
       {% get_providers as socialaccount_providers %}
-      {% for provider in socialaccount_providers %}
-        <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
-        <img src="{% static 'images/sso/' %}{{ provider }}.svg" alt="{{ provider|capfirst }} logo"
-          style="height:1em; vertical-align:middle; margin-right:0.5em" onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
-        Login with {{provider|capfirst}}</a>
-      {% endfor %}
+      {% if socialaccount_providers %}
+        <div class="sso_divider">
+          <div class="line"></div>
+          <span class="or">or</span>
+        </div>
+        <div class="sso_providers">
+          {% for provider in socialaccount_providers %}
+            <div class="sso_provider">
+              <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
+                <span>
+                  <img src="{% static 'images/sso/' %}{{ provider }}.svg" alt="{{ provider|capfirst }} logo"
+                    style="height:1em; vertical-align:middle; margin-right:0.5em"
+                    onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
+                  <span>Login with {{provider|capfirst}}</span>
+                </span>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
       {% if messages %}
         {% for message in messages %}
           {% if 'error' in message.tags %}

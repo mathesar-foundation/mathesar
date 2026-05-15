@@ -65,7 +65,7 @@ services:
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY-}
-      - OIDC_CONFIG_DICT=${OIDC_CONFIG_DICT-{}}
+      - SSO_CONFIG_DICT=${SSO_CONFIG_DICT-{}}
       - FILE_STORAGE_DICT=${FILE_STORAGE_DICT-{}}
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
