@@ -292,3 +292,5 @@ LANGUAGE_COOKIE_NAME = 'display_language'
 FALLBACK_LANGUAGE = 'en'
 
 SALT_KEY = SECRET_KEY
+
+PER_USER_DATABASES_ENABLED = os.environ.get('PER_USER_DATABASES_ENABLED') in ['t', 'true', 'True']

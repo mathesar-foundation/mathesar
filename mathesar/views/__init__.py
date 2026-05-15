@@ -97,6 +97,7 @@ def get_base_common_data(request):
         'current_release_tag_name': __version__,
         'is_authenticated': not request.user.is_anonymous,
         'is_sso_login_required': settings.REQUIRE_SSO_LOGIN,
+        'per_user_databases_enabled': settings.PER_USER_DATABASES_ENABLED,
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'file_backends': get_file_backends(public_info=True),
     }

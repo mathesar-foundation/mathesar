@@ -15,6 +15,7 @@
   import DatabasePageSchemasSection from '@mathesar/pages/database/schemas/SchemasSection.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databasesStore } from '@mathesar/stores/databases';
+  import { canViewDbPermissionsAndSettings } from '@mathesar/utils/preloadData';
 
   import DatabaseSettingsRoute from './DatabaseSettingsRoute.svelte';
   import SchemaRoute from './SchemaRoute.svelte';
@@ -23,6 +24,7 @@
 
   $: databasesStore.setCurrentDatabaseId(databaseId);
   const { currentDatabase } = databasesStore;
+  const allowDbSettingsRoute = canViewDbPermissionsAndSettings();
 
   $: collabFeaturesContext = ensureReadable(
     $currentDatabase
@@ -61,13 +63,17 @@
       <EventfulRoute path="/schemas" onLoad={() => setSection('schemas')}>
         <DatabasePageSchemasSection />
       </EventfulRoute>
-      <EventfulRoute
-        path="/settings/*"
-        onLoad={() => setSection('settings')}
-        firstmatch
-      >
-        <DatabaseSettingsRoute />
-      </EventfulRoute>
+      {#if allowDbSettingsRoute}
+        <EventfulRoute
+          path="/settings/*"
+          onLoad={() => setSection('settings')}
+          firstmatch
+        >
+          <DatabaseSettingsRoute />
+        </EventfulRoute>
+      {:else}
+        <Route path="/settings/*" redirect="schemas/" />
+      {/if}
     </DatabasePageWrapper>
   </Route>
 {:else}
