@@ -1,3 +1,6 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import {
   type RawColumnWithMetadata,
   getColumnMetadataValue,
@@ -48,7 +51,7 @@ const displayForm: AbstractTypeConfigForm = {
 };
 
 function determineDbTypeAndOptions(
-  dbFormValues: FormValues,
+  _dbFormValues: FormValues,
   columnType: DbType,
 ): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
   return {
@@ -107,6 +110,7 @@ const userType: AbstractTypeConfiguration = {
     determineDisplayOptions,
     constructDisplayFormValuesFromDisplayOptions,
   }),
+  getHelpInfo: () => get(_)('user_type_stores_collaborator_help'),
 };
 
 export default userType;

@@ -530,12 +530,12 @@ METHODS = [
     (
         users.get,
         "users.get",
-        [user_is_authenticated]
+        [user_is_superuser]
     ),
     (
         users.list_,
         "users.list",
-        [user_is_authenticated]
+        [user_is_superuser]
     ),
     (
         users.patch_self,

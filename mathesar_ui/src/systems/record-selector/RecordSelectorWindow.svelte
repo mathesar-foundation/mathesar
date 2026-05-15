@@ -4,12 +4,13 @@
 
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { CollaborationFeaturesContext } from '@mathesar/contexts/CollaborationFeaturesContext';
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import { databasesStore } from '@mathesar/stores/databases';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
-  import { Window, portal } from '@mathesar-component-library';
+  import { Window, ensureReadable, portal } from '@mathesar-component-library';
 
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
@@ -35,6 +36,9 @@
   });
   $: ({ tableOid, purpose } = controller);
   $: database = databasesStore.currentDatabase;
+  $: collabFeaturesContext = ensureReadable(
+    $database ? CollaborationFeaturesContext.construct($database) : undefined,
+  );
   $: $tableOid && $database
     ? void tableFetch.run({ database: $database, tableOid: $tableOid })
     : tableFetch.reset();
@@ -112,7 +116,7 @@
 
 <svelte:window on:keydown={handleKeydown} on:click|capture={onWindowClick} />
 
-{#if tabularData}
+{#if tabularData && $collabFeaturesContext}
   <div class="record-selector-window" style="margin-bottom: {marginBottom};">
     <Window on:close={() => controller.cancel()} canScrollBody={false}>
       <span slot="title">
