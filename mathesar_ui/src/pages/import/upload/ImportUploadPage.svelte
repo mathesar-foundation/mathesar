@@ -41,7 +41,7 @@
   export let schema: Schema;
 
   interface UploadMethod {
-    key: 'file' | 'url' | 'clipboard';
+    key: 'file' | 'clipboard';
     label: string;
     icon: IconProps;
   }
@@ -52,11 +52,6 @@
       icon: iconUploadFile,
     },
     {
-      key: 'url',
-      label: $_('provide_url_to_file'),
-      icon: iconUrl,
-    },
-    {
       key: 'clipboard',
       label: $_('copy_and_paste_text'),
       icon: iconPaste,
@@ -64,7 +59,6 @@
   ];
 
   const uploadMethod = requiredField<UploadMethod>(uploadMethods[0]);
-  const urlToFile = requiredField('');
   const clipboardContent = requiredField('');
   const fileUploadId = requiredField<number | undefined>(undefined);
   const useColumnTypeInference = requiredField(true);
@@ -73,9 +67,6 @@
     const commonFields = { uploadMethod, useColumnTypeInference };
     if ($uploadMethod.key === 'file') {
       return makeForm({ ...commonFields, fileUploadId });
-    }
-    if ($uploadMethod.key === 'url') {
-      return makeForm({ ...commonFields, urlToFile });
     }
     if ($uploadMethod.key === 'clipboard') {
       return makeForm({ ...commonFields, clipboardContent });
@@ -96,9 +87,6 @@
         throw new Error($_('no_file_uploaded'));
       }
       return $fileUploadId;
-    }
-    if ($uploadMethod.key === 'url') {
-      return (await dataFilesApi.addViaUrlToFile($urlToFile)).id;
     }
     if ($uploadMethod.key === 'clipboard') {
       return (await dataFilesApi.addViaText($clipboardContent)).id;
@@ -181,12 +169,6 @@
             <div class="data-source-input">
               {#if $uploadMethod.key === 'file'}
                 <DataFileInput bind:value={$fileUploadId} />
-              {:else if $uploadMethod.key === 'url'}
-                <Field
-                  field={urlToFile}
-                  layout="stacked"
-                  label={$_('enter_url_import_file')}
-                />
               {:else if $uploadMethod.key === 'clipboard'}
                 <Field
                   field={clipboardContent}
