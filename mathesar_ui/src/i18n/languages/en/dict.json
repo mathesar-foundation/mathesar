@@ -275,6 +275,7 @@
   "edit_user": "Edit User",
   "email": "Email",
   "email_address_invalid": "The email address is invalid.",
+  "email_managed_by_sso": "Your email is managed by your SSO provider and cannot be changed here.",
   "enable_anonymous_usage_data_collection": "Enable anonymous usage data collection",
   "enter_a_number_between_1_and_max": "Enter a number between 1 and {max}",
   "error": "Error",

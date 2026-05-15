@@ -16,7 +16,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
 from config.database_config import PostgresConfig, parse_port
-from config.sso_config import load_sso_config
+from config.sso_config import load_sso_config, resolve_require_sso_login
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,6 +74,11 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 SOCIALACCOUNT_ADAPTER = "mathesar.sso.SocialAccountAdapter"
+
+REQUIRE_SSO_LOGIN = resolve_require_sso_login(
+    env_value=os.environ.get('REQUIRE_SSO_LOGIN'),
+    sso_config=SSO_CONFIG,
+)
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`

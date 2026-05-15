@@ -23,6 +23,7 @@ export interface BaseCommonData {
   current_release_tag_name: string;
   supported_languages: Record<string, string>;
   is_authenticated: boolean;
+  is_sso_login_required: boolean;
   file_backends: { backend: string; anonymous_access: boolean }[] | null;
 }
 

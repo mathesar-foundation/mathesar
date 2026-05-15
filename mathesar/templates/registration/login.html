@@ -10,46 +10,48 @@
     onsubmit="showLoadingStatus({{ logging_in_loader_text }});"
   >
     {% csrf_token %}
-    <div class="labeled-input layout-stacked">
-      <label for="id_username" class="label-component">
-        <span class="label-content">
-          <span class="labeled-input-label">{% translate "Username" %}</span>
-          <span class="labeled-input-slot input">
-            <input type="text" name="username"
-            class="input-element{% if form.username.errors %} has-error{% endif %}"
-            value="{% if form.username.value %}{{form.username.value}}{% endif %}"
-            autofocus autocapitalize="none" autocomplete="username"
-            required id="id_username">
-          </span>
-          {% if form.username.errors %}
-            <span class="help error">
-              {% for error in form.username.errors %}
-                <span>{{error|escape}}</span>
-              {% endfor %}
+    {% if not is_sso_login_required %}
+      <div class="labeled-input layout-stacked">
+        <label for="id_username" class="label-component">
+          <span class="label-content">
+            <span class="labeled-input-label">{% translate "Username" %}</span>
+            <span class="labeled-input-slot input">
+              <input type="text" name="username"
+              class="input-element{% if form.username.errors %} has-error{% endif %}"
+              value="{% if form.username.value %}{{form.username.value}}{% endif %}"
+              autofocus autocapitalize="none" autocomplete="username"
+              required id="id_username">
             </span>
-          {% endif %}
-        </span>
-      </label>
-    </div>
-    <div class="labeled-input layout-stacked">
-      <label for="id_password" class="label-component">
-        <span class="label-content">
-          <span class="labeled-input-label">{% translate "Password" %}</span>
-          <span class="labeled-input-slot input">
-            <input type="password" name="password"
-            class="input-element{% if form.password.errors %} has-error{% endif %}"
-            autocomplete="current-password" required id="id_password">
+            {% if form.username.errors %}
+              <span class="help error">
+                {% for error in form.username.errors %}
+                  <span>{{error|escape}}</span>
+                {% endfor %}
+              </span>
+            {% endif %}
           </span>
-          {% if form.password.errors %}
-            <span class="help error">
-              {% for error in form.password.errors %}
-                <span>{{error|escape}}</span>
-              {% endfor %}
+        </label>
+      </div>
+      <div class="labeled-input layout-stacked">
+        <label for="id_password" class="label-component">
+          <span class="label-content">
+            <span class="labeled-input-label">{% translate "Password" %}</span>
+            <span class="labeled-input-slot input">
+              <input type="password" name="password"
+              class="input-element{% if form.password.errors %} has-error{% endif %}"
+              autocomplete="current-password" required id="id_password">
             </span>
-          {% endif %}
-        </span>
-      </label>
-    </div>
+            {% if form.password.errors %}
+              <span class="help error">
+                {% for error in form.password.errors %}
+                  <span>{{error|escape}}</span>
+                {% endfor %}
+              </span>
+            {% endif %}
+          </span>
+        </label>
+      </div>
+    {% endif %}
     <div class="footer">
       {% if form.non_field_errors %}
         <div class="message-box error-message">
@@ -61,17 +63,21 @@
           </div>
         </div>
       {% endif %}
-      <button class="btn btn-primary submit-button" type="submit">
-        {% translate "Log In" %}
-      </button>
+      {% if not is_sso_login_required %}
+        <button class="btn btn-primary submit-button" type="submit">
+          {% translate "Log In" %}
+        </button>
+      {% endif %}
 
       {% load socialaccount %}
       {% get_providers as socialaccount_providers %}
       {% if socialaccount_providers %}
-        <div class="sso_divider">
-          <div class="line"></div>
-          <span class="or">or</span>
-        </div>
+        {% if not is_sso_login_required %}
+          <div class="sso_divider">
+            <div class="line"></div>
+            <span class="or">or</span>
+          </div>
+        {% endif %}
         <div class="sso_providers">
           {% for provider in socialaccount_providers %}
             <div class="sso_provider">
