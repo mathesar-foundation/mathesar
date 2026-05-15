@@ -24,6 +24,7 @@ export interface BaseCommonData {
   supported_languages: Record<string, string>;
   is_authenticated: boolean;
   is_sso_login_required: boolean;
+  per_user_databases_enabled: boolean;
   file_backends: { backend: string; anonymous_access: boolean }[] | null;
 }
 
@@ -75,6 +76,13 @@ export function preloadCommonData(): CommonData {
     throw new Error('commonData is undefined. This state should never occur');
   }
   return commonData;
+}
+
+export function canViewDbPermissionsAndSettings(): boolean {
+  const commonData = preloadCommonData();
+  if (commonData.routing_context !== 'normal') return false;
+  if (commonData.user.is_superuser) return true;
+  return !commonData.per_user_databases_enabled;
 }
 
 export function getFileStorageBackend(backend: string) {
