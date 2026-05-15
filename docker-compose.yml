@@ -184,10 +184,11 @@ services:
       # least 1 logical core.
       WEB_CONCURRENCY: ${WEB_CONCURRENCY-3}
 
+      # EXPERIMENTAL FEATURE: Behavior might change in future Mathesar versions.
       # If this is set to true, each new use in Mathesar will receive a role
       # with the same name as their username on the internal DB server, and a
       # database owned by that role will be created and connected for that user.
-      PER_USER_DATABASES_ENABLED: ${PER_USER_DATABASES_ENABLED-}
+      PER_USER_DATABASES_ENABLED: ${PER_USER_DATABASES_ENABLED-false}
 
     volumes:
       - ./msar/static:/code/static
