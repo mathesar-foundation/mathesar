@@ -250,6 +250,18 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
+# Datafiles storage configuration (for CSV/TSV imports)
+# The storage backend config here is technically deprecated at the time of
+# writing, but we'll fix that at the point where we upgrade to Django 6.
+DATA_FILES_STORAGE_BACKEND = os.environ.get('DATA_FILES_STORAGE_BACKEND', 'local')
+
+if DATA_FILES_STORAGE_BACKEND == 'azure':
+    DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+    AZURE_CONTAINER = os.environ.get('DATA_FILES_AZURE_CONTAINER', 'mathesar-datafiles')
+    AZURE_CONNECTION_STRING = os.environ.get('DATA_FILES_AZURE_CONNECTION_STRING', '')
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
 # Mathesar settings
 MATHESAR_MODE = os.environ.get('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
