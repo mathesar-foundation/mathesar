@@ -10,16 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from collections import defaultdict
-import json
 import os
-import traceback
 from pathlib import Path
-import yaml
 
 from django.core.management.utils import get_random_secret_key
 
 from config.database_config import PostgresConfig, parse_port
+from config.sso_config import load_sso_config, resolve_require_sso_login
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,6 +38,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.openid_connect",
+    "allauth.socialaccount.providers.github",
 ]
 
 MIDDLEWARE = [
@@ -58,80 +56,29 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
-OIDC_CONFIG_FILE = BASE_DIR.joinpath('sso.yml')
-OIDC_CONFIG_DICT = {}
-# Try loading OIDC_CONFIG_DICT from env, iff it doesn't exist, try loading from sso.yml
-try:
-    OIDC_CONFIG_DICT = json.loads(os.getenv('OIDC_CONFIG_DICT', "{}"))
-except Exception as e:
-    traceback.print_exception(type(e), e, e.__traceback__)
-try:
-    if OIDC_CONFIG_DICT in [None, {}] and OIDC_CONFIG_FILE.exists():
-        with open(OIDC_CONFIG_FILE, "rb") as f:
-            OIDC_CONFIG_DICT = yaml.full_load(f)
-except Exception as e:
-    traceback.print_exception(type(e), e, e.__traceback__)
-OIDC_CONFIG = []
-OIDC_ALLOWED_EMAIL_DOMAINS = {}
-OIDC_DEFAULT_PG_ROLE_MAP = defaultdict(list)
-
-try:
-    for providers, config in OIDC_CONFIG_DICT['oidc_providers'].items():
-        if not config:
-            continue
-        provider_name = config.get("provider_name")
-        client_id = config.get("client_id")
-        secret = config.get("secret")
-        server_url = config.get("server_url")
-        allowed_email_domains = config.get("allowed_email_domains", [])  # Here [] means allow all domains.
-        default_pg_role = config.get("default_pg_role", {})
-        if all([provider_name, client_id, secret, server_url]):
-            OIDC_CONFIG.append(
-                {
-                    "provider_id": provider_name.lower(),
-                    "name": provider_name.lower(),
-                    "client_id": client_id,
-                    "secret": secret,
-                    "settings": {
-                        "server_url": server_url
-                    }
-                }
-            )
-
-        if isinstance(allowed_email_domains, list):
-            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = allowed_email_domains
-        elif isinstance(allowed_email_domains, str):
-            OIDC_ALLOWED_EMAIL_DOMAINS[provider_name] = [allowed_email_domains]
-
-        for role_info in default_pg_role.values():
-            if not role_info:
-                continue
-            db_name = role_info.get("name")
-            host = role_info.get("host")
-            port = role_info.get("port")
-            role_name = role_info.get("role")
-            if all([db_name, host, port, role_name]):
-                OIDC_DEFAULT_PG_ROLE_MAP[provider_name].append(
-                    {
-                        "db_name": db_name,
-                        "host": host,
-                        "port": port,
-                        "role_name": role_name
-                    }
-                )
-except Exception as e:
-    # We swallow any exceptions when SSO is misconfigured in sso.yml so that the django server doesn't fail to start.
-    if OIDC_CONFIG_DICT not in [None, {}]:
-        traceback.print_exception(type(e), e, e.__traceback__)  # Print the traceback in case of an exception.
-
+# SSO_CONFIG_DICT is the canonical env var; OIDC_CONFIG_DICT is kept as a
+# backwards compatible alias for installs that predate the v2 schema
+SSO_CONFIG = load_sso_config(
+    env_value=os.environ.get('SSO_CONFIG_DICT') or os.environ.get('OIDC_CONFIG_DICT'),
+    config_file=BASE_DIR.joinpath('sso.yml'),
+)
 
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
-        "APPS": OIDC_CONFIG
-    }
+        "APPS": SSO_CONFIG.oidc_apps,
+    },
+    "github": {
+        "APPS": SSO_CONFIG.github_apps,
+        "SCOPE": ["user:email", "read:user"],
+    },
 }
 
-SOCIALACCOUNT_ADAPTER = "mathesar.oidc.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "mathesar.sso.SocialAccountAdapter"
+
+REQUIRE_SSO_LOGIN = resolve_require_sso_login(
+    env_value=os.environ.get('REQUIRE_SSO_LOGIN'),
+    sso_config=SSO_CONFIG,
+)
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
@@ -145,6 +92,8 @@ AUTHENTICATION_BACKENDS = [
 # More context: https://docs.allauth.org/en/dev/socialaccount/configuration.html
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+# For GH provider to call /user/emails.
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 
 ROOT_URLCONF = "config.urls"
@@ -301,6 +250,18 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
+# Datafiles storage configuration (for CSV/TSV imports)
+# The storage backend config here is technically deprecated at the time of
+# writing, but we'll fix that at the point where we upgrade to Django 6.
+DATA_FILES_STORAGE_BACKEND = os.environ.get('DATA_FILES_STORAGE_BACKEND', 'local')
+
+if DATA_FILES_STORAGE_BACKEND == 'azure':
+    DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+    AZURE_CONTAINER = os.environ.get('DATA_FILES_AZURE_CONTAINER', 'mathesar-datafiles')
+    AZURE_CONNECTION_STRING = os.environ.get('DATA_FILES_AZURE_CONNECTION_STRING', '')
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
 # Mathesar settings
 MATHESAR_MODE = os.environ.get('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
@@ -343,3 +304,5 @@ LANGUAGE_COOKIE_NAME = 'display_language'
 FALLBACK_LANGUAGE = 'en'
 
 SALT_KEY = SECRET_KEY
+
+PER_USER_DATABASES_ENABLED = os.environ.get('PER_USER_DATABASES_ENABLED') in ['t', 'true', 'True']

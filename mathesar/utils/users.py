@@ -1,6 +1,8 @@
+from django.conf import settings
 from django.db import transaction
 
 from mathesar.models import User
+from mathesar.utils.permissions import set_up_home_role_and_db_for_user
 
 
 def get_user(user_id):
@@ -23,6 +25,8 @@ def add_user(user_def):
     )
     user.set_password(user_def["password"])
     user.save()
+    if settings.PER_USER_DATABASES_ENABLED is True:
+        set_up_home_role_and_db_for_user(user)
     return user
 
 

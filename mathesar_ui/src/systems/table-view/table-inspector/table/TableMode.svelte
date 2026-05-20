@@ -14,6 +14,7 @@
   } from '@mathesar/stores/localStorage';
   import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { canViewDbPermissionsAndSettings } from '@mathesar/utils/preloadData';
   import { isTableView } from '@mathesar/utils/tables';
   import { Button, Help, Icon } from '@mathesar-component-library';
 
@@ -27,6 +28,7 @@
   import TablePermissionsModal from './TablePermissionsModal.svelte';
   import TableUserTracking from './TableUserTracking.svelte';
 
+  const showPermissionsModal = canViewDbPermissionsAndSettings();
   const tabularData = getTabularDataStoreFromContext();
   const permissionModal = modal.spawnModalController();
   $: ({ table } = $tabularData);
@@ -43,17 +45,19 @@
   {#if !isView}
     <TableDescription disabled={!$currentRoleOwns} />
   {/if}
-  <div>
-    <Button
-      appearance="secondary"
-      on:click={() => permissionModal.open()}
-      size="small"
-      class="permissions-button"
-    >
-      <Icon {...iconPermissions} />
-      <span>{isView ? $_('view_permissions') : $_('table_permissions')}</span>
-    </Button>
-  </div>
+  {#if showPermissionsModal}
+    <div>
+      <Button
+        appearance="secondary"
+        on:click={() => permissionModal.open()}
+        size="small"
+        class="permissions-button"
+      >
+        <Icon {...iconPermissions} />
+        <span>{isView ? $_('view_permissions') : $_('table_permissions')}</span>
+      </Button>
+    </div>
+  {/if}
 </InspectorSection>
 
 {#if !isView}

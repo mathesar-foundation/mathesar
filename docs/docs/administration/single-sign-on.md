@@ -3,9 +3,18 @@
 !!! question "Help us refine SSO!"
 	Our SSO feature is new and potentially rough around the edges. We would love to talk with you about what you're using it for, whether it's working for you, and any additional workflows you'd like us to support. If you [talk to us for 20 min](https://cal.com/mathesar/users), we'll give you a $25 gift card as a thank you!
 
-Mathesar supports single sign-on (SSO) using any identity provider that implements the [OpenID Connect (OIDC) standard](https://openid.net/developers/how-connect-works/), such as Okta, Azure Active Directory, Google Workspace, and others. SSO allows users to use Mathesar without needing to maintain another set of credentials.
+Mathesar supports single sign-on (SSO) using any identity provider that implements the [OpenID Connect (OIDC) standard](https://openid.net/developers/how-connect-works/), such as Okta, Azure Active Directory, Google Workspace, and others. Mathesar also supports signing in with **GitHub** (github.com). SSO allows users to use Mathesar without needing to maintain another set of credentials.
 
 **Configuring SSO is optional**. By default, Mathesar has separate user accounts with their own passwords, as described in [Mathesar Users](../user-guide/users.md).
+
+## Configuration schema versions
+
+The `sso.yml` configuration file (and the equivalent environment variable) supports two schema versions:
+
+- **Version 1**: OIDC providers only. Configured under `oidc_providers:`. Existing installations continue to work unchanged.
+- **Version 2**: Adds support for GitHub alongside OIDC. Configured under `providers:` with an explicit `type:` field (`oidc` or `github`) per provider.
+
+If `version:` is omitted, Mathesar defaults to version 1. It is recommended to use version 2 as version 1 would be deprecated and removed in upcoming releases.
 
 ## Setting up SSO
 
@@ -17,7 +26,7 @@ First, you'll need to set up your IdP to be aware of Mathesar.
 
 #### 1a. Identify your IdP key
 
-We support over a hundred IdPs ([see the full list](https://docs.allauth.org/en/latest/socialaccount/providers/index.html)). You'll need our "key" associated with it to configure your application's callback URL in your IdP.
+We support over a hundred OIDC IdPs ([see the full list](https://docs.allauth.org/en/latest/socialaccount/providers/index.html)). You'll need our "key" associated with it to configure your application's callback URL in your IdP.
 
 Here's a list of common IdPs, with links to their documentation, and the key associated with each.
 
@@ -27,7 +36,10 @@ Here's a list of common IdPs, with links to their documentation, and the key ass
 | [Auth0](https://auth0.com/docs/get-started/auth0-overview/create-applications) | `auth0` | [Kakao](https://developers.kakao.com/docs/latest/en/kakaologin/utilize#oidc) | `kakao` | [Microsoft](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc) | `microsoft` |
 | [GitLab](https://docs.gitlab.com/integration/openid_connect_provider/) | `gitlab` | [Keycloak](https://www.keycloak.org/securing-apps/oidc-layers) | `keycloak` | [Okta](https://developer.okta.com/docs/guides/sign-into-web-app-redirect/asp-net-core-3/main/#create-an-app-integration-in-the-admin-console) | `okta` |
 
-If you would like to use a different provider, find your IdP on [this list](https://docs.allauth.org/en/latest/socialaccount/providers/index.html) and navigate to its page. The key is the part of the "development callback URL" between `accounts/` and `/login`.
+If you would like to use a different OIDC provider, find your IdP on [this list](https://docs.allauth.org/en/latest/socialaccount/providers/index.html) and navigate to its page. The key is the part of the "development callback URL" between `accounts/` and `/login`.
+
+!!! note "Using GitHub instead?"
+    GitHub is not an OIDC provider, so it doesn't appear in the table above. GitHub is identified by `type: github` in `sso.yml` (see [Step 3c](#3c-github-setup) below). You can skip the IdP-key lookup for GitHub.
 
 #### 1b. Create the Mathesar application in your IdP
 
@@ -37,12 +49,20 @@ During this process, you'll be asked to specify a "Callback URL" (also called a 
 
 In your provider's settings, set the Callback URL to:
 
-```
-https://[YOUR MATHESAR DOMAIN]/auth/oidc/[IDP KEY FROM 1a]/login/callback/
-```
+=== "OIDC providers"
+
+    ```
+    https://[YOUR MATHESAR DOMAIN]/auth/oidc/[IDP KEY FROM 1a]/login/callback/
+    ```
+
+=== "GitHub"
+
+    ```
+    https://[YOUR MATHESAR DOMAIN]/auth/github/login/callback/
+    ```
 
 !!! warning ""
-	Ensure you replace the two variables in the example URL above. Your SSO configuration will not work unless this URL is an exact match.
+	Ensure you replace the variables in the example URL above. Your SSO configuration will not work unless this URL is an exact match.
 
 ### 2. Enable SSO in Mathesar
 
@@ -50,7 +70,7 @@ Enabling SSO in Mathesar requires setting up a new configuration file or environ
 
 #### 2a. Create configuration file.
 
-You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` environment variable. Which you create, and where you save it depends on how you installed Mathesar:
+You'll either create a file named `sso.yml` or set up the `SSO_CONFIG_DICT` environment variable (formerly `OIDC_CONFIG_DICT`, which is still supported). Which you create, and where you save it depends on how you installed Mathesar:
 
 === "For Docker Compose installations"
 
@@ -80,20 +100,23 @@ You'll either create a file named `sso.yml` or set up the `OIDC_CONFIG_DICT` env
 
 === "For DigitalOcean or Railway"
 
-	If you deployed to an environment where you can't use the local filesystem (e.g. [DigitalOcean](./install-digitalocean.md), [Railway](./install-railway.md)), you can use the `OIDC_CONFIG_DICT` environment variable instead of an `sso.yml` file.
+	If you deployed to an environment where you can't use the local filesystem (e.g. [DigitalOcean](./install-digitalocean.md), [Railway](./install-railway.md)), you can use the `SSO_CONFIG_DICT` environment variable instead of an `sso.yml` file.
 
 	This variable must contain a JSON representation of the same data that `sso.yml` contains, wrapped in quotes and with quotes escaped. Here's an example:
 
     ```env
-    OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
+    SSO_CONFIG_DICT="{\"version\": 2,\"providers\": {\"provider1\": {\"type\": \"oidc\",\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
     ```
-	!!! tip "See [Environment Variables](./environment-variables.md#oidc_config_dict-optional) for links to tools that simplify this process."
+
+    The legacy `OIDC_CONFIG_DICT` environment variable continues to work as an alias.
+
+	!!! tip "See [Environment Variables](./environment-variables.md#sso_config_dict-optional) for links to tools that simplify this process."
 
 #### 2b. Start with our sample configuration
 
 Once you have `sso.yml` created, paste in our [example configuration](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
 
-If you're using `OIDC_CONFIG_DICT` instead, we recommend starting with a YAML file and filling in the configuration before converting it to JSON.
+If you're using `SSO_CONFIG_DICT` instead, we recommend starting with a YAML file and filling in the configuration before converting it to JSON.
 
 
 ### 3. Configuring your IdP in Mathesar
@@ -104,28 +127,83 @@ Here's where you populate the configuration file.
 
 You'll need the following information handy for this step:
 
-- The key associated with your IdP, from Step 1a.
-- OIDC issuer or discovery URL, from your IdP's documentation (e.g. `https://[YOUR-ORGANIZATION].okta.com` for Okta)
+- For OIDC providers: the key associated with your IdP, from Step 1a, plus the OIDC issuer or discovery URL from your IdP's documentation (e.g. `https://[YOUR-ORGANIZATION].okta.com` for Okta).
+- For GitHub: no extra identifier is needed; `type: github` is used directly.
 - The client ID and secret for the Mathesar OAuth application you set up in Step 1b. The secret may instead be called "client secret", "token", or "client key".
 
-#### 3b. Basic setup
+#### 3b. Basic setup (OIDC)
 
 Once you have those, update `sso.yml` like so:
 
 ```diff
-# This config file allows you to configure OpenID Connect(OIDC)
-# based Single Sign-On(SSO) for logging into Mathesar with your preferred
-# Identity Provider(IdP).
-version: 1
-oidc_providers:
+# Schema version 2 supports both OIDC and GitHub providers.
+version: 2
+providers:
 +  [provider1]:
++    type: oidc
 +    provider_name: [PROVIDER KEY]
 +    server_url: [YOUR SERVER URL]
-+ 	 client_id: [YOUR CLIENT ID]
-+	 secret: [YOUR CLIENT SECRET]
++    client_id: [YOUR CLIENT ID]
++    secret: [YOUR CLIENT SECRET]
 ```
 
 !!! tip "Skip straight to [Step 7](#7-activate-sso) if you don't need to configure restricted email domains, default Postgres roles, or additional providers."
+
+#### 3c. GitHub setup {: #3c-github-setup }
+
+Mathesar can sign users in using either a **GitHub OAuth App** or a **GitHub App**. The Mathesar configuration is identical (`type: github`) for both — they only differ in how you register and configure the application on GitHub. Pick whichever you already use, or whichever fits your installation/permission model better.
+
+=== "GitHub OAuth App"
+
+    OAuth Apps grant capabilities at sign-in time via the OAuth `scope` parameter. Mathesar automatically requests the `user:email` and `read:user` scopes, so no extra app-side permission configuration is required to read the user's verified primary email.
+
+    1. On GitHub, go to **Settings → Developer Settings → OAuth Apps → New OAuth App** (under either your user account or an organization).
+    1. Provide a name for your Oauth App, and for **Homepage URL**, specify `https://[YOUR MATHESAR DOMAIN]`.
+    1. Set the **Authorization callback URL** to:
+        ```
+        https://[YOUR MATHESAR DOMAIN]/auth/github/login/callback/
+        ```
+    1. After creating the app, generate a **Client secret** and copy both the **Client ID** and the secret.
+    1. Add a GitHub provider entry to `sso.yml`:
+
+        ```diff
+        version: 2
+        providers:
+        +  [provider1]:
+        +    type: github
+        +    client_id: [YOUR GITHUB OAUTH CLIENT ID]
+        +    secret: [YOUR GITHUB OAUTH CLIENT SECRET]
+        ```
+
+=== "GitHub App"
+
+    GitHub Apps grant capabilities through **account permissions** configured on the App itself. The OAuth `scope` parameter is **ignored** for GitHub Apps, so the email scope Mathesar would otherwise request has no effect. You must explicitly grant email access at the App level for SSO to work.
+
+    1. On GitHub, go to **Settings → Developer Settings → GitHub Apps → New GitHub App** (under either your user account or an organization).
+    1. Provide a name for your GitHub App, and for **Homepage URL**, specify `https://[YOUR MATHESAR DOMAIN]`.
+    1. Under **Identifying and authorizing users**, set the **Callback URL** to:
+        ```
+        https://[YOUR MATHESAR DOMAIN]/auth/github/login/callback/
+        ```
+    1. Under **Permissions & events → Account permissions**, set **Email addresses** to **Read-only**. This is **required**: without it, GitHub will not let Mathesar read the user's verified primary email, and matching SSO logins to existing Mathesar accounts will fail.
+    1. Save the App. Generate a **Client secret** and copy both the **Client ID** and the secret.
+    1. Add a GitHub provider entry to `sso.yml` (same shape as for an OAuth App):
+        ```diff
+        version: 2
+        providers:
+        +  [provider1]:
+        +    type: github
+        +    client_id: [YOUR GITHUB APP CLIENT ID]
+        +    secret: [YOUR GITHUB APP CLIENT SECRET]
+        ```
+    !!! warning "Re-authorization after changing App permissions"
+        If you change a GitHub App's account permissions after users have already authorized it, those existing authorizations enter a **pending review** state. The new permission (e.g. Email addresses) only takes effect once each user re-authorizes the App. New users get the new permission immediately on first authorization.
+
+!!! warning "GitHub users must have a verified email"
+    Mathesar matches SSO logins to existing users by email address. If a user's GitHub account has no verified primary email, Mathesar will refuse the login. Users can verify an email in GitHub's **Settings → Emails** page.
+
+!!! note "Email domain restriction is weaker for GitHub"
+    Because anyone can register a GitHub account with any email address, `allowed_email_domains:` is a less reliable access-control mechanism for GitHub than it is for corporate OIDC providers. For tighter access control, consider pre-creating Mathesar user accounts so only known emails can be matched.
 
 ### 4. (Optional) Restrict to specific email domains
 
@@ -134,8 +212,10 @@ By default, users from any domain can log in to Mathesar, as long as they are re
 You can use the `allowed_email_domains` setting to achieve this. It expects a list of domain names (e.g., `['example.com', 'mathesar.org']`), like so:
 
 ```diff
-oidc_providers:
+version: 2
+providers:
   provider1:
+    type: oidc
     provider_name: okta
     server_url: https://trial-example-admin.okta.com
     client_id: YOUR_CLIENT_ID
@@ -143,7 +223,7 @@ oidc_providers:
 +   allowed_email_domains: ['example.com', 'mathesar.org']
 ```
 
-Now, only users whose email ends in `@example.com` or `@mathesar.org` will be allowed to log in.
+Now, only users whose email ends in `@example.com` or `@mathesar.org` will be allowed to log in. This setting also applies to `type: github` providers.
 
 ### 5. (Optional) Automatically provision new users with a specific role
 
@@ -152,8 +232,10 @@ By default, administrators need to [manually assign](../user-guide/collaborators
 The `default_pg_role` block simplifies this process by allowing you to configure a specific PostgreSQL role to automatically assign the user the first time they log in via SSO. This must be configured per-database, as follows:
 
 ```diff
-oidc_providers:
+version: 2
+providers:
   provider1:
+    type: oidc
     provider_name: okta
     server_url: https://trial-example-admin.okta.com
     client_id: YOUR_CLIENT_ID
@@ -170,6 +252,8 @@ oidc_providers:
 +       port: 5432
 +       role: analyst
 ```
+
+This setting also applies to `type: github` providers.
 
 Each database block must include the following:
 
@@ -197,7 +281,7 @@ On first login, users will be granted the specified roles on each listed databas
 
 ### 6. (Optional) Set up additional IdPs
 
-Mathesar supports logging in using multiple IdPs. To add an additional IdP, add a `provider2` block to your `sso.yml` file or `OIDC_CONFIG_DICT` JSON and configure it just like above.
+Mathesar supports logging in using multiple IdPs. To add an additional IdP, add a `provider2` block to your `sso.yml` file or `SSO_CONFIG_DICT` JSON and configure it just like above. You can mix OIDC and GitHub providers in the same `providers:` block.
 
 ### 7. Activate SSO
 
@@ -227,6 +311,13 @@ Visit your Mathesar installation and you should see your IdP as a log in option:
 Mathesar's login screen with Okta SSO enabled.
 ///
 
+## How to require SSO-only login
+
+Once SSO is configured, you can optionally disable password-based login entirely so that all users must sign in via SSO. Set the [`REQUIRE_SSO_LOGIN`](./environment-variables.md#require_sso_login) environment variable to `true` and restart Mathesar.
+
+!!! warning "Misconfiguration is handled gracefully"
+    `REQUIRE_SSO_LOGIN` only takes effect when at least one SSO provider is configured. If you set it without configuring a provider, Mathesar logs a warning and continues to allow password login, so you cannot accidentally lock everyone out.
+
 ## How to transition existing users to SSO
 
 When a user logs in via SSO, Mathesar checks if their email address matches an existing user. If it does, they will be logged into the that existing account, with roles and access intact.
@@ -238,7 +329,7 @@ This means that if you already have users in Mathesar, you can transition to SSO
 
 ## How to deactivate SSO
 
-You can remove the option for users to use SSO by deleting the `sso.yml` file or `OIDC_CONFIG_DICT` environment variable and restarting Mathesar. Mathesar will then only support password-based authentication.
+You can remove the option for users to use SSO by deleting the `sso.yml` file or `SSO_CONFIG_DICT` (and/or `OIDC_CONFIG_DICT`) environment variable and restarting Mathesar. Mathesar will then only support password-based authentication.
 
 !!! danger "Deactivating SSO may require manual password resets"
 	Note that Mathesar users who only logged in via SSO will not have known passwords. If SSO is deactivated, these users will not be able to log in until an admin resets their password through the Mathesar UI.

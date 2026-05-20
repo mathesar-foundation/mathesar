@@ -6,20 +6,33 @@
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Table } from '@mathesar/models/Table';
-  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getTablePageUrlByTable } from '@mathesar/routes/urls';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { databasesStore } from '@mathesar/stores/databases';
+  import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
 
   import LinkCard from './LinkCard.svelte';
+
+  const tableFetch = new AsyncStore(getTableFromStoreOrApi);
 
   export let referentTable: Pick<Table, 'name' | 'oid'>;
   export let referencingTable: { name: string };
   export let referencingColumn: { name: string };
 
-  $: href = $storeToGetTablePageUrl({ tableId: referentTable.oid });
+  $: database = databasesStore.currentDatabase;
+  $: $database
+    ? void tableFetch.run({ database: $database, tableOid: referentTable.oid })
+    : tableFetch.reset();
+  $: referentTableModel = $tableFetch.resolvedValue;
+
+  $: href = referentTableModel
+    ? getTablePageUrlByTable(referentTableModel)
+    : undefined;
 </script>
 
-{#if href}
+{#if referentTableModel && href}
   <LinkCard {href}>
-    <TableName slot="table-name" table={referentTable} truncate={false} />
+    <TableName slot="table-name" table={referentTableModel} truncate={false} />
     <svelte:fragment slot="detail">
       <RichText text={$_('referenced_via_reference')} let:slotName>
         {#if slotName === 'reference'}

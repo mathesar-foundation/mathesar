@@ -25,8 +25,10 @@
   const createRoleModalController = modal.spawnModalController();
   const modifyRoleMembersModalController = modal.spawnModalController();
 
-  $: ({ databaseRouteContext, configuredRoles, collaborators } = $routeContext);
-  $: ({ roles, underlyingDatabase, currentRole } = databaseRouteContext);
+  $: ({ databaseRouteContext, configuredRoles } = $routeContext);
+  $: ({ roles, underlyingDatabase, currentRole, collaborationFeaturesContext } =
+    databaseRouteContext);
+  $: ({ collaborators } = collaborationFeaturesContext);
 
   $: void roles.runConservatively();
   $: roleList = [...($roles.resolvedValue?.values() ?? [])];

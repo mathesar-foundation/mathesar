@@ -27,6 +27,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
+  import { canViewDbPermissionsAndSettings } from '@mathesar/utils/preloadData';
   import {
     Button,
     ButtonMenuItem,
@@ -62,17 +63,23 @@
   type Section = 'schemas' | 'settings';
   let section: Section = 'schemas';
 
+  const showSettingsTab = canViewDbPermissionsAndSettings();
+
   $: tabs = [
     {
       id: 'schemas',
       label: $_('schemas'),
       href: getDatabasePageSchemasSectionUrl(database.id),
     },
-    {
-      id: 'settings',
-      label: $_('database_settings'),
-      href: getDatabasePageSettingsSectionUrl(database.id),
-    },
+    ...(showSettingsTab
+      ? [
+          {
+            id: 'settings' as const,
+            label: $_('database_settings'),
+            href: getDatabasePageSettingsSectionUrl(database.id),
+          },
+        ]
+      : []),
   ];
   $: activeTab = tabs.find((tab) => tab.id === section);
 
@@ -112,13 +119,15 @@
       </div>
       <div slot="action">
         <div class="actions-container">
-          <Button
-            appearance="secondary"
-            on:click={() => permissionsModal.open()}
-          >
-            <Icon {...iconPermissions} />
-            <span>{$_('database_permissions')}</span>
-          </Button>
+          {#if showSettingsTab}
+            <Button
+              appearance="secondary"
+              on:click={() => permissionsModal.open()}
+            >
+              <Icon {...iconPermissions} />
+              <span>{$_('database_permissions')}</span>
+            </Button>
+          {/if}
           {#if isMathesarAdmin}
             <div class="dropdown-container">
               <DropdownMenu
