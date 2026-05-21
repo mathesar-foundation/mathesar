@@ -11,6 +11,7 @@ from django.core.cache import cache
 from django.db import IntegrityError
 import pytest
 from mathesar import analytics
+from mathesar.analytics import _is_dockerized
 from mathesar.models.analytics import AnalyticsReport, InstallationID
 from mathesar.models.base import Database, Server
 
@@ -55,6 +56,28 @@ def test_analytics_installation_id_nongenerated_pkey():
     analytics.initialize_analytics()
     with pytest.raises(IntegrityError):
         analytics.initialize_analytics()
+
+
+def test_is_dockerized_via_dockerenv(tmp_path, monkeypatch):
+    """_is_dockerized() returns True when /.dockerenv is present."""
+    dockerenv = tmp_path / ".dockerenv"
+    dockerenv.touch()
+    with patch("mathesar.analytics.os.path.isfile", side_effect=lambda p: p == "/.dockerenv"):
+        assert _is_dockerized() is True
+
+
+def test_is_dockerized_via_env_var(monkeypatch):
+    """_is_dockerized() returns True when MATHESAR_DOCKER_SIGNAL env var is set."""
+    monkeypatch.setenv("MATHESAR_DOCKER_SIGNAL", "true")
+    with patch("mathesar.analytics.os.path.isfile", return_value=False):
+        assert _is_dockerized() is True
+
+
+def test_is_not_dockerized(monkeypatch):
+    """_is_dockerized() returns False when neither signal is present."""
+    monkeypatch.delenv("MATHESAR_DOCKER_SIGNAL", raising=False)
+    with patch("mathesar.analytics.os.path.isfile", return_value=False):
+        assert _is_dockerized() is False
 
 
 def test_analytics_upload_delete_stale(settings, monkeypatch):
@@ -105,6 +128,7 @@ def test_analytics_upload_delete_stale(settings, monkeypatch):
     assert [d['connected_database_table_count'] for d in reports_blob] == [50, 60]
     assert [d['connected_database_record_count'] for d in reports_blob] == [10000, 20000]
     assert [d['exploration_count'] for d in reports_blob] == [5, 10]
+    assert all(['is_dockerized' in d for d in reports_blob])
     assert len(AnalyticsReport.objects.filter(uploaded=True)) == 2
     analytics.delete_stale_reports()
     assert len(AnalyticsReport.objects.all()) == 2
