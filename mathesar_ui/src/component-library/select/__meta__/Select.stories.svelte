@@ -57,7 +57,7 @@
       { id: 3, label: 'Option 3' },
       { id: 4, label: 'Option 4' },
     ]}
-    triggerAppearance="default"
+    triggerAppearance="input"
   />
 
   <Select

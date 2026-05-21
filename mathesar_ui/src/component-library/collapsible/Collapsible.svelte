@@ -5,7 +5,7 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 
   export let isOpen = false;
-  export let triggerAppearance: Appearance = 'default';
+  export let triggerAppearance: Appearance = 'control';
   function toggle() {
     isOpen = !isOpen;
   }
