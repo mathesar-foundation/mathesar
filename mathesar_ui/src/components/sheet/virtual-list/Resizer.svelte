@@ -1,72 +1,47 @@
 <script lang="ts">
-  /**
-   * Ported from "react-virtualized-auto-sizer@1.0.5"
-   * https://github.com/bvaughn/react-virtualized-auto-sizer
-   * MIT © bvaughn
-   *
-   * This fork contains the following changes:
-   * 1. Ported to Svelte, TS
-   * 2. Stripped down to essentials
-   * 3. Works only on height, width always assumed to be 100%
-   */
-
   import { onMount } from 'svelte';
-
-  import {
-    type ElementResizeDetector,
-    createDetectElementResize,
-  } from './detectElementResize';
 
   let classes = 'default';
   export { classes as class };
   $: outerClass = ['virtual-list', 'resizer', classes].join(' ');
 
   let wrapperRef: HTMLElement;
-  let parentNode: HTMLElement;
-
-  let bailoutOnSlot = false;
   let height = 0;
 
-  function onResize() {
-    if (parentNode) {
-      const parentOffsetHeight = parentNode.offsetHeight || 0;
-      const style =
-        window.getComputedStyle(parentNode) || ({} as CSSStyleDeclaration);
-      const paddingTop = parseInt(style.paddingTop, 10) || 0;
-      const paddingBottom = parseInt(style.paddingBottom, 10) || 0;
-      const newHeight = parentOffsetHeight - paddingTop - paddingBottom;
-      if (height !== newHeight) {
-        height = parentOffsetHeight - paddingTop - paddingBottom;
-      }
-    }
+  function readContentBoxHeight(el: HTMLElement): number {
+    const rect = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    const pt = parseInt(cs.paddingTop, 10) || 0;
+    const pb = parseInt(cs.paddingBottom, 10) || 0;
+    const bt = parseInt(cs.borderTopWidth, 10) || 0;
+    const bb = parseInt(cs.borderBottomWidth, 10) || 0;
+    const scrollbarH = Math.max(0, el.offsetHeight - el.clientHeight - bt - bb);
+    return Math.ceil(rect.height - pt - pb - bt - bb - scrollbarH);
   }
 
   onMount(() => {
-    let detectElementResize: ElementResizeDetector;
-
-    if (wrapperRef?.parentNode) {
-      parentNode = wrapperRef.parentNode as HTMLElement;
-      detectElementResize = createDetectElementResize();
-      detectElementResize.addResizeListener(parentNode, onResize);
-      onResize();
+    if (!wrapperRef?.parentNode) {
+      return () => {};
     }
 
-    return () => {
-      if (detectElementResize && parentNode) {
-        detectElementResize.removeResizeListener(parentNode, onResize);
-      }
-    };
+    const parentNode = wrapperRef.parentNode as HTMLElement;
+
+    function update() {
+      const newHeight = readContentBoxHeight(parentNode);
+      if (height !== newHeight) height = newHeight;
+    }
+
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(parentNode);
+
+    return () => observer.disconnect();
   });
-
-  function onHeightChange(_height: number) {
-    bailoutOnSlot = _height === 0;
-  }
-
-  $: onHeightChange(height);
 </script>
 
 <div class={outerClass} bind:this={wrapperRef}>
-  {#if !bailoutOnSlot}
+  {#if height > 0}
     <slot {height} />
   {/if}
 </div>
