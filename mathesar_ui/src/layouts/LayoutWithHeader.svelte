@@ -15,6 +15,8 @@
   $: style = cssVariables
     ? makeStyleStringFromCssVariables(cssVariables)
     : undefined;
+
+  const { custom_logo_url } = commonData;
 </script>
 
 <div class="app-layout" class:fit-viewport={fitViewport} {style}>
@@ -23,6 +25,11 @@
       <AppHeader />
     </div>
     <slot name="secondary-header" />
+    {#if custom_logo_url}
+      <footer class="app-footer">
+        Powered by <a href="https://mathesar.org" target="_blank">Mathesar</a>
+      </footer>
+    {/if}
   {/if}
   <main class="app-layout-content" class:restrict-width={restrictWidth}>
     <slot />
@@ -30,6 +37,20 @@
 </div>
 
 <style lang="scss">
+  .app-footer {
+    padding: 0.5rem;
+    text-align: center;
+    font-size: var(--sm2);
+    color: var(--color-fg-subtle);
+    border-top: 1px solid var(--color-border-base);
+    background-color: var(--color-bg-raised);
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+    }
+  }
+
   .app-layout {
     height: 100%;
     display: flex;

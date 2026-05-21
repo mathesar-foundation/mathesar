@@ -26,6 +26,7 @@ export interface BaseCommonData {
   is_sso_login_required: boolean;
   per_user_databases_enabled: boolean;
   file_backends: { backend: string; anonymous_access: boolean }[] | null;
+  custom_logo_url: string | null;
 }
 
 export interface AuthenticatedCommonData extends BaseCommonData {

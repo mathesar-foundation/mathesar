@@ -100,6 +100,7 @@ def get_base_common_data(request):
         'per_user_databases_enabled': settings.PER_USER_DATABASES_ENABLED,
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'file_backends': get_file_backends(public_info=True),
+        'custom_logo_url': getattr(settings, 'MATHESAR_CUSTOM_LOGO_URL', None),
     }
 
 
