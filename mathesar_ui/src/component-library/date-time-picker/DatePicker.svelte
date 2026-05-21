@@ -25,6 +25,6 @@
   on:keydown
   on:input
 />
-<AttachableDropdown class={contentClass} trigger={element} bind:isOpen on:close>
+<AttachableDropdown class={contentClass} trigger={element} bind:isOpen autoReposition={true} on:close>
   <InlineDateTimePicker type="date" bind:value format={dateFormat} on:change />
 </AttachableDropdown>
