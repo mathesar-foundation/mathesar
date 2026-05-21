@@ -68,7 +68,7 @@
 <svelte:window on:keydown={handleKeydown} />
 
 {#if isOpen}
-  <div class="modal" data-modal-id={modalId} use:portal>
+  <div class="modal" data-modal-id={modalId} role="dialog" use:portal>
     {#if hasOverlay}
       <div
         class="overlay"
