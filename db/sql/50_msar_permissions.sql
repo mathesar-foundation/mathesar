@@ -30,7 +30,6 @@ $$ LANGUAGE plpgsql;
 
 
 GRANT USAGE ON SCHEMA __msar, msar, mathesar_types TO PUBLIC;
-GRANT CREATE ON SCHEMA public TO PUBLIC;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar, mathesar_types TO PUBLIC;
 GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar, mathesar_types TO PUBLIC;
 SELECT msar.grant_usage_on_custom_mathesar_types_to_public();
