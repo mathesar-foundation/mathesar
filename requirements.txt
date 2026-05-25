@@ -1,3 +1,4 @@
+Brotli==1.1.0
 CairoSVG==2.9.0
 django-storages[azure]==1.14.6
 clevercsv==0.8.2
