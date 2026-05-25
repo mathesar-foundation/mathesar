@@ -1264,7 +1264,7 @@ SELECT
   r.rolcreaterole AS create_role,
   r.rolcreatedb AS create_db,
   r.rolcanlogin AS login,
-  pg_catalog.shobj_description(r.oid, 'pg_catalog.pg_authid') AS description,
+  pg_catalog.shobj_description(r.oid, 'pg_authid') AS description,
   rolemembers.members AS members
 FROM pg_catalog.pg_roles r
 LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid;
