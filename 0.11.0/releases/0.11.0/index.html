@@ -1725,15 +1725,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#azure-blob-storage-for-imported-data-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      Azure Blob Storage for imported data files
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#experimental-per-user-database-provisioning" class="md-nav__link">
     <span class="md-ellipsis">
       Experimental per-user database provisioning
@@ -1775,9 +1766,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#maintenance" class="md-nav__link">
+  <a href="#maintenance-and-groundwork" class="md-nav__link">
     <span class="md-ellipsis">
-      Maintenance
+      Maintenance and groundwork
     </span>
   </a>
   
@@ -2524,15 +2515,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#azure-blob-storage-for-imported-data-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      Azure Blob Storage for imported data files
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#experimental-per-user-database-provisioning" class="md-nav__link">
     <span class="md-ellipsis">
       Experimental per-user database provisioning
@@ -2574,9 +2556,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#maintenance" class="md-nav__link">
+  <a href="#maintenance-and-groundwork" class="md-nav__link">
     <span class="md-ellipsis">
-      Maintenance
+      Maintenance and groundwork
     </span>
   </a>
   
@@ -2660,7 +2642,7 @@
 
 <h1 id="mathesar-0110">Mathesar 0.11.0<a class="headerlink" href="#mathesar-0110" title="Permanent link">&para;</a></h1>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<p>Mathesar 0.11.0 introduces several improvements for administrators including a new setting to require SSO login for users, adding GitHub as an SSO provider, narrower permissions for user account information, and supporting Azure Blob Storage for file storage. It also adds native UI support for interlinked tables in different schemas, plus an experimental option for auto-provisioning a separate role and database for each new user.</p>
+<p>Mathesar 0.11.0 introduces several improvements for administrators including a new setting to require SSO login for users, adding GitHub as an SSO provider, and narrower permissions for where we show user information. It also adds native UI support for interlinked tables in different schemas, plus an experimental option for auto-provisioning a separate role and database for each new user.</p>
 <p>This release also includes a few other bug fixes and maintenance upgrades. We&rsquo;ve also removed support for importing files from URIs.</p>
 <div class="admonition info">
 <p>This page provides a comprehensive list of all changes in the release.</p>
@@ -2674,9 +2656,6 @@
 <p>Administrators can now set <code>REQUIRE_SSO_LOGIN=true</code> to disable password-based login after SSO has been configured. When this setting is enabled, Mathesar&rsquo;s login page shows SSO options only, and users cannot change their own passwords or email addresses. Administrators can still reset another user&rsquo;s password and edit other users&rsquo; email addresses as a fallback.</p>
 <p>This setting only takes effect when at least one SSO provider is configured. If it is enabled without an SSO provider, Mathesar keeps password login available to avoid locking administrators out.</p>
 <p><em>Related work:</em> <a href="https://github.com/mathesar-foundation/mathesar/pull/5271" title="REQUIRE_SSO_LOGIN env variable to force users to only login via SSO">#5271</a></p>
-<h3 id="azure-blob-storage-for-imported-data-files">Azure Blob Storage for imported data files<a class="headerlink" href="#azure-blob-storage-for-imported-data-files" title="Permanent link">&para;</a></h3>
-<p>Mathesar can now use Azure Blob Storage for imported data files. Administrators can enable it by setting <code>DATA_FILES_STORAGE_BACKEND=azure</code> and providing <code>DATA_FILES_AZURE_CONTAINER</code> and <code>DATA_FILES_AZURE_CONNECTION_STRING</code>.</p>
-<p><em>Related work:</em> <a href="https://github.com/mathesar-foundation/mathesar/pull/5275" title="Azure FileStorage configuration">#5275</a></p>
 <h3 id="experimental-per-user-database-provisioning">Experimental per-user database provisioning<a class="headerlink" href="#experimental-per-user-database-provisioning" title="Permanent link">&para;</a></h3>
 <p>Mathesar now includes an experimental <code>PER_USER_DATABASES_ENABLED</code> setting. When enabled, each newly created Mathesar user receives a PostgreSQL role and database on Mathesar&rsquo;s internal database server, both named after that user&rsquo;s username.</p>
 <p>In this mode, non-admin users no longer see database permissions and database settings controls. This feature is experimental, and its behavior may change in future versions.</p>
@@ -2693,9 +2672,10 @@
 <li>Fix issue where exporting a saved Data Explorer exploration could fail when resolving the exploration within the selected database <a href="https://github.com/mathesar-foundation/mathesar/pull/5264" title="Pass database_id to get_exploration in exploration_chunker">#5264</a></li>
 <li>Fix nondeterministic column ordering in table metadata returned by Mathesar&rsquo;s database functions <a href="https://github.com/mathesar-foundation/mathesar/pull/5283" title="Fix indeterministic column ordering">#5283</a></li>
 </ul>
-<h2 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h2>
+<h2 id="maintenance-and-groundwork">Maintenance and groundwork<a class="headerlink" href="#maintenance-and-groundwork" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Merge the 0.10.0 release branch into develop <a href="https://github.com/mathesar-foundation/mathesar/pull/5255" title="Merge pull request #5254 from mathesar-foundation/release-0.10.0">#5255</a></li>
+<li>Started work on supporting Azure Blob Storage for imported data files <a href="https://github.com/mathesar-foundation/mathesar/pull/5275" title="Azure FileStorage configuration">#5275</a></li>
 </ul>
 <h2 id="features-removed">Features removed<a class="headerlink" href="#features-removed" title="Permanent link">&para;</a></h2>
 <h3 id="url-based-file-imports">URL-based file imports<a class="headerlink" href="#url-based-file-imports" title="Permanent link">&para;</a></h3>
