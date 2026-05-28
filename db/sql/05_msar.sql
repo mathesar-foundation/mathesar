@@ -988,7 +988,7 @@ object has the keys:
   value: A string giving the value (as an SQL expression) of the default.
   is_dynamic: A boolean giving whether the default is (likely to be) dynamic.
 */
-SELECT coalesce(jsonb_agg(column_data), '[]'::jsonb)
+SELECT coalesce(jsonb_agg(column_data ORDER BY column_data.id ASC), '[]'::jsonb)
 FROM msar.column_info_table(tab_id) AS column_data;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
