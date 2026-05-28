@@ -20,6 +20,7 @@ jobs:
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-private-notes -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-scripts -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-website -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-cloud-website -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-wiki -d
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-infrastructure -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-data-playground -s open
@@ -28,4 +29,5 @@ jobs:
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-private-notes -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-scripts -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-website -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-cloud-website -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-wiki -s open
