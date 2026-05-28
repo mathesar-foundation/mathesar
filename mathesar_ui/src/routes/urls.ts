@@ -1,3 +1,4 @@
+import type { Table } from '@mathesar/models/Table';
 import Url64 from '@mathesar/utils/Url64';
 
 export function getDatabasePageUrl(databaseId: number): string {
@@ -117,6 +118,10 @@ export function getTablePageUrl(
   return `${getSchemaPageTablesSectionUrl(databaseId, schemaId)}${tableId}/`;
 }
 
+export function getTablePageUrlByTable(table: Table) {
+  return getTablePageUrl(table.schema.database.id, table.schema.oid, table.oid);
+}
+
 export function getRecordPageUrl(
   databaseId: number,
   schemaId: number,
@@ -124,6 +129,15 @@ export function getRecordPageUrl(
   recordId: unknown,
 ): string {
   return `${getTablePageUrl(databaseId, schemaId, tableId)}${String(recordId)}`;
+}
+
+export function getRecordPageUrlByTable(table: Table, recordId: unknown) {
+  return getRecordPageUrl(
+    table.schema.database.id,
+    table.schema.oid,
+    table.oid,
+    recordId,
+  );
 }
 
 export function getDataFormPageUrl(

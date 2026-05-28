@@ -65,7 +65,8 @@ services:
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY-}
-      - OIDC_CONFIG_DICT=${OIDC_CONFIG_DICT-{}}
+      - SSO_CONFIG_DICT=${SSO_CONFIG_DICT-{}}
+      - REQUIRE_SSO_LOGIN=${REQUIRE_SSO_LOGIN-false}
       - FILE_STORAGE_DICT=${FILE_STORAGE_DICT-{}}
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
@@ -76,6 +77,7 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
+      - PER_USER_DATABASES_ENABLED=${PER_USER_DATABASES_ENABLED-}
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket

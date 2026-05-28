@@ -6,13 +6,12 @@
     iconLinkToRecordPage,
     iconModalRecordView,
   } from '@mathesar/icons';
+  import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     extractPrimaryKeyValue,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { currentTablesMap } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import RecordStore from '@mathesar/systems/record-view/RecordStore';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
@@ -39,18 +38,13 @@
       return undefined;
     }
   })();
-  $: recordPageLink = $storeToGetRecordPageUrl({
-    tableId: table.oid,
-    recordId,
-  });
+  $: recordPageLink = getRecordPageUrlByTable(table, recordId);
 
   function quickViewRecord() {
     if (!modalRecordView) return;
     if (recordId === undefined) return;
-    const containingTable = $currentTablesMap.get(table.oid);
-    if (!containingTable) return;
     const recordStore = new RecordStore({
-      table: containingTable,
+      table,
       recordPk: String(recordId),
     });
     modalRecordView.open(recordStore);

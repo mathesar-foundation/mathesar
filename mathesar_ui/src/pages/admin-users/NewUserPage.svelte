@@ -10,11 +10,11 @@
     ADMIN_USERS_PAGE_ADD_NEW_URL,
     getEditUsersPageUrl,
   } from '@mathesar/routes/urls';
-  import { getGlobalUsersStore } from '@mathesar/stores/users';
+  import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { UserDetailsForm } from '@mathesar/systems/users';
   import { Icon } from '@mathesar-component-library';
 
-  const usersStore = getGlobalUsersStore();
+  const usersStore = getUsersStoreFromContext();
 
   function onUserCreate(user: User) {
     void usersStore?.fetchUsers();

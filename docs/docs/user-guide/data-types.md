@@ -133,7 +133,7 @@ Learn more about [Mathesar's file feature](./files.md).
 - **PostgreSQL types**
     - `integer`
 
-This is a custom type implemented in Mathesar's UI. User columns store Mathesar user IDs, allowing you to reference Mathesar users directly in your database tables.
+This is a custom type implemented in Mathesar's UI. User columns store Mathesar user IDs, allowing you to reference Mathesar users directly in your database tables. Only users who are collaborators on the database can be stored in a user column.
 
 Learn more about [working with user columns](./user-type.md).
 

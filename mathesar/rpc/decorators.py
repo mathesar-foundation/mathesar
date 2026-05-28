@@ -36,8 +36,6 @@ def mathesar_rpc_method(*, name, auth="superuser"):
             'analytics.upload_feedback',
             'databases.configured.list',
             'servers.configured.list',
-            'users.get',
-            'users.list',
             'users.patch_self',
             'users.password.replace_own'
         ]
@@ -79,6 +77,8 @@ def ensure_db_authorization(f):
     def wrapper(*args, **kwargs):
         DATABASE_ID_KEY = 'database_id'
         user = kwargs.get(REQUEST_KEY).user
+        if user.is_superuser:
+            return f(*args, **kwargs)
         database_id = kwargs[DATABASE_ID_KEY]
         try:
             models.UserDatabaseRoleMap.objects.get(database__id=database_id, user=user)

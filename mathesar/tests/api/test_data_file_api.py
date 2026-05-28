@@ -128,29 +128,6 @@ def test_data_file_create_paste(client, paste_filename, header):
     )
 
 
-@pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_url(client, header, patents_url, patents_url_data, mocked_responses):
-    mocked_responses.get(
-        url=patents_url,
-        body=patents_url_data,
-        status=200,
-        content_type='text/csv',
-    )
-    mocked_responses.head(
-        url=patents_url,
-        status=200,
-        content_type='text/csv',
-    )
-    num_data_files = DataFile.objects.count()
-    data = {'url': patents_url, 'header': header}
-    response = client.post('/api/db/v0/data_files/', data)
-
-    base_name = patents_url.split('/')[-1].split('.')[0]
-    check_create_data_file_response(
-        response, num_data_files, 'url', base_name, ',', '"', '', header
-    )
-
-
 def test_data_file_update(client, data_file):
     response = client.put(f'/api/db/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
@@ -198,52 +175,6 @@ def test_data_file_create_non_unicode_file(client, non_unicode_csv_filepath):
     with open(non_unicode_csv_filepath, 'rb') as non_unicode_file:
         response = client.post('/api/db/v0/data_files/', data={'file': non_unicode_file}, format='multipart')
     assert response.status_code == 201
-
-
-def test_data_file_create_url_invalid_format(client):
-    url = 'invalid_url'
-    response = client.post('/api/db/v0/data_files/', data={'url': url})
-    response_dict = response.json()
-    assert response.status_code == 400
-    assert response_dict['errors']['url'][0] == 'Enter a valid URL.'
-
-
-def test_data_file_create_url_invalid_address(client, mocked_responses):
-    url = 'https://www.test.invalid'
-    response = client.post('/api/db/v0/data_files/', data={'url': url})
-    response_dict = response.json()
-    assert response.status_code == 400
-    assert response_dict['errors']['url'][0] == 'URL cannot be reached.'
-
-
-def test_data_file_create_url_invalid_download(
-    client, patents_url, mocked_responses
-):
-    mocked_responses.head(
-        url=patents_url,
-        status=400,
-    )
-    mocked_responses.get(
-        url=patents_url,
-        status=400,
-    )
-    response = client.post('/api/db/v0/data_files/', data={'url': patents_url})
-    response_dict = response.json()
-    assert response.status_code == 400
-    assert response_dict['errors'] == 'URL cannot be downloaded.'
-
-
-def test_data_file_create_url_invalid_content_type(client, mocked_responses):
-    url = 'https://www.google.com'
-    mocked_responses.head(
-        url=url,
-        status=200,
-        content_type='text/html',
-    )
-    response = client.post('/api/db/v0/data_files/', data={'url': url})
-    response_dict = response.json()
-    assert response.status_code == 400
-    assert response_dict['errors']['url'][0] == "URL resource 'text/html' not a valid type."
 
 
 def test_data_file_create_multiple_source_fields(client, patents_csv_filepath, paste_filename):

@@ -1,9 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { readable } from 'svelte/store';
 
   import LinkedRecordInput from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordInput.svelte';
-  import { type UserModel, getGlobalUsersStore } from '@mathesar/stores/users';
+  import { CollaborationFeaturesContext } from '@mathesar/contexts/CollaborationFeaturesContext';
   import { makeRowSeekerOrchestratorFactory } from '@mathesar/systems/row-seeker/rowSeekerOrchestrator';
   import {
     type UserDisplayField,
@@ -19,26 +18,20 @@
   export let userDisplayField: UserDisplayField = 'full_name';
 
   const dispatch = createEventDispatcher();
+  const collabContext = CollaborationFeaturesContext.get();
 
-  const usersStore = getGlobalUsersStore();
+  $: collaboratorsApiStore = $collabContext.collaborators;
+  $: void collaboratorsApiStore.runConservatively();
+  $: collaborators = $collaboratorsApiStore.resolvedValue
+    ? [...$collaboratorsApiStore.resolvedValue.values()]
+    : [];
+  $: users = collaborators.map((c) => c.userInfo);
+  $: isLoadingCollaborators = $collaboratorsApiStore.isLoading;
+  $: error = $collaboratorsApiStore.error;
 
-  // Use proper store subscriptions with readable fallbacks
-  const usersReadable = usersStore?.users ?? readable<UserModel[]>([]);
-  const requestStatusReadable =
-    usersStore?.requestStatus ?? readable(undefined);
-
-  $: users = $usersReadable;
-  $: isLoading = $requestStatusReadable?.state === 'processing';
-  $: error = (() => {
-    if ($requestStatusReadable?.state === 'failure') {
-      return ($requestStatusReadable as { state: 'failure'; errors?: string[] })
-        ?.errors?.[0];
-    }
-    return undefined;
-  })();
   $: selectedUser = users.find((u) => u.id === value);
   $: recordSummary = selectedUser
-    ? getUserLabel(selectedUser.getUser(), userDisplayField)
+    ? getUserLabel(selectedUser, userDisplayField)
     : undefined;
 
   // Create record selection orchestrator factory for LinkedRecordInput
@@ -57,24 +50,26 @@
   ) => void = () => {};
 </script>
 
-<div class="user-input">
-  {#if isLoading}
+{#if isLoadingCollaborators}
+  <div class="input-element user-input">
     <Spinner />
-  {:else if error}
-    <div class="error">{error}</div>
-  {:else}
-    <LinkedRecordInput
-      bind:value
-      {recordSelectionOrchestratorFactory}
-      {recordSummary}
-      {setRecordSummary}
-      {disabled}
-      {placeholder}
-      on:artificialChange={(e) => dispatch('artificialChange', e.detail)}
-      on:artificialInput={(e) => dispatch('artificialInput', e.detail)}
-    />
-  {/if}
-</div>
+  </div>
+{:else if error}
+  <div class="input-element user-input">
+    <div class="error">{error.message}</div>
+  </div>
+{:else}
+  <LinkedRecordInput
+    bind:value
+    {recordSelectionOrchestratorFactory}
+    {recordSummary}
+    {setRecordSummary}
+    {disabled}
+    {placeholder}
+    on:artificialChange={(e) => dispatch('artificialChange', e.detail)}
+    on:artificialInput={(e) => dispatch('artificialInput', e.detail)}
+  />
+{/if}
 
 <style>
   .user-input {

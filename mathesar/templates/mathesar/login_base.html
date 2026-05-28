@@ -5,16 +5,16 @@
 
 {% block page_styles %}
   <style type="text/css">
+    html, body {
+      overflow: auto;
+    }
     body {
       padding: 4rem 2rem;
       background: var(--color-bg-base);
-      --login-page-spacing: var(--lg5);
+      --login-page-spacing: var(--lg3);
       color: var(--color-fg-base);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: block;
     }
     .align-center {
       margin-left: auto;
@@ -62,6 +62,12 @@
       align-items: center;
       gap: var(--lg3);
     }
+    .login-card .submit-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .tutorial, .login-card,
     .login-card form, .login-card .footer {
       margin-top: var(--login-page-spacing);
@@ -94,6 +100,35 @@
       color: var(--color-fg-base);
       padding: var(--sm3);
       cursor: pointer;
+    }
+    .sso_divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .sso_divider .line {
+      height: 1px;
+      background: var(--color-border-base);
+      width: 100%;
+      position: absolute;
+    }
+    .sso_divider .or {
+      display: block;
+      background-color: var(--card-background);
+      z-index: 1;
+      padding: 0 var(--sm3);
+    }
+    .sso_providers {
+      display: flex;
+      width: 100%;
+      gap: var(--sm3);
+      flex-direction: column;
+    }
+    .sso_provider a {
+      display: flex;
+      justify-content: center;
     }
     @media (max-width: 50rem) {
       .unsupported-device {

@@ -11,6 +11,7 @@
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
+  import { canViewDbPermissionsAndSettings } from '@mathesar/utils/preloadData';
   import { Button, Icon } from '@mathesar-component-library';
 
   import CreateTableModal from './CreateTableModal.svelte';
@@ -21,6 +22,7 @@
   const editSchemaModal = modal.spawnModalController();
   const createTableModal = modal.spawnModalController();
   const permissionsModal = modal.spawnModalController();
+  const showPermissionsModal = canViewDbPermissionsAndSettings();
 
   $: ({ schema } = $schemaRouteContext);
   $: tablesMap = $tablesStore.tablesMap;
@@ -59,10 +61,15 @@
           <Icon {...iconEdit} />
           <span>{$_('rename_schema')}</span>
         </Button>
-        <Button appearance="secondary" on:click={() => permissionsModal.open()}>
-          <Icon {...iconPermissions} />
-          <span>{$_('schema_permissions')}</span>
-        </Button>
+        {#if showPermissionsModal}
+          <Button
+            appearance="secondary"
+            on:click={() => permissionsModal.open()}
+          >
+            <Icon {...iconPermissions} />
+            <span>{$_('schema_permissions')}</span>
+          </Button>
+        {/if}
       </div>
 
       <svelte:fragment slot="bottom">
