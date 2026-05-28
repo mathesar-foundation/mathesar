@@ -221,7 +221,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: curl -f http://localhost:8000
+      test: curl -f http://localhost:8000/healthz/ready/
       interval: 10s
       timeout: 5s
       retries: 30
