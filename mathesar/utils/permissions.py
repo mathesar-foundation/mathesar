@@ -2,6 +2,7 @@ import secrets
 import string
 
 from django.db import transaction
+from psycopg import sql
 from psycopg.errors import DuplicateSchema
 
 from config.database_config import get_internal_database_config
@@ -91,6 +92,7 @@ def set_up_home_role_and_db_for_user(user, sample_data=[]):
         password=user_database_role.configured_role.password,
     )
     with user_database_role.connection as conn:
+        _grant_create_on_public(conn, owner=user_database_role.configured_role.name)
         _load_sample_data(conn, sample_data)
     return user_database_role
 
@@ -210,3 +212,11 @@ def _load_sample_data(conn, sample_data):
             # error on the front end even though installation
             # generally succeeded.
             continue
+
+
+def _grant_create_on_public(conn, owner):
+    # We need to explicitly grant create for public schema to the owner
+    # because Azure deviates from default PG settings.
+    # https://learn.microsoft.com/en-us/azure/postgresql/security/security-access-control#public-schema-ownership-changes-in-azure-database-for-postgresql
+    stmt = sql.SQL("GRANT CREATE ON SCHEMA public TO {}").format(sql.Identifier(owner))
+    conn.execute(stmt)
