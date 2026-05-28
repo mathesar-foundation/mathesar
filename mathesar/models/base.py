@@ -409,6 +409,7 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
+    encoding = models.CharField(max_length=32, default='utf-8')
 
 
 class DownloadLink(BaseModel):
