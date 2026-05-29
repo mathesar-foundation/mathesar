@@ -301,11 +301,13 @@ STORAGES = {
     },
 }
 
+LANDING_PAGE_URL = os.environ.get('LANDING_PAGE_URL', default=None)
+
 # Accounts
 AUTH_USER_MODEL = 'mathesar.User'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = LOGIN_URL
+LOGOUT_REDIRECT_URL = '/'
 
 # List of Template names that contains additional script tags to be added to the base template
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
