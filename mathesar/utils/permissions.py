@@ -87,12 +87,12 @@ def set_up_home_role_and_db_for_user(user, sample_data=[]):
             root_conn,
             owner=user_database_role.configured_role.name,
         )
+        _grant_create_on_public(root_conn, owner=user_database_role.configured_role.name)
     user_database_role.database.install_sql(
         username=user_database_role.configured_role.name,
         password=user_database_role.configured_role.password,
     )
     with user_database_role.connection as conn:
-        _grant_create_on_public(conn, owner=user_database_role.configured_role.name)
         _load_sample_data(conn, sample_data)
     return user_database_role
 
