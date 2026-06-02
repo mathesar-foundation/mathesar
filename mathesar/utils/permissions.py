@@ -87,7 +87,17 @@ def set_up_home_role_and_db_for_user(user, sample_data=[]):
             root_conn,
             owner=user_database_role.configured_role.name,
         )
-        _grant_create_on_public(root_conn, owner=user_database_role.configured_role.name)
+    with mathesar_connection(
+        host=conn_info.host,
+        port=conn_info.port,
+        dbname=user_database_role.database.name,
+        user=conn_info.role,
+        password=conn_info.password,
+        sslmode=conn_info.sslmode,
+        application_name="mathesar.utils.permissions.set_up_home_role_and_db_for_user",
+    ) as root_conn_to_user_db:
+        _grant_create_on_public(root_conn_to_user_db, owner=user_database_role.configured_role.name)
+
     user_database_role.database.install_sql(
         username=user_database_role.configured_role.name,
         password=user_database_role.configured_role.password,
