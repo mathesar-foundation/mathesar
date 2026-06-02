@@ -5935,6 +5935,163 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_composite_pk_records_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE composite_orders (
+    order_id integer NOT NULL,
+    customer_id integer NOT NULL,
+    order_date date NOT NULL,
+    total_amount numeric,
+    status text,
+    PRIMARY KEY (order_id, customer_id, order_date)
+  );
+
+  INSERT INTO composite_orders VALUES
+    (3, 103, '2024-01-17', 320.60, 'pending'),
+    (3, 104, '2024-01-18', 120.00, 'pending');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_composite_pk() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_composite_pk_records_table();
+
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      'composite_orders'::regclass,
+      '{"1": 3, "2": 105, "3": "2024-01-19", "4": 77.77, "5": "new"}'
+    ),
+    '{
+      "results": [
+        {"1": 3, "2": 105, "3": "2024-01-19 AD", "4": 77.77, "5": "new"}
+      ],
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_composite_pk_leaves_existing_rows() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_composite_pk_records_table();
+  PERFORM msar.add_record_to_table(
+    'composite_orders'::regclass,
+    '{"1": 3, "2": 105, "3": "2024-01-19", "4": 77.77, "5": "new"}'
+  );
+
+  RETURN NEXT results_eq(
+    'SELECT order_id, customer_id, order_date, total_amount, status FROM composite_orders ORDER BY customer_id',
+    $v$VALUES
+      (3, 103, '2024-01-17'::date, 320.60::numeric, 'pending'),
+      (3, 104, '2024-01-18'::date, 120.00::numeric, 'pending'),
+      (3, 105, '2024-01-19'::date, 77.77::numeric, 'new')$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_composite_pk_quoted_columns() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE quoted_composite_orders (
+    "Order ID" integer NOT NULL,
+    "Customer ID" integer NOT NULL,
+    "Order Date" date NOT NULL,
+    "Order Status" text,
+    PRIMARY KEY ("Order ID", "Customer ID", "Order Date")
+  );
+
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      'quoted_composite_orders'::regclass,
+      '{"1": 11, "2": 107, "3": "2024-02-01", "4": "pending"}'
+    ),
+    '{
+      "results": [
+        {"1": 11, "2": 107, "3": "2024-02-01 AD", "4": "pending"}
+      ],
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_record_from_table_by_pk_composite() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_composite_pk_records_table();
+
+  RETURN NEXT is(
+    msar.get_record_from_table_by_pk(
+      'composite_orders'::regclass,
+      '{"1": 3, "2": 103, "3": "2024-01-17"}'
+    ) -> 'results',
+    '[{"1": 3, "2": 103, "3": "2024-01-17 AD", "4": 320.60, "5": "pending"}]'::jsonb
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_by_pk_composite() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_composite_pk_records_table();
+
+  RETURN NEXT is(
+    msar.patch_record_in_table_by_pk(
+      'composite_orders'::regclass,
+      '{"1": 3, "2": 103, "3": "2024-01-17"}',
+      '{"5": "fulfilled"}'
+    ),
+    '{
+      "results": [
+        {"1": 3, "2": 103, "3": "2024-01-17 AD", "4": 320.60, "5": "fulfilled"}
+      ],
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_by_pk_leaves_other_composite_rows() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_composite_pk_records_table();
+  PERFORM msar.patch_record_in_table_by_pk(
+    'composite_orders'::regclass,
+    '{"1": 3, "2": 103, "3": "2024-01-17"}',
+    '{"5": "fulfilled"}'
+  );
+
+  RETURN NEXT results_eq(
+    'SELECT order_id, customer_id, order_date, status FROM composite_orders ORDER BY customer_id',
+    $v$VALUES
+      (3, 103, '2024-01-17'::date, 'fulfilled'),
+      (3, 104, '2024-01-18'::date, 'pending')$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_by_pk_missing_key() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_composite_pk_records_table();
+
+  RETURN NEXT throws_ok(
+    $q$SELECT msar.patch_record_in_table_by_pk(
+      'composite_orders'::regclass,
+      '{"1": 3, "2": 103}',
+      '{"5": "fulfilled"}'
+    )$q$,
+    'Record identifier is missing primary key column 3'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __setup_add_records_table_only_pk() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE atable (

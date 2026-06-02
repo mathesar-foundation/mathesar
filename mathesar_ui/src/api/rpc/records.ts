@@ -4,6 +4,7 @@ import type { RecordsSummaryListResponse } from './_common/commonTypes';
 import type { JoinPath, RecordSummaryTemplate } from './tables';
 
 export type ResultValue = string | number | boolean | number[] | null;
+export type RecordIdentifier = ResultValue | Record<string, ResultValue>;
 
 export type SortDirection = 'asc' | 'desc';
 export interface SortingEntry {
@@ -145,7 +146,7 @@ export const records = {
     {
       database_id: number;
       table_oid: number;
-      record_id: ResultValue;
+      record_id: RecordIdentifier;
       /** Keys are stringified attnums */
       record_def: Record<string, unknown>;
       return_record_summaries?: boolean;
@@ -157,7 +158,7 @@ export const records = {
     {
       database_id: number;
       table_oid: number;
-      record_id: ResultValue;
+      record_id: RecordIdentifier;
       return_record_summaries?: boolean;
       /**
        * Keys are stringified table OIDs. Values are record summary templates
