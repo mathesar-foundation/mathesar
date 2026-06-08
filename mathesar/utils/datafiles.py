@@ -45,6 +45,7 @@ def create_datafile(data, user=None):
             delimiter=dialect.delimiter,
             escapechar=dialect.escapechar,
             quotechar=dialect.quotechar,
+            encoding=encoding,
             user=user,
         )
         datafile.save()

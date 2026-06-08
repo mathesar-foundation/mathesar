@@ -141,14 +141,41 @@ The database specified in this section is used to store Mathesar's internal data
 
 ### `FILE_STORAGE_DICT` (optional)
 
-- **Description**: The configuration to connect Mathesar to an S3-compatible [file storage backend](../administration/file-backend-config.md).
+- **Description**: The configuration to connect Mathesar to an S3-compatible or Azure Blob Storage [file storage backend](../administration/file-backend-config.md).
 - **Format**: A stringified JSON representation of the config in the [`file_storage.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/file_storage.yml.example).
 
-    !!! example
+    !!! example "S3-compatible"
         ```env
          FILE_STORAGE_DICT="{\"default\":{\"protocol\":\"s3\",\"nickname\":\"Example\",\"prefix\":\"mathesar-storage\",\"kwargs\":{\"client_kwargs\":{\"endpoint_url\":\"https:\/\/storage-example.mathesar.org\",\"region_name\":\"auto\",\"aws_access_key_id\":\"XXX\",\"aws_secret_access_key\":\"XXX\"}}}}"
+        ```
+
+    !!! example "Azure Blob Storage (managed identity)"
+        ```env
+         FILE_STORAGE_DICT="{\"default\":{\"protocol\":\"az\",\"nickname\":\"Example\",\"prefix\":\"mathesar-file-attachments\",\"kwargs\":{\"account_name\":\"my-storage-account\"}}}"
         ```
 
 - **Additional information**: The following tools might help you convert the YAML syntax from `file_storage.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+
+## Datafiles storage configuration {: #datafiles-storage}
+
+!!! info "**OPTIONAL**"
+    Only needed if you want to store uploaded datafiles (used for CSV/TSV imports) in Azure Blob Storage instead of on the local filesystem.
+
+### `DATA_FILES_STORAGE_BACKEND` (optional)
+
+- **Description**: Selects the backend used to store uploaded datafiles. Set to `azure` to store them in Azure Blob Storage; otherwise they are stored on the local filesystem. Static files are always served by whitenoise regardless of this setting.
+- **Format**: One of `local` or `azure`
+- **Default value**: `local`
+
+### `DATA_FILES_AZURE_ACCOUNT_NAME` (optional)
+
+- **Description**: The Azure Storage account name used to store datafiles. Required when `DATA_FILES_STORAGE_BACKEND` is `azure`. Authentication uses [`DefaultAzureCredential`](https://learn.microsoft.com/python/api/azure-identity/azure.identity.defaultazurecredential), which resolves credentials from the environment (managed identity, workload identity, `az login`, etc.,).
+- **Format**: An Azure Storage account name
+
+### `DATA_FILES_AZURE_CONTAINER` (optional)
+
+- **Description**: The Azure Blob Storage container in which datafiles are stored. Required when `DATA_FILES_STORAGE_BACKEND` is `azure`.
+- **Format**: An Azure Blob Storage container name
+- **Default value**: `mathesar-datafiles`

@@ -42,6 +42,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # HealthCheckMiddleware must stay first so they are served before
+    # host validation, SSL redirect, and auth.
+    "mathesar.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -250,17 +253,6 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
-# Datafiles storage configuration (for CSV/TSV imports)
-# The storage backend config here is technically deprecated at the time of
-# writing, but we'll fix that at the point where we upgrade to Django 6.
-DATA_FILES_STORAGE_BACKEND = os.environ.get('DATA_FILES_STORAGE_BACKEND', 'local')
-
-if DATA_FILES_STORAGE_BACKEND == 'azure':
-    DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-    AZURE_CONTAINER = os.environ.get('DATA_FILES_AZURE_CONTAINER', 'mathesar-datafiles')
-    AZURE_CONNECTION_STRING = os.environ.get('DATA_FILES_AZURE_CONNECTION_STRING', '')
-else:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Mathesar settings
 MATHESAR_MODE = os.environ.get('MODE', default='PRODUCTION')
@@ -279,13 +271,43 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # https://vitejs.dev/guide/assets.html
 # https://vitejs.dev/guide/backend-integration.html
 STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION, MATHESAR_STATIC_NON_CODE_FILES_LOCATION] if MATHESAR_MODE == 'DEVELOPMENT' else [MATHESAR_UI_BUILD_LOCATION, MATHESAR_STATIC_NON_CODE_FILES_LOCATION]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Datafiles storage configuration (for CSV/TSV imports)
+# Selects the backend used for the "default" storage (uploaded datafiles/media).
+# Set DATA_FILES_STORAGE_BACKEND=azure to store datafiles in Azure Blob Storage.
+DATA_FILES_STORAGE_BACKEND = os.environ.get('DATA_FILES_STORAGE_BACKEND', 'local')
+
+if DATA_FILES_STORAGE_BACKEND == 'azure':
+    # Authentication uses DefaultAzureCredential, which resolves credentials from
+    # the environment (managed identity, workload identity, `az login`, etc.,)
+    from azure.identity import DefaultAzureCredential
+    _default_storage = {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": os.environ.get('DATA_FILES_AZURE_ACCOUNT_NAME'),
+            "azure_container": os.environ.get('DATA_FILES_AZURE_CONTAINER', 'mathesar-datafiles'),
+            "token_credential": DefaultAzureCredential(),
+        },
+    }
+else:
+    _default_storage = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    }
+
+STORAGES = {
+    "default": _default_storage,
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+LANDING_PAGE_URL = os.environ.get('LANDING_PAGE_URL', default=None)
 
 # Accounts
 AUTH_USER_MODEL = 'mathesar.User'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = LOGIN_URL
+LOGOUT_REDIRECT_URL = '/'
 
 # List of Template names that contains additional script tags to be added to the base template
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []

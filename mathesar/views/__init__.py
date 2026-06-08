@@ -2,7 +2,8 @@ from functools import wraps
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.contrib.auth.views import redirect_to_login
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
@@ -141,8 +142,11 @@ class MathesarRPCEntryPoint(RPCEntryPoint):
     pass
 
 
-@login_required
 def home(request):
+    if not request.user.is_authenticated:
+        if settings.LANDING_PAGE_URL:
+            return redirect(settings.LANDING_PAGE_URL)
+        return redirect_to_login(request.get_full_path())
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)
     })
