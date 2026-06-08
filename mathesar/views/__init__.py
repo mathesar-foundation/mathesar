@@ -95,10 +95,8 @@ def _get_internal_db_meta():
 
 def get_common_data(request, database_id=None, schema_oid=None):
     if request.user.is_authenticated:
-        print("RETURNING AUTHORIZED COMMON DATA")
         return get_authorized_common_data(request, database_id, schema_oid)
     else:
-        print("RETURNING ANON COMMON DATA")
         return get_anonymous_common_data(request)
 
 
@@ -202,7 +200,10 @@ def analytics_sample_report(request):
     return render(request, 'analytics/sample_report.html')
 
 
-def page_not_found_view(request, _):
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request),
-    }, status=404)
+def page_not_found_view(request, exception):
+    return render(
+        request,
+        'mathesar/index.html',
+        {'common_data': get_common_data(request)},
+        status=404
+    )
