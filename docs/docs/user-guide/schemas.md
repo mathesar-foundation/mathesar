@@ -2,7 +2,7 @@
 
 ## What is a schema?
 
-"Schema" is one of those funny words that can mean different things in different contexts, even within the word of relational database systems.
+"Schema" is one of those funny words that can mean different things in different contexts, even within the world of relational database systems.
 
 While all relational databases store their data in [tables](./tables.md), PostgreSQL has an additional level of nesting which requires every table to live within one and only one schema. You might think of a schema as a sort of folder. PostgreSQL sometimes calls it a "namespace". Schemas exist to help organize tables (and other database objects such as functions) into logical groups and avoid naming collisions.
 
@@ -48,5 +48,5 @@ Mathesar allows you to work with all the schemas in your database _except_ for t
 - `msar` - This holds the bulk of Mathesar's application code, defined as PostgreSQL functions.
 - `__msar` - This is a deprecated schema which holds some Mathesar functions that are [gradually being migrated](https://github.com/mathesar-foundation/mathesar/blob/develop/db/sql/STANDARDS.md#quoting-escaping-sql-injection-and-security) to the `msar` schema.
 
-The first time you use Mathesar to connect to your database, Mathesar installs these schemas. Mathesar's approach to [tightly integrating with PostgreSQL](./index.md#postgres) means these schemas are required for Mathesar to function with your database. For Mathesar to successfully install them, you'll need to enure that the PostgreSQL role you provide has `CREATE` privileges on the database. After the schemas are installed and your database is connected, you can revoke the `CREATE` privilege if do not wish for your users to be able to create other schemas.
+The first time you use Mathesar to connect to your database, Mathesar installs these schemas. Mathesar's approach to [tightly integrating with PostgreSQL](./index.md#postgres) means these schemas are required for Mathesar to function with your database. For Mathesar to successfully install them, you'll need to ensure that the PostgreSQL role you provide has `CREATE` privileges on the database. After the schemas are installed and your database is connected, you can revoke the `CREATE` privilege if you do not wish for your users to be able to create other schemas.
 

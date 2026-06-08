@@ -22,7 +22,7 @@ Each Mathesar data type is described in more detail below.
     - [`boolean`](https://www.postgresql.org/docs/current/datatype-boolean.html)
 - **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Display a dropdown instead of a checkbox
-    - Customize the text show within the two dropdown options
+    - Customize the text shown within the two dropdown options
 
 ### Date
 
@@ -63,17 +63,17 @@ Used to store valid email addresses
 
     - `mathesar_types.money` **(default)**
 
-        This is custom PostgreSQL type implemented by Mathesar as a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over [`numeric`](https://www.postgresql.org/docs/17/datatype-numeric.html).
+        This is a custom PostgreSQL type implemented by Mathesar as a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over [`numeric`](https://www.postgresql.org/docs/17/datatype-numeric.html).
 
         ??? question "`mathesar_types.money` vs `numeric`"
-            Compared with `numeric`, the `mathesar_types.money` type only exists for: (A) compatibility with our custom casting functions that can import CSV data with currency symbols; and (B) indicate to the upper layers of the Mathesar application that this column is eligible for an additional "Currency Symbol" metadata field.
+            Compared with `numeric`, the `mathesar_types.money` type only exists to provide compatibility with our custom casting functions that can import CSV data with currency symbols, and to indicate to the upper layers of the Mathesar application that this column is eligible for an additional "Currency Symbol" metadata field.
 
             You are welcome to store money values in Number columns, but you won't be able to display the values with a currency symbol.
 
     - [`money`](https://www.postgresql.org/docs/current/datatype-money.html)
 
         ??? question "`mathesar_types.money` vs `money`"
-            Although PostgreSQL _does_ natively have a `money` type, we've chosen to recommend our custom PostgreSQL type for money in order to give your more control over the fractional precision for money columns. The fractional precision of the native `money` type is controlled by the [`LC_MONETARY`](https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-LC-MONETARY) which is set at the database level and thus may not be granular enough or accessible enough for all Mathesar users to configure.
+            Although PostgreSQL _does_ natively have a `money` type, we've chosen to recommend our custom PostgreSQL type for money in order to give you more control over the fractional precision for money columns. The fractional precision of the native `money` type is controlled by the [`LC_MONETARY`](https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-LC-MONETARY) which is set at the database level and thus may not be granular enough or accessible enough for all Mathesar users to configure.
 
 - **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the number of decimal places displayed (e.g. 1.2 vs 1.20)
@@ -117,7 +117,7 @@ Used to store valid email addresses
 - **PostgreSQL types**
     - `mathesar_types.uri`
 
-        This is a custom PostgreSQL type implemented by Mathesar. It is a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over `text` with additional logic to validate that the input is a valid uri address.
+        This is a custom PostgreSQL type implemented by Mathesar. It is a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over `text` with additional logic to validate that the input is a valid URI.
 
 ### Files
 
