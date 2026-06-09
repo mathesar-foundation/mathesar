@@ -59,6 +59,20 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
+
 # SSO_CONFIG_DICT is the canonical env var; OIDC_CONFIG_DICT is kept as a
 # backwards compatible alias for installs that predate the v2 schema
 SSO_CONFIG = load_sso_config(
