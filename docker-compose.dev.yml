@@ -71,6 +71,8 @@ services:
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
       - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
+      - MATHESAR_TERMS_OF_SERVICE_URL=${MATHESAR_TERMS_OF_SERVICE_URL-}
+      - MATHESAR_PRIVACY_POLICY_URL=${MATHESAR_PRIVACY_POLICY_URL-}
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
