@@ -10,6 +10,10 @@
   import AuthenticatedRoutes from './AuthenticatedRoutes.svelte';
 
   export let commonData: CommonData;
+
+  function gotoLoginPage() {
+    window.location.href = '/auth/login/?next=/';
+  }
 </script>
 
 <Route path="/*" firstmatch>
@@ -17,10 +21,7 @@
     <AuthenticatedRoutes />
   {:else}
     <Route path="/" let:meta>
-      <RouteObserver
-        {meta}
-        onLoadAlways={() => (window.location.href = '/auth/login/?next=/')}
-      />
+      <RouteObserver {meta} onLoadAlways={gotoLoginPage} />
     </Route>
   {/if}
 
