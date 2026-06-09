@@ -264,6 +264,8 @@ MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/stati
 MATHESAR_ANALYTICS_URL = os.environ.get('MATHESAR_ANALYTICS_URL', default='https://example.com/collector')
 MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='https://example.com/hello')
 MATHESAR_FEEDBACK_URL = os.environ.get('MATHESAR_FEEDBACK_URL', default='https://example.com/feedback')
+MATHESAR_TERMS_OF_SERVICE_URL = os.environ.get('MATHESAR_TERMS_OF_SERVICE_URL', default=None)
+MATHESAR_PRIVACY_POLICY_URL = os.environ.get('MATHESAR_PRIVACY_POLICY_URL', default=None)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
