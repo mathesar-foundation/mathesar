@@ -29,3 +29,29 @@ def test_login_view_context_flag_false_when_sso_not_required(rf, settings):
     view.setup(rf.get('/auth/login/'))
     ctx = view.get_context_data(form=view.get_form())
     assert ctx['is_sso_login_required'] is False
+
+
+def test_login_view_context_terms_of_service_url_defaults_to_none(rf, settings):
+    settings.MATHESAR_TERMS_OF_SERVICE_URL = None
+    view = MathesarLoginView()
+    view.setup(rf.get('/auth/login/'))
+    ctx = view.get_context_data(form=view.get_form())
+    assert ctx['terms_of_service_url'] is None
+
+
+def test_login_view_context_privacy_policy_url_defaults_to_none(rf, settings):
+    settings.MATHESAR_PRIVACY_POLICY_URL = None
+    view = MathesarLoginView()
+    view.setup(rf.get('/auth/login/'))
+    ctx = view.get_context_data(form=view.get_form())
+    assert ctx['privacy_policy_url'] is None
+
+
+def test_login_view_context_includes_custom_urls_when_set(rf, settings):
+    settings.MATHESAR_TERMS_OF_SERVICE_URL = 'https://example.com/terms'
+    settings.MATHESAR_PRIVACY_POLICY_URL = 'https://example.com/privacy'
+    view = MathesarLoginView()
+    view.setup(rf.get('/auth/login/'))
+    ctx = view.get_context_data(form=view.get_form())
+    assert ctx['terms_of_service_url'] == 'https://example.com/terms'
+    assert ctx['privacy_policy_url'] == 'https://example.com/privacy'

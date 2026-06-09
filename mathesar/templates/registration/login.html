@@ -108,4 +108,17 @@
 
     </div>
   </form>
+  {% if terms_of_service_url or privacy_policy_url %}
+    <div class="login-card-footer-links">
+      {% if terms_of_service_url %}
+        <a href="{{ terms_of_service_url }}" target="_blank">{% translate "Terms of Service" %}</a>
+      {% endif %}
+      {% if terms_of_service_url and privacy_policy_url %}
+        <span> | </span>
+      {% endif %}
+      {% if privacy_policy_url %}
+        <a href="{{ privacy_policy_url }}" target="_blank">{% translate "Privacy Policy" %}</a>
+      {% endif %}
+    </div>
+  {% endif %}
 {% endblock %}

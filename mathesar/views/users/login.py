@@ -14,4 +14,6 @@ class MathesarLoginView(LoginView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['is_sso_login_required'] = settings.REQUIRE_SSO_LOGIN
+        ctx['terms_of_service_url'] = settings.MATHESAR_TERMS_OF_SERVICE_URL
+        ctx['privacy_policy_url'] = settings.MATHESAR_PRIVACY_POLICY_URL
         return ctx
