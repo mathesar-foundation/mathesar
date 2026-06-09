@@ -179,3 +179,21 @@ The database specified in this section is used to store Mathesar's internal data
 - **Description**: The Azure Blob Storage container in which datafiles are stored. Required when `DATA_FILES_STORAGE_BACKEND` is `azure`.
 - **Format**: An Azure Blob Storage container name
 - **Default value**: `mathesar-datafiles`
+
+## Login page links {: #login-links}
+
+!!! info "**OPTIONAL**"
+    Only needed if you want to show links to your own terms of service and/or privacy
+    policy pages at the bottom of the login page. If both are unset, nothing displays.
+
+### `MATHESAR_TERMS_OF_SERVICE_URL` (optional)
+
+- **Description**: URL for a "Terms of Service" link shown at the bottom of the login page.
+- **Format**: A URL
+- **Default value**: (none — no link is shown)
+
+### `MATHESAR_PRIVACY_POLICY_URL` (optional)
+
+- **Description**: URL for a "Privacy Policy" link shown at the bottom of the login page.
+- **Format**: A URL
+- **Default value**: (none — no link is shown)
