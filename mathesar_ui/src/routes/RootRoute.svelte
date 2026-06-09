@@ -12,39 +12,27 @@
   export let commonData: CommonData;
 </script>
 
-<!--
-  We're explicity having two separate routing context for the app to avoid the user
-  from client routing across either of them.
--->
-
-{#if commonData.routing_context === 'anonymous'}
-  <Route path="/*" firstmatch>
-    <Route path="/shares/*" firstmatch>
-      <AnonymousAccessRoutes />
-
-      <Route fallback>
-        <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
-      </Route>
+<Route path="/*" firstmatch>
+  {#if commonData.is_authenticated}
+    <AuthenticatedRoutes />
+  {:else}
+    <Route path="/" let:meta>
+      <RouteObserver
+        {meta}
+        onLoadAlways={() => (window.location.href = '/auth/login/?next=/')}
+      />
     </Route>
+  {/if}
 
-    <Route fallback let:meta>
-      <!--Reload page to let server routing take over-->
-      <RouteObserver {meta} on:load={() => window.location.reload()} />
-    </Route>
-  </Route>
-{:else}
-  <Route path="/*" firstmatch>
-    {#if commonData.is_authenticated}
-      <AuthenticatedRoutes />
-    {/if}
-
-    <Route path="/shares/*" let:meta>
-      <!--Reload page to let server routing take over-->
-      <RouteObserver {meta} on:load={() => window.location.reload()} />
-    </Route>
+  <Route path="/shares/*" firstmatch>
+    <AnonymousAccessRoutes />
 
     <Route fallback>
       <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
     </Route>
   </Route>
-{/if}
+
+  <Route fallback>
+    <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
+  </Route>
+</Route>
