@@ -280,6 +280,10 @@ MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='h
 MATHESAR_FEEDBACK_URL = os.environ.get('MATHESAR_FEEDBACK_URL', default='https://example.com/feedback')
 MATHESAR_TERMS_OF_SERVICE_URL = os.environ.get('MATHESAR_TERMS_OF_SERVICE_URL', default=None)
 MATHESAR_PRIVACY_POLICY_URL = os.environ.get('MATHESAR_PRIVACY_POLICY_URL', default=None)
+MATHESAR_INSTANCE_NAME = os.environ.get('MATHESAR_INSTANCE_NAME') or 'Mathesar'
+MATHESAR_INSTANCE_LOGO_URL = os.environ.get('MATHESAR_INSTANCE_LOGO_URL') or None
+MATHESAR_LOGIN_PAGE_HEADING = os.environ.get('MATHESAR_LOGIN_PAGE_HEADING') or None
+MATHESAR_LOGIN_PAGE_BODY = os.environ.get('MATHESAR_LOGIN_PAGE_BODY') or None
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -317,7 +321,7 @@ STORAGES = {
     },
 }
 
-LANDING_PAGE_URL = os.environ.get('LANDING_PAGE_URL', default=None)
+MATHESAR_LANDING_PAGE_URL = os.environ.get('MATHESAR_LANDING_PAGE_URL') or None
 
 # Accounts
 AUTH_USER_MODEL = 'mathesar.User'

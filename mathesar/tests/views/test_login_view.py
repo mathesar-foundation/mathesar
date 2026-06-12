@@ -1,10 +1,12 @@
 """
-Tests for the MathesarLoginView's behavior under SSO-only mode.
+Tests for the MathesarLoginView's login behavior and rendered login page.
 
 Fixtures:
     rf(pytest-django): Provides a Django RequestFactory.
     settings(pytest-django): Lets tests temporarily override Django settings.
 """
+from html.parser import HTMLParser
+
 import pytest
 
 from django.contrib.auth.models import AnonymousUser
@@ -24,6 +26,19 @@ PRIVACY_LINK = (
     f'<a href="{PRIVACY_URL}" target="_blank" rel="noopener noreferrer">'
     'Privacy Policy</a>'
 )
+CUSTOM_LOGO_URL = 'https://example.com/logo.svg'
+CUSTOM_INSTANCE_NAME = 'Mathesar Cloud'
+CUSTOM_HEADING = 'Welcome to Mathesar Cloud'
+CUSTOM_BODY = '<strong>Sign in to start working.</strong>'
+
+
+class _StartTagParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.tags = []
+
+    def handle_starttag(self, tag, attrs):
+        self.tags.append((tag, dict(attrs)))
 
 
 def _login_page_html(rf, settings):
@@ -43,6 +58,24 @@ def _login_page_html(rf, settings):
     assert response.status_code == 200
     response.render()
     return ' '.join(response.content.decode().split())
+
+
+def _find_start_tags(html, tag_name, **expected_attrs):
+    parser = _StartTagParser()
+    parser.feed(html)
+    return [
+        attrs
+        for tag, attrs in parser.tags
+        if tag == tag_name
+        and all(attrs.get(name) == value for name, value in expected_attrs.items())
+    ]
+
+
+def _assert_link_attrs(html, href):
+    links = _find_start_tags(html, 'a', href=href)
+    assert len(links) == 1
+    assert links[0]['target'] == '_blank'
+    assert links[0]['rel'] == 'noopener noreferrer'
 
 
 def test_login_view_post_forbidden_when_sso_required(rf, settings):
@@ -94,6 +127,82 @@ def test_login_view_context_includes_custom_urls_when_set(rf, settings):
     assert ctx['privacy_policy_url'] == 'https://example.com/privacy'
 
 
+def test_login_view_context_login_page_heading_defaults_to_original_heading(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_HEADING = None
+    view = MathesarLoginView()
+    view.setup(rf.get('/auth/login/'))
+    ctx = view.get_context_data(form=view.get_form())
+    assert ctx['login_page_heading'] == 'Log in to Mathesar'
+
+
+def test_login_view_context_includes_login_page_copy_when_set(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_HEADING = 'Welcome to Mathesar Cloud'
+    settings.MATHESAR_LOGIN_PAGE_BODY = 'Sign in to start working with your database.'
+
+    view = MathesarLoginView()
+    view.setup(rf.get('/auth/login/'))
+    ctx = view.get_context_data(form=view.get_form())
+
+    assert ctx['login_page_heading'] == 'Welcome to Mathesar Cloud'
+    assert ctx['login_page_body'] == 'Sign in to start working with your database.'
+
+
+@pytest.mark.django_db
+def test_login_page_preserves_default_heading_and_logo(rf, settings):
+    settings.MATHESAR_INSTANCE_NAME = 'Mathesar'
+    settings.MATHESAR_INSTANCE_LOGO_URL = None
+    settings.MATHESAR_LOGIN_PAGE_HEADING = None
+    settings.MATHESAR_LOGIN_PAGE_BODY = None
+
+    html = _login_page_html(rf, settings)
+
+    assert 'Log in to Mathesar' in html
+    logo = _find_start_tags(
+        html,
+        'img',
+        src='/static/images/red-logo-with-text.svg',
+    )
+    assert len(logo) == 1
+    assert logo[0]['alt'] == 'Mathesar Logo'
+    assert logo[0]['title'] == 'Mathesar'
+
+
+@pytest.mark.django_db
+def test_login_page_renders_custom_heading(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_HEADING = 'Welcome to Mathesar Cloud'
+    settings.MATHESAR_LOGIN_PAGE_BODY = None
+
+    html = _login_page_html(rf, settings)
+
+    assert 'Welcome to Mathesar Cloud' in html
+    assert 'Log in to Mathesar' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_renders_custom_body_as_plain_text(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_HEADING = None
+    settings.MATHESAR_LOGIN_PAGE_BODY = '<strong>Sign in to start working.</strong>'
+
+    html = _login_page_html(rf, settings)
+
+    assert '&lt;strong&gt;Sign in to start working.&lt;/strong&gt;' in html
+    assert '<strong>Sign in to start working.</strong>' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_renders_custom_instance_logo(rf, settings):
+    settings.MATHESAR_INSTANCE_NAME = 'Mathesar Cloud'
+    settings.MATHESAR_INSTANCE_LOGO_URL = CUSTOM_LOGO_URL
+
+    html = _login_page_html(rf, settings)
+
+    logo = _find_start_tags(html, 'img', src=CUSTOM_LOGO_URL)
+    assert len(logo) == 1
+    assert logo[0]['alt'] == 'Mathesar Cloud Logo'
+    assert logo[0]['title'] == 'Mathesar Cloud'
+    assert 'red-logo-with-text.svg' not in html
+
+
 @pytest.mark.django_db
 def test_login_page_legal_notice_with_terms_and_privacy(rf, settings):
     settings.MATHESAR_TERMS_OF_SERVICE_URL = TERMS_URL
@@ -105,6 +214,8 @@ def test_login_page_legal_notice_with_terms_and_privacy(rf, settings):
     assert TERMS_LINK in html
     assert 'and acknowledge the' in html
     assert PRIVACY_LINK in html
+    _assert_link_attrs(html, TERMS_URL)
+    _assert_link_attrs(html, PRIVACY_URL)
     assert 'Terms of Service | Privacy Policy' not in html
 
 
@@ -117,6 +228,7 @@ def test_login_page_legal_notice_with_terms_only(rf, settings):
 
     assert 'By logging in, you agree to the' in html
     assert TERMS_LINK in html
+    _assert_link_attrs(html, TERMS_URL)
     assert 'Privacy Policy' not in html
     assert 'and acknowledge the' not in html
 
@@ -130,8 +242,33 @@ def test_login_page_legal_notice_with_privacy_only(rf, settings):
 
     assert 'By logging in, you acknowledge the' in html
     assert PRIVACY_LINK in html
+    _assert_link_attrs(html, PRIVACY_URL)
     assert 'Terms of Service' not in html
     assert 'agree to the' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_legal_notice_not_rendered_without_links(rf, settings):
+    settings.MATHESAR_TERMS_OF_SERVICE_URL = None
+    settings.MATHESAR_PRIVACY_POLICY_URL = None
+
+    html = _login_page_html(rf, settings)
+
+    assert '<div class="login-card-legal-notice">' not in html
+    assert 'Terms of Service' not in html
+    assert 'Privacy Policy' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_legal_notice_not_rendered_with_blank_links(rf, settings):
+    settings.MATHESAR_TERMS_OF_SERVICE_URL = ''
+    settings.MATHESAR_PRIVACY_POLICY_URL = ''
+
+    html = _login_page_html(rf, settings)
+
+    assert '<div class="login-card-legal-notice">' not in html
+    assert 'Terms of Service' not in html
+    assert 'Privacy Policy' not in html
 
 
 @pytest.mark.django_db
@@ -148,3 +285,32 @@ def test_login_page_legal_notice_renders_when_sso_is_required(rf, settings):
     assert TERMS_LINK in html
     assert 'and acknowledge the' in html
     assert PRIVACY_LINK in html
+
+
+@pytest.mark.django_db
+def test_login_page_renders_cloud_configuration_when_sso_is_required(
+        rf, settings
+):
+    settings.REQUIRE_SSO_LOGIN = True
+    settings.MATHESAR_INSTANCE_NAME = CUSTOM_INSTANCE_NAME
+    settings.MATHESAR_INSTANCE_LOGO_URL = CUSTOM_LOGO_URL
+    settings.MATHESAR_LOGIN_PAGE_HEADING = CUSTOM_HEADING
+    settings.MATHESAR_LOGIN_PAGE_BODY = CUSTOM_BODY
+    settings.MATHESAR_TERMS_OF_SERVICE_URL = TERMS_URL
+    settings.MATHESAR_PRIVACY_POLICY_URL = PRIVACY_URL
+
+    html = _login_page_html(rf, settings)
+
+    assert 'name="username"' not in html
+    assert 'name="password"' not in html
+    assert CUSTOM_HEADING in html
+    assert '&lt;strong&gt;Sign in to start working.&lt;/strong&gt;' in html
+    assert '<strong>Sign in to start working.</strong>' not in html
+    logo = _find_start_tags(html, 'img', src=CUSTOM_LOGO_URL)
+    assert len(logo) == 1
+    assert logo[0]['alt'] == 'Mathesar Cloud Logo'
+    assert logo[0]['title'] == 'Mathesar Cloud'
+    assert TERMS_LINK in html
+    assert PRIVACY_LINK in html
+    _assert_link_attrs(html, TERMS_URL)
+    _assert_link_attrs(html, PRIVACY_URL)

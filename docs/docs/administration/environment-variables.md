@@ -180,20 +180,50 @@ The database specified in this section is used to store Mathesar's internal data
 - **Format**: An Azure Blob Storage container name
 - **Default value**: `mathesar-datafiles`
 
-## Login page links {: #login-links}
+## Public entry and login page configuration {: #public-entry}
 
 !!! info "**OPTIONAL**"
-    Only needed if you want to show links to your own terms of service and/or privacy
-    policy pages at the bottom of the login page. If both are unset, nothing displays.
+    Only needed if you want to customize the public-facing login experience or
+    redirect anonymous visitors from Mathesar's home page.
+
+### `MATHESAR_LANDING_PAGE_URL` (optional)
+
+- **Description**: URL to redirect anonymous visitors who open Mathesar's home page (`/`). If unset, anonymous visitors are sent to the login page.
+- **Format**: A URL
+- **Default value**: (none — anonymous visitors are sent to the login page)
+
+### `MATHESAR_INSTANCE_NAME` (optional)
+
+- **Description**: Name for this Mathesar instance. Currently used as accessible text for the logo on login/auth pages.
+- **Format**: Plain text
+- **Default value**: `Mathesar`
+
+### `MATHESAR_INSTANCE_LOGO_URL` (optional)
+
+- **Description**: Public-facing URL for a custom instance logo shown on login/auth pages. If unset, Mathesar's default logo is shown.
+- **Format**: A URL
+- **Default value**: (none — Mathesar's default logo is shown)
+
+### `MATHESAR_LOGIN_PAGE_HEADING` (optional)
+
+- **Description**: Custom heading shown on the login page.
+- **Format**: Plain text
+- **Default value**: `Log in to Mathesar`
+
+### `MATHESAR_LOGIN_PAGE_BODY` (optional)
+
+- **Description**: Plain text orientation copy shown on the login page. HTML and Markdown are not rendered.
+- **Format**: Plain text
+- **Default value**: (none — no orientation copy is shown)
 
 ### `MATHESAR_TERMS_OF_SERVICE_URL` (optional)
 
-- **Description**: URL for a "Terms of Service" link shown at the bottom of the login page.
+- **Description**: URL for a "Terms of Service" link used in the login page legal notice.
 - **Format**: A URL
 - **Default value**: (none — no link is shown)
 
 ### `MATHESAR_PRIVACY_POLICY_URL` (optional)
 
-- **Description**: URL for a "Privacy Policy" link shown at the bottom of the login page.
+- **Description**: URL for a "Privacy Policy" link used in the login page legal notice.
 - **Format**: A URL
 - **Default value**: (none — no link is shown)

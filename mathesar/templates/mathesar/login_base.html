@@ -47,6 +47,13 @@
       text-align: center;
       color: var(--color-fg-base);
     }
+    .login-card-intro {
+      margin: 0;
+      color: var(--color-fg-subtle-2);
+      font-size: var(--base-size);
+      line-height: 1.4;
+      text-align: center;
+    }
     .login-card .labeled-input + .labeled-input {
       margin-top: var(--sm1);
     }
@@ -178,7 +185,11 @@
 
 {% block content %}
   <div class="logo">
-    <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
+    {% if mathesar_instance_logo_url %}
+      <img src="{{ mathesar_instance_logo_url }}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}" class="align-center"/>
+    {% else %}
+      <img src="{% static 'images/red-logo-with-text.svg' %}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}" class="align-center"/>
+    {% endif %}
   </div>
 
   <div class="login-card align-center">

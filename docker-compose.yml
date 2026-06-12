@@ -73,6 +73,17 @@ x-config: &config
   # least one SSO provider is configured.
   REQUIRE_SSO_LOGIN: ${REQUIRE_SSO_LOGIN:-false}
 
+  # (Optional) Redirect anonymous visits to "/" to an external landing page.
+  MATHESAR_LANDING_PAGE_URL: ${MATHESAR_LANDING_PAGE_URL:-}
+
+  # (Optional) Customize the instance branding shown on login/auth pages.
+  MATHESAR_INSTANCE_NAME: ${MATHESAR_INSTANCE_NAME:-Mathesar}
+  MATHESAR_INSTANCE_LOGO_URL: ${MATHESAR_INSTANCE_LOGO_URL:-}
+
+  # (Optional) Customize the heading and plain text intro shown on the login page.
+  MATHESAR_LOGIN_PAGE_HEADING: ${MATHESAR_LOGIN_PAGE_HEADING:-}
+  MATHESAR_LOGIN_PAGE_BODY: ${MATHESAR_LOGIN_PAGE_BODY:-}
+
   # (Optional) Set one or both to show links to your terms of service and
   # privacy policy pages at the bottom of the login page.
   MATHESAR_TERMS_OF_SERVICE_URL: ${MATHESAR_TERMS_OF_SERVICE_URL:-}
