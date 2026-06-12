@@ -14,6 +14,7 @@ from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 
 from mathesar.views.users.login import MathesarLoginView
+from mathesar.views.users.password_reset import MathesarPasswordResetConfirmView
 
 
 TERMS_URL = 'https://example.com/terms'
@@ -42,6 +43,20 @@ class _StartTagParser(HTMLParser):
 
 
 def _login_page_html(rf, settings):
+    return _render_auth_view(rf, settings, MathesarLoginView.as_view(), '/auth/login/')
+
+
+def _password_reset_page_html(rf, settings, admin_user):
+    return _render_auth_view(
+        rf,
+        settings,
+        MathesarPasswordResetConfirmView.as_view(),
+        '/auth/password_reset_confirm/',
+        user=admin_user,
+    )
+
+
+def _render_auth_view(rf, settings, view, path, user=None):
     settings.MATHESAR_MODE = 'DEVELOPMENT'
     settings.STORAGES = {
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
@@ -49,12 +64,12 @@ def _login_page_html(rf, settings):
             'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
         },
     }
-    request = rf.get('/auth/login/')
-    request.user = AnonymousUser()
+    request = rf.get(path)
+    request.user = user or AnonymousUser()
     request.LANGUAGE_CODE = 'en'
     SessionMiddleware(lambda request: None).process_request(request)
     request._messages = FallbackStorage(request)
-    response = MathesarLoginView.as_view()(request)
+    response = view(request)
     assert response.status_code == 200
     response.render()
     return ' '.join(response.content.decode().split())
@@ -76,6 +91,15 @@ def _assert_link_attrs(html, href):
     assert len(links) == 1
     assert links[0]['target'] == '_blank'
     assert links[0]['rel'] == 'noopener noreferrer'
+
+
+def _assert_tag_with_class(html, tag_name, class_name):
+    matches = [
+        attrs
+        for attrs in _find_start_tags(html, tag_name)
+        if class_name in attrs.get('class', '').split()
+    ]
+    assert len(matches) >= 1
 
 
 def test_login_view_post_forbidden_when_sso_required(rf, settings):
@@ -156,6 +180,11 @@ def test_login_page_preserves_default_heading_and_logo(rf, settings):
 
     html = _login_page_html(rf, settings)
 
+    _assert_tag_with_class(html, 'body', 'auth-page')
+    _assert_tag_with_class(html, 'div', 'auth-shell')
+    _assert_tag_with_class(html, 'div', 'auth-logo')
+    _assert_tag_with_class(html, 'div', 'auth-card')
+    assert '<link rel="stylesheet" href="/static/css/auth.css" />' in html
     assert 'Log in to Mathesar' in html
     logo = _find_start_tags(
         html,
@@ -185,6 +214,7 @@ def test_login_page_renders_custom_body_as_plain_text(rf, settings):
 
     html = _login_page_html(rf, settings)
 
+    _assert_tag_with_class(html, 'p', 'auth-card-intro')
     assert '&lt;strong&gt;Sign in to start working.&lt;/strong&gt;' in html
     assert '<strong>Sign in to start working.</strong>' not in html
 
@@ -210,6 +240,7 @@ def test_login_page_legal_notice_with_terms_and_privacy(rf, settings):
 
     html = _login_page_html(rf, settings)
 
+    _assert_tag_with_class(html, 'div', 'auth-legal-notice')
     assert 'By logging in, you agree to the' in html
     assert TERMS_LINK in html
     assert 'and acknowledge the' in html
@@ -254,7 +285,7 @@ def test_login_page_legal_notice_not_rendered_without_links(rf, settings):
 
     html = _login_page_html(rf, settings)
 
-    assert '<div class="login-card-legal-notice">' not in html
+    assert '<div class="auth-legal-notice">' not in html
     assert 'Terms of Service' not in html
     assert 'Privacy Policy' not in html
 
@@ -266,7 +297,7 @@ def test_login_page_legal_notice_not_rendered_with_blank_links(rf, settings):
 
     html = _login_page_html(rf, settings)
 
-    assert '<div class="login-card-legal-notice">' not in html
+    assert '<div class="auth-legal-notice">' not in html
     assert 'Terms of Service' not in html
     assert 'Privacy Policy' not in html
 
@@ -281,6 +312,7 @@ def test_login_page_legal_notice_renders_when_sso_is_required(rf, settings):
 
     assert 'name="username"' not in html
     assert 'name="password"' not in html
+    _assert_tag_with_class(html, 'div', 'auth-legal-notice')
     assert 'By logging in, you agree to the' in html
     assert TERMS_LINK in html
     assert 'and acknowledge the' in html
@@ -306,6 +338,8 @@ def test_login_page_renders_cloud_configuration_when_sso_is_required(
     assert CUSTOM_HEADING in html
     assert '&lt;strong&gt;Sign in to start working.&lt;/strong&gt;' in html
     assert '<strong>Sign in to start working.</strong>' not in html
+    _assert_tag_with_class(html, 'div', 'auth-sso-providers')
+    _assert_tag_with_class(html, 'div', 'auth-card-actions')
     logo = _find_start_tags(html, 'img', src=CUSTOM_LOGO_URL)
     assert len(logo) == 1
     assert logo[0]['alt'] == 'Mathesar Cloud Logo'
@@ -314,3 +348,13 @@ def test_login_page_renders_cloud_configuration_when_sso_is_required(
     assert PRIVACY_LINK in html
     _assert_link_attrs(html, TERMS_URL)
     _assert_link_attrs(html, PRIVACY_URL)
+
+
+@pytest.mark.django_db
+def test_password_reset_page_uses_auth_shell(rf, settings, admin_user):
+    html = _password_reset_page_html(rf, settings, admin_user)
+
+    _assert_tag_with_class(html, 'body', 'auth-page')
+    _assert_tag_with_class(html, 'div', 'auth-card')
+    _assert_tag_with_class(html, 'div', 'auth-card-actions')
+    assert 'Update Your Password' in html

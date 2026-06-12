@@ -3,174 +3,10 @@
 
 {% block title %}{% translate "Login" %}{% endblock %}
 
+{% block body_class %}auth-page{% endblock %}
+
 {% block page_styles %}
-  <style type="text/css">
-    html, body {
-      overflow: auto;
-    }
-    body {
-      padding: 4rem 2rem;
-      background: var(--color-bg-base);
-      --login-page-spacing: var(--lg3);
-      color: var(--color-fg-base);
-      min-height: 100vh;
-      display: block;
-    }
-    .align-center {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .logo img {
-      width: 13.25rem;
-      display: block;
-    }
-    .tutorial {
-      max-width: 48rem;
-      line-height: var(--lg3);
-    }
-    .tutorial .body {
-      margin-top: var(--sm3);
-    }
-    .login-card {
-      max-width: 28rem;
-      background-color: var(--card-background);
-      padding: var(--login-page-spacing);
-      border-radius: var(--border-radius-l);
-      box-shadow: 0 4px 6px -1px var(--color-shadow),
-                 0 2px 4px -2px var(--color-shadow),
-                 0 0 0 1px var(--color-shadow) inset;
-    }
-    .login-card h1 {
-      font-weight: var(--font-weight-medium);
-      font-size: var(--lg4);
-      margin: 0 0 var(--lg3);
-      text-align: center;
-      color: var(--color-fg-base);
-    }
-    .login-card-intro {
-      margin: 0;
-      color: var(--color-fg-subtle-2);
-      font-size: var(--base-size);
-      line-height: 1.4;
-      text-align: center;
-    }
-    .login-card .labeled-input + .labeled-input {
-      margin-top: var(--sm1);
-    }
-    .login-card .labeled-input .help.info {
-      color: var(--color-fg-subtle-2);
-    }
-    .login-card .labeled-input .help.error {
-      color: var(--color-fg-danger);
-    }
-    .login-card .footer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--lg3);
-    }
-    .login-card .submit-button {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .tutorial, .login-card,
-    .login-card form, .login-card .footer {
-      margin-top: var(--login-page-spacing);
-    }
-    .unsupported-device {
-      display: none;
-      margin-top: var(--lg3);
-      background: var(--color-bg-danger);
-      border: solid 1px var(--color-border-danger);
-      border-radius: var(--border-radius-m);
-      padding: var(--sm1) var(--lg1);
-    }
-    .unsupported-device .title {
-      margin-top: var(--sm3);
-      font-weight: var(--font-weight-bold);
-      font-size: var(--lg1);
-      text-align: center;
-      color: var(--color-fg-base);
-    }
-    .unsupported-device .warning-icon {
-      margin-top: var(--sm3);
-      font-size: var(--lg3);
-      text-align: center;
-    }
-    .login-card-legal-notice {
-      margin-top: var(--lg3);
-      text-align: center;
-      color: var(--color-fg-subtle-2);
-      font-size: var(--sm1);
-      line-height: 1.4;
-    }
-    .login-card-legal-notice p {
-      margin: 0;
-    }
-    .login-card-legal-notice a {
-      color: var(--color-fg-link);
-      text-decoration: underline;
-      text-underline-offset: 0.12em;
-    }
-    .login-card-legal-notice a:hover {
-      color: var(--color-fg-link-hover);
-    }
-    .login-card-legal-notice a:focus-visible {
-      border-radius: var(--border-radius-s);
-      outline: 2px solid var(--color-border-input-focused);
-      outline-offset: 2px;
-    }
-    .login-card .language-selector {
-      display: block;
-      background-color: var(--color-bg-input);
-      border: 1px solid var(--color-border-input);
-      border-radius: var(--border-radius-m);
-      color: var(--color-fg-base);
-      padding: var(--sm3);
-      cursor: pointer;
-    }
-    .sso_divider {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .sso_divider .line {
-      height: 1px;
-      background: var(--color-border-base);
-      width: 100%;
-      position: absolute;
-    }
-    .sso_divider .or {
-      display: block;
-      background-color: var(--card-background);
-      z-index: 1;
-      padding: 0 var(--sm3);
-    }
-    .sso_providers {
-      display: flex;
-      width: 100%;
-      gap: var(--sm3);
-      flex-direction: column;
-    }
-    .sso_provider a {
-      display: flex;
-      justify-content: center;
-    }
-    @media (max-width: 50rem) {
-      .unsupported-device {
-        display: block;
-      }
-    }
-    @media (max-height: 30rem) {
-      .unsupported-device {
-        display: block;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}" />
 {% endblock %}
 
 {% block page_scripts %}
@@ -184,31 +20,32 @@
 {% endblock %}
 
 {% block content %}
-  <div class="logo">
-    {% if mathesar_instance_logo_url %}
-      <img src="{{ mathesar_instance_logo_url }}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}" class="align-center"/>
-    {% else %}
-      <img src="{% static 'images/red-logo-with-text.svg' %}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}" class="align-center"/>
-    {% endif %}
-  </div>
+  <div class="auth-shell">
+    <div class="auth-logo">
+      {% if mathesar_instance_logo_url %}
+        <img src="{{ mathesar_instance_logo_url }}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}"/>
+      {% else %}
+        <img src="{% static 'images/red-logo-with-text.svg' %}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}"/>
+      {% endif %}
+    </div>
 
-  <div class="login-card align-center">
-    <h1>{% block h1 %} {% endblock %}</h1>
-    {% block box_content %} {% endblock %}
-    {% comment %} set_language https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view  {% endcomment %}
-    <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-      <input name="next" type="hidden" value="{{ redirect_to }}">
-      <select name="language" onchange="form.submit()" class="language-selector align-center" aria-label="Display Language">
-          {% get_current_language as LANGUAGE_CODE %}
-          {% get_available_languages as LANGUAGES %}
-          {% get_language_info_list for LANGUAGES as languages %}
-          {% for language in languages %}
-              <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-                  {{ language.name_local }} ({{ language.code }})
-              </option>
-          {% endfor %}
-      </select>
-    </form>
-   
+    <div class="auth-card">
+      <h1>{% block h1 %} {% endblock %}</h1>
+      {% block box_content %} {% endblock %}
+      {% comment %} set_language https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view  {% endcomment %}
+      <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+        <input name="next" type="hidden" value="{{ redirect_to }}">
+        <select name="language" onchange="form.submit()" class="auth-language-selector" aria-label="Display Language">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for language in languages %}
+                <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                    {{ language.name_local }} ({{ language.code }})
+                </option>
+            {% endfor %}
+        </select>
+      </form>
+    </div>
   </div>
 {% endblock %}

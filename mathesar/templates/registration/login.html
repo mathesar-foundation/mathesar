@@ -6,7 +6,7 @@
 
 {% block box_content %}
   {% if login_page_body %}
-    <p class="login-card-intro">{{ login_page_body }}</p>
+    <p class="auth-card-intro">{{ login_page_body }}</p>
   {% endif %}
   <form
     method="post"
@@ -55,7 +55,7 @@
         </label>
       </div>
     {% endif %}
-    <div class="footer">
+    <div class="auth-card-actions">
       {% if form.non_field_errors %}
         <div class="message-box error-message">
           <div class="icon">&#9888;</div>
@@ -76,14 +76,14 @@
       {% get_providers as socialaccount_providers %}
       {% if socialaccount_providers %}
         {% if not is_sso_login_required %}
-          <div class="sso_divider">
+          <div class="auth-sso-divider">
             <div class="line"></div>
             <span class="or">or</span>
           </div>
         {% endif %}
-        <div class="sso_providers">
+        <div class="auth-sso-providers">
           {% for provider in socialaccount_providers %}
-            <div class="sso_provider">
+            <div class="auth-sso-provider">
               <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
                 <span>
                   <img src="{% static 'images/sso/' %}{{ provider|lower }}.svg" alt="{{ provider|capfirst }} logo"
@@ -112,7 +112,7 @@
     </div>
   </form>
   {% if terms_of_service_url or privacy_policy_url %}
-    <div class="login-card-legal-notice">
+    <div class="auth-legal-notice">
       <p>
         {% if terms_of_service_url and privacy_policy_url %}
           {% blocktranslate trimmed %}
