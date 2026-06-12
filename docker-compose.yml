@@ -73,6 +73,10 @@ x-config: &config
   # least one SSO provider is configured.
   REQUIRE_SSO_LOGIN: ${REQUIRE_SSO_LOGIN:-false}
 
+  # (Optional) Set to 'true' to enable Django's built-in admin at /admin/.
+  # This does not affect Mathesar's own /administration/ pages.
+  MATHESAR_DJANGO_ADMIN_ENABLED: ${MATHESAR_DJANGO_ADMIN_ENABLED:-false}
+
   # (Optional) Redirect anonymous visits to "/" to an external landing page.
   MATHESAR_LANDING_PAGE_URL: ${MATHESAR_LANDING_PAGE_URL:-}
 

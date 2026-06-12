@@ -23,6 +23,13 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Format**: An integer.
 - **Default value**: `3`
 
+### `MATHESAR_DJANGO_ADMIN_ENABLED` {: #mathesar_django_admin_enabled}
+
+- **Description**: Enables Django's built-in admin interface at `/admin/`. This is disabled by default and does not affect Mathesar's own administration pages under `/administration/`.
+- **Format**: `true` or `false`
+- **Default value**: `false`
+- **Additional information**: If you enable this after installing Mathesar directly on Linux, macOS, or WSL, start Mathesar once with `mathesar run --setup-django` so Django can apply any required admin migrations and collect admin static files.
+
 
 ## Internal database configuration {: #db}
 

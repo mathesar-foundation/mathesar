@@ -23,9 +23,9 @@ from config.sso_config import load_sso_config, resolve_require_sso_login
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Application definition
+MATHESAR_DJANGO_ADMIN_ENABLED = os.environ.get('MATHESAR_DJANGO_ADMIN_ENABLED') in ['t', 'true', 'True']
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.openid_connect",
     "allauth.socialaccount.providers.github",
 ]
+
+if MATHESAR_DJANGO_ADMIN_ENABLED:
+    INSTALLED_APPS.insert(0, "django.contrib.admin")
 
 MIDDLEWARE = [
     # HealthCheckMiddleware must stay first so they are served before
