@@ -109,16 +109,27 @@
     </div>
   </form>
   {% if terms_of_service_url or privacy_policy_url %}
-    <div class="login-card-footer-links">
-      {% if terms_of_service_url %}
-        <a href="{{ terms_of_service_url }}" target="_blank">{% translate "Terms of Service" %}</a>
-      {% endif %}
-      {% if terms_of_service_url and privacy_policy_url %}
-        <span> | </span>
-      {% endif %}
-      {% if privacy_policy_url %}
-        <a href="{{ privacy_policy_url }}" target="_blank">{% translate "Privacy Policy" %}</a>
-      {% endif %}
+    <div class="login-card-legal-notice">
+      <p>
+        {% if terms_of_service_url and privacy_policy_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you agree to the
+            <a href="{{ terms_of_service_url }}" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+            and acknowledge the
+            <a href="{{ privacy_policy_url }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          {% endblocktranslate %}
+        {% elif terms_of_service_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you agree to the
+            <a href="{{ terms_of_service_url }}" target="_blank" rel="noopener noreferrer">Terms of Service</a>.
+          {% endblocktranslate %}
+        {% elif privacy_policy_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you acknowledge the
+            <a href="{{ privacy_policy_url }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          {% endblocktranslate %}
+        {% endif %}
+      </p>
     </div>
   {% endif %}
 {% endblock %}

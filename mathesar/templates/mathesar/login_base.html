@@ -92,15 +92,28 @@
       font-size: var(--lg3);
       text-align: center;
     }
-    .login-card-footer-links {
+    .login-card-legal-notice {
       margin-top: var(--lg3);
       text-align: center;
       color: var(--color-fg-subtle-2);
-      font-size: var(--sm2);
+      font-size: var(--sm1);
+      line-height: 1.4;
     }
-    .login-card-footer-links a {
-      color: var(--color-fg-subtle-2);
+    .login-card-legal-notice p {
+      margin: 0;
+    }
+    .login-card-legal-notice a {
+      color: var(--color-fg-link);
       text-decoration: underline;
+      text-underline-offset: 0.12em;
+    }
+    .login-card-legal-notice a:hover {
+      color: var(--color-fg-link-hover);
+    }
+    .login-card-legal-notice a:focus-visible {
+      border-radius: var(--border-radius-s);
+      outline: 2px solid var(--color-border-input-focused);
+      outline-offset: 2px;
     }
     .login-card .language-selector {
       display: block;
