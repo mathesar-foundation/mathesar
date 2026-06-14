@@ -31,6 +31,7 @@ CUSTOM_LOGO_URL = 'https://example.com/logo.svg'
 CUSTOM_INSTANCE_NAME = 'Mathesar Cloud'
 CUSTOM_HEADING = 'Welcome to Mathesar Cloud'
 CUSTOM_BODY = '<strong>Sign in to start working.</strong>'
+CUSTOM_BACKGROUND = 'linear-gradient(#123842, #0b222b)'
 
 
 class _StartTagParser(HTMLParser):
@@ -102,6 +103,21 @@ def _assert_tag_with_class(html, tag_name, class_name):
     assert len(matches) >= 1
 
 
+def _configure_github_sso_provider(settings):
+    settings.SOCIALACCOUNT_PROVIDERS = {
+        'openid_connect': {'APPS': []},
+        'github': {
+            'APPS': [{
+                'provider_id': 'github',
+                'name': 'GitHub',
+                'client_id': 'test-client-id',
+                'secret': 'test-secret',
+            }],
+            'SCOPE': ['user:email', 'read:user'],
+        },
+    }
+
+
 def test_login_view_post_forbidden_when_sso_required(rf, settings):
     settings.REQUIRE_SSO_LOGIN = True
     request = rf.post('/auth/login/', data={'username': 'a', 'password': 'b'})
@@ -162,6 +178,7 @@ def test_login_view_context_login_page_heading_defaults_to_original_heading(rf, 
 def test_login_view_context_includes_login_page_copy_when_set(rf, settings):
     settings.MATHESAR_LOGIN_PAGE_HEADING = 'Welcome to Mathesar Cloud'
     settings.MATHESAR_LOGIN_PAGE_BODY = 'Sign in to start working with your database.'
+    settings.MATHESAR_LOGIN_PAGE_BACKGROUND = CUSTOM_BACKGROUND
 
     view = MathesarLoginView()
     view.setup(rf.get('/auth/login/'))
@@ -169,23 +186,32 @@ def test_login_view_context_includes_login_page_copy_when_set(rf, settings):
 
     assert ctx['login_page_heading'] == 'Welcome to Mathesar Cloud'
     assert ctx['login_page_body'] == 'Sign in to start working with your database.'
+    assert ctx['login_page_background'] == CUSTOM_BACKGROUND
 
 
 @pytest.mark.django_db
 def test_login_page_preserves_default_heading_and_logo(rf, settings):
     settings.MATHESAR_INSTANCE_NAME = 'Mathesar'
-    settings.MATHESAR_INSTANCE_LOGO_URL = None
+    settings.MATHESAR_AUTH_LOGO_URL = None
     settings.MATHESAR_LOGIN_PAGE_HEADING = None
     settings.MATHESAR_LOGIN_PAGE_BODY = None
+    settings.MATHESAR_LOGIN_PAGE_BACKGROUND = None
 
     html = _login_page_html(rf, settings)
 
     _assert_tag_with_class(html, 'body', 'auth-page')
     _assert_tag_with_class(html, 'div', 'auth-shell')
-    _assert_tag_with_class(html, 'div', 'auth-logo')
-    _assert_tag_with_class(html, 'div', 'auth-card')
+    _assert_tag_with_class(html, 'div', 'auth-page-frame')
+    _assert_tag_with_class(html, 'div', 'auth-utility-bar')
+    _assert_tag_with_class(html, 'a', 'auth-logo')
+    _assert_tag_with_class(html, 'main', 'auth-card')
+    _assert_tag_with_class(html, 'figure', 'auth-launch-plane')
+    _assert_tag_with_class(html, 'svg', 'auth-flight-path')
     assert '<link rel="stylesheet" href="/static/css/auth.css" />' in html
+    assert "showLoadingStatus('Logging In...');" in html
     assert 'Log in to Mathesar' in html
+    assert '/static/images/mathesar-paper-airplane-transparent.png' in html
+    assert '--auth-login-page-background' not in html
     logo = _find_start_tags(
         html,
         'img',
@@ -197,9 +223,19 @@ def test_login_page_preserves_default_heading_and_logo(rf, settings):
 
 
 @pytest.mark.django_db
+def test_login_page_renders_custom_background(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_BACKGROUND = CUSTOM_BACKGROUND
+
+    html = _login_page_html(rf, settings)
+
+    assert f'--auth-login-page-background: {CUSTOM_BACKGROUND};' in html
+
+
+@pytest.mark.django_db
 def test_login_page_renders_custom_heading(rf, settings):
     settings.MATHESAR_LOGIN_PAGE_HEADING = 'Welcome to Mathesar Cloud'
     settings.MATHESAR_LOGIN_PAGE_BODY = None
+    settings.MATHESAR_LOGIN_PAGE_BACKGROUND = None
 
     html = _login_page_html(rf, settings)
 
@@ -211,6 +247,7 @@ def test_login_page_renders_custom_heading(rf, settings):
 def test_login_page_renders_custom_body_as_plain_text(rf, settings):
     settings.MATHESAR_LOGIN_PAGE_HEADING = None
     settings.MATHESAR_LOGIN_PAGE_BODY = '<strong>Sign in to start working.</strong>'
+    settings.MATHESAR_LOGIN_PAGE_BACKGROUND = None
 
     html = _login_page_html(rf, settings)
 
@@ -220,9 +257,10 @@ def test_login_page_renders_custom_body_as_plain_text(rf, settings):
 
 
 @pytest.mark.django_db
-def test_login_page_renders_custom_instance_logo(rf, settings):
+def test_login_page_renders_custom_auth_logo(rf, settings):
     settings.MATHESAR_INSTANCE_NAME = 'Mathesar Cloud'
-    settings.MATHESAR_INSTANCE_LOGO_URL = CUSTOM_LOGO_URL
+    settings.MATHESAR_AUTH_LOGO_URL = CUSTOM_LOGO_URL
+    settings.MATHESAR_LOGIN_PAGE_BACKGROUND = None
 
     html = _login_page_html(rf, settings)
 
@@ -324,8 +362,9 @@ def test_login_page_renders_cloud_configuration_when_sso_is_required(
         rf, settings
 ):
     settings.REQUIRE_SSO_LOGIN = True
+    _configure_github_sso_provider(settings)
     settings.MATHESAR_INSTANCE_NAME = CUSTOM_INSTANCE_NAME
-    settings.MATHESAR_INSTANCE_LOGO_URL = CUSTOM_LOGO_URL
+    settings.MATHESAR_AUTH_LOGO_URL = CUSTOM_LOGO_URL
     settings.MATHESAR_LOGIN_PAGE_HEADING = CUSTOM_HEADING
     settings.MATHESAR_LOGIN_PAGE_BODY = CUSTOM_BODY
     settings.MATHESAR_TERMS_OF_SERVICE_URL = TERMS_URL
@@ -340,6 +379,7 @@ def test_login_page_renders_cloud_configuration_when_sso_is_required(
     assert '<strong>Sign in to start working.</strong>' not in html
     _assert_tag_with_class(html, 'div', 'auth-sso-providers')
     _assert_tag_with_class(html, 'div', 'auth-card-actions')
+    assert 'Continue with GitHub' in html
     logo = _find_start_tags(html, 'img', src=CUSTOM_LOGO_URL)
     assert len(logo) == 1
     assert logo[0]['alt'] == 'Mathesar Cloud Logo'
@@ -355,6 +395,10 @@ def test_password_reset_page_uses_auth_shell(rf, settings, admin_user):
     html = _password_reset_page_html(rf, settings, admin_user)
 
     _assert_tag_with_class(html, 'body', 'auth-page')
-    _assert_tag_with_class(html, 'div', 'auth-card')
+    _assert_tag_with_class(html, 'main', 'auth-card')
     _assert_tag_with_class(html, 'div', 'auth-card-actions')
     assert 'Update Your Password' in html
+    assert 'auth-launch-plane' not in html
+    assert 'auth-flight-path' not in html
+    assert 'mathesar-paper-airplane-transparent.png' not in html
+    assert 'auth-legal-notice' not in html

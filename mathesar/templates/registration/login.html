@@ -1,10 +1,14 @@
 {% extends 'mathesar/login_base.html' %}
 {% load i18n static %}
-{% translate "Logging In..." as logging_in_loader_text %}
+
+{% block auth_page_frame_class %} auth-login-page{% endblock %}
+
+{% block auth_page_frame_attrs %}{% if login_page_background %} style="--auth-login-page-background: {{ login_page_background }};"{% endif %}{% endblock %}
 
 {% block h1 %}{{ login_page_heading }}{% endblock %}
 
 {% block box_content %}
+  {% translate "Logging In..." as logging_in_loader_text %}
   {% if login_page_body %}
     <p class="auth-card-intro">{{ login_page_body }}</p>
   {% endif %}
@@ -87,9 +91,9 @@
               <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
                 <span>
                   <img src="{% static 'images/sso/' %}{{ provider|lower }}.svg" alt="{{ provider|capfirst }} logo"
-                    style="height:1em; vertical-align:middle; margin-right:0.5em"
+                    class="auth-sso-provider-icon"
                     onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
-                  <span>Login with {{provider|capfirst}}</span>
+                  <span>Continue with {{provider}}</span>
                 </span>
               </a>
             </div>
@@ -135,4 +139,13 @@
       </p>
     </div>
   {% endif %}
+{% endblock %}
+
+{% block auth_page_visuals %}
+  <svg class="auth-flight-path" viewBox="0 0 980 190" aria-hidden="true" focusable="false">
+    <path d="M26 148 C188 54 346 37 514 98 C650 148 780 130 954 46" />
+  </svg>
+  <figure class="auth-launch-plane" aria-hidden="true">
+    <img src="{% static 'images/mathesar-paper-airplane-transparent.png' %}" alt="" />
+  </figure>
 {% endblock %}

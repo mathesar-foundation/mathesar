@@ -205,10 +205,10 @@ The database specified in this section is used to store Mathesar's internal data
 - **Format**: Plain text
 - **Default value**: `Mathesar`
 
-### `MATHESAR_INSTANCE_LOGO_URL` (optional)
+### `MATHESAR_AUTH_LOGO_URL` (optional)
 
-- **Description**: Public-facing URL for a custom instance logo shown on login/auth pages. If unset, Mathesar's default logo is shown.
-- **Format**: A URL
+- **Description**: URL for a custom logo shown on login/auth pages. If unset, Mathesar's default auth logo is shown.
+- **Format**: An `http://` or `https://` URL, a root-relative Mathesar path such as `/static/...`, or a small `data:image/...;base64,...` URL.
 - **Default value**: (none — Mathesar's default logo is shown)
 
 ### `MATHESAR_LOGIN_PAGE_HEADING` (optional)
@@ -222,6 +222,13 @@ The database specified in this section is used to store Mathesar's internal data
 - **Description**: Plain text orientation copy shown on the login page. HTML and Markdown are not rendered.
 - **Format**: Plain text
 - **Default value**: (none — no orientation copy is shown)
+
+### `MATHESAR_LOGIN_PAGE_BACKGROUND` (optional)
+
+- **Description**: CSS `background` value for the login page. This is intended for trusted administrators and can be a solid color, image URL, or layered gradient.
+- **Format**: CSS background value
+- **Default value**: (none — Mathesar's default login page background is shown)
+- **Additional information**: If you set this in a dotenv-style file and the value contains `#` characters, wrap the value in quotes so the colors are not parsed as comments.
 
 ### `MATHESAR_TERMS_OF_SERVICE_URL` (optional)
 

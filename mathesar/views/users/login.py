@@ -21,4 +21,5 @@ class MathesarLoginView(LoginView):
             settings.MATHESAR_LOGIN_PAGE_HEADING or _('Log in to Mathesar')
         )
         ctx['login_page_body'] = settings.MATHESAR_LOGIN_PAGE_BODY
+        ctx['login_page_background'] = settings.MATHESAR_LOGIN_PAGE_BACKGROUND
         return ctx
