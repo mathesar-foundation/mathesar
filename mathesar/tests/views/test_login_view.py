@@ -210,7 +210,6 @@ def test_login_page_preserves_default_heading_and_logo(rf, settings):
     assert '<link rel="stylesheet" href="/static/css/auth.css" />' in html
     assert "showLoadingStatus('Logging In...');" in html
     assert 'Log in to Mathesar' in html
-    assert '/static/images/mathesar-paper-airplane-transparent.png' in html
     assert '--auth-login-page-background' not in html
     logo = _find_start_tags(
         html,

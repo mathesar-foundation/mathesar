@@ -101,6 +101,10 @@ body.auth-page {
 
 .auth-launch-plane {
   align-items: center;
+  aspect-ratio: 640 / 439;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   display: flex;
   filter:
     drop-shadow(0 0 1px rgb(255 255 255 / 0.78))
@@ -126,11 +130,10 @@ body.auth-page {
   z-index: 1;
 }
 
-.auth-launch-plane img {
-  display: block;
-  height: auto;
-  max-width: none;
-  width: 100%;
+@media (min-width: 46.001rem) {
+  .auth-launch-plane {
+    background-image: url("../images/mathesar-paper-airplane-transparent.png");
+  }
 }
 
 .auth-flight-path {

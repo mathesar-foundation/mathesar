@@ -93,7 +93,7 @@
                   <img src="{% static 'images/sso/' %}{{ provider|lower }}.svg" alt="{{ provider|capfirst }} logo"
                     class="auth-sso-provider-icon"
                     onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
-                  <span>Continue with {{provider}}</span>
+                  <span>Continue with {{provider|capfirst}}</span>
                 </span>
               </a>
             </div>
@@ -145,7 +145,5 @@
   <svg class="auth-flight-path" viewBox="0 0 980 190" aria-hidden="true" focusable="false">
     <path d="M26 148 C188 54 346 37 514 98 C650 148 780 130 954 46" />
   </svg>
-  <figure class="auth-launch-plane" aria-hidden="true">
-    <img src="{% static 'images/mathesar-paper-airplane-transparent.png' %}" alt="" />
-  </figure>
+  <figure class="auth-launch-plane" aria-hidden="true"></figure>
 {% endblock %}
