@@ -165,7 +165,7 @@
   <form
     method="post"
     class="form-card"
-    onsubmit="showLoadingStatus({{ creating_user_loader_text }});"
+    onsubmit="showLoadingStatus('{{ creating_user_loader_text|escapejs }}');"
   >
     <div>
       <div class="form-group-title">{% translate "Create Admin User" %}</div>

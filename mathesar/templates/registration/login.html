@@ -10,7 +10,7 @@
   {% endif %}
   <form
     method="post"
-    onsubmit="showLoadingStatus({{ logging_in_loader_text }});"
+    onsubmit="showLoadingStatus('{{ logging_in_loader_text|escapejs }}');"
   >
     {% csrf_token %}
     {% if not is_sso_login_required %}
