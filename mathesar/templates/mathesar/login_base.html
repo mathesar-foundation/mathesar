@@ -3,160 +3,19 @@
 
 {% block title %}{% translate "Login" %}{% endblock %}
 
+{% block body_class %}auth-page{% endblock %}
+
 {% block page_styles %}
-  <style type="text/css">
-    html, body {
-      overflow: auto;
-    }
-    body {
-      padding: 4rem 2rem;
-      background: var(--color-bg-base);
-      --login-page-spacing: var(--lg3);
-      color: var(--color-fg-base);
-      min-height: 100vh;
-      display: block;
-    }
-    .align-center {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .logo img {
-      width: 13.25rem;
-      display: block;
-    }
-    .tutorial {
-      max-width: 48rem;
-      line-height: var(--lg3);
-    }
-    .tutorial .body {
-      margin-top: var(--sm3);
-    }
-    .login-card {
-      max-width: 28rem;
-      background-color: var(--card-background);
-      padding: var(--login-page-spacing);
-      border-radius: var(--border-radius-l);
-      box-shadow: 0 4px 6px -1px var(--color-shadow),
-                 0 2px 4px -2px var(--color-shadow),
-                 0 0 0 1px var(--color-shadow) inset;
-    }
-    .login-card h1 {
-      font-weight: var(--font-weight-medium);
-      font-size: var(--lg4);
-      margin: 0 0 var(--lg3);
-      text-align: center;
-      color: var(--color-fg-base);
-    }
-    .login-card .labeled-input + .labeled-input {
-      margin-top: var(--sm1);
-    }
-    .login-card .labeled-input .help.info {
-      color: var(--color-fg-subtle-2);
-    }
-    .login-card .labeled-input .help.error {
-      color: var(--color-fg-danger);
-    }
-    .login-card .footer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--lg3);
-    }
-    .login-card .submit-button {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .tutorial, .login-card,
-    .login-card form, .login-card .footer {
-      margin-top: var(--login-page-spacing);
-    }
-    .unsupported-device {
-      display: none;
-      margin-top: var(--lg3);
-      background: var(--color-bg-danger);
-      border: solid 1px var(--color-border-danger);
-      border-radius: var(--border-radius-m);
-      padding: var(--sm1) var(--lg1);
-    }
-    .unsupported-device .title {
-      margin-top: var(--sm3);
-      font-weight: var(--font-weight-bold);
-      font-size: var(--lg1);
-      text-align: center;
-      color: var(--color-fg-base);
-    }
-    .unsupported-device .warning-icon {
-      margin-top: var(--sm3);
-      font-size: var(--lg3);
-      text-align: center;
-    }
-    .login-card-footer-links {
-      margin-top: var(--lg3);
-      text-align: center;
-      color: var(--color-fg-subtle-2);
-      font-size: var(--sm2);
-    }
-    .login-card-footer-links a {
-      color: var(--color-fg-subtle-2);
-      text-decoration: underline;
-    }
-    .login-card .language-selector {
-      display: block;
-      background-color: var(--color-bg-input);
-      border: 1px solid var(--color-border-input);
-      border-radius: var(--border-radius-m);
-      color: var(--color-fg-base);
-      padding: var(--sm3);
-      cursor: pointer;
-    }
-    .sso_divider {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .sso_divider .line {
-      height: 1px;
-      background: var(--color-border-base);
-      width: 100%;
-      position: absolute;
-    }
-    .sso_divider .or {
-      display: block;
-      background-color: var(--card-background);
-      z-index: 1;
-      padding: 0 var(--sm3);
-    }
-    .sso_providers {
-      display: flex;
-      width: 100%;
-      gap: var(--sm3);
-      flex-direction: column;
-    }
-    .sso_provider a {
-      display: flex;
-      justify-content: center;
-    }
-    @media (max-width: 50rem) {
-      .unsupported-device {
-        display: block;
-      }
-    }
-    @media (max-height: 30rem) {
-      .unsupported-device {
-        display: block;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}" />
 {% endblock %}
 
 {% block page_scripts %}
   <script>
     function showLoadingStatus(newText) {
       const loginButton = document.querySelector('form button[type="submit"]');
+      if (!loginButton) {
+        return;
+      }
       loginButton.disabled = true;
       loginButton.innerText = newText ?? 'Loading...';
     }
@@ -164,27 +23,50 @@
 {% endblock %}
 
 {% block content %}
-  <div class="logo">
-    <img src="{% static 'images/red-logo-with-text.svg' %}" alt="Mathesar Logo" class="align-center"/>
-  </div>
+  <div class="auth-shell auth-page-frame{% block auth_page_frame_class %}{% endblock %}"{% block auth_page_frame_attrs %}{% endblock %}>
+    <div class="auth-utility-bar">
+      {% comment %} set_language https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view  {% endcomment %}
+      <form action="{% url 'set_language' %}" method="post" class="auth-language-form">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ redirect_to }}">
+        <label class="auth-language-control">
+          <span class="auth-language-icon" aria-hidden="true">
+            <svg viewBox="0 0 512 512" focusable="false">
+              <path d="M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.1 20.4 3.3 41.8 3.3 64Zm28.8-64h123.1c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64H380.8c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64Zm112.6-32H376.7c-10-63.9-29.8-117.4-55.3-151.6C399.3 29.8 463.4 85.5 493.4 160Zm-149.1 0H167.7c6.1-36.4 15.5-68.6 27-94.7 10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5 11.5 26.1 20.9 58.3 27 94.7Zm-209 0H18.6C48.6 85.5 112.7 29.8 190.6 8.4 165.1 42.6 145.3 96.1 135.3 160ZM8.1 192h123.1c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64H8.1C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64Zm186.6 254.6c-11.6-26-20.9-58.2-27-94.6h176.6c-6.1 36.4-15.5 68.6-27 94.6-10.5 23.6-22.2 40.7-33.5 51.5C272.6 508.8 263.3 512 256 512s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.6ZM135.3 352c10 63.9 29.8 117.4 55.3 151.6C112.7 482.2 48.6 426.5 18.6 352h116.7Zm358.1 0c-30 74.5-94.1 130.2-172 151.6 25.5-34.2 45.2-87.7 55.3-151.6h116.7Z"/>
+            </svg>
+          </span>
+          <select name="language" onchange="form.submit()" class="auth-language-selector" aria-label="Display Language">
+              {% get_current_language as LANGUAGE_CODE %}
+              {% get_available_languages as LANGUAGES %}
+              {% get_language_info_list for LANGUAGES as languages %}
+              {% for language in languages %}
+                  <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                      {{ language.name_local }} ({{ language.code }})
+                  </option>
+              {% endfor %}
+          </select>
+        </label>
+      </form>
+    </div>
 
-  <div class="login-card align-center">
-    <h1>{% block h1 %} {% endblock %}</h1>
-    {% block box_content %} {% endblock %}
-    {% comment %} set_language https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view  {% endcomment %}
-    <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-      <input name="next" type="hidden" value="{{ redirect_to }}">
-      <select name="language" onchange="form.submit()" class="language-selector align-center" aria-label="Display Language">
-          {% get_current_language as LANGUAGE_CODE %}
-          {% get_available_languages as LANGUAGES %}
-          {% get_language_info_list for LANGUAGES as languages %}
-          {% for language in languages %}
-              <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-                  {{ language.name_local }} ({{ language.code }})
-              </option>
-          {% endfor %}
-      </select>
-    </form>
-   
+    <div class="auth-main-layout">
+      <div class="auth-login-stack">
+        <header class="auth-page-header">
+          <a class="auth-logo" href="/" aria-label="{{ mathesar_instance_name }} home">
+            {% if mathesar_auth_logo_url %}
+              <img src="{{ mathesar_auth_logo_url }}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}"/>
+            {% else %}
+              <img src="{% static 'images/red-logo-with-text.svg' %}" alt="{{ mathesar_instance_name }} Logo" title="{{ mathesar_instance_name }}"/>
+            {% endif %}
+          </a>
+        </header>
+
+        <main class="auth-card" aria-labelledby="auth-page-title">
+          <h1 id="auth-page-title">{% block h1 %} {% endblock %}</h1>
+          {% block box_content %} {% endblock %}
+        </main>
+      </div>
+      {% block auth_page_visuals %}{% endblock %}
+    </div>
   </div>
 {% endblock %}

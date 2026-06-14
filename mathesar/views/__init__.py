@@ -151,8 +151,8 @@ class MathesarRPCEntryPoint(RPCEntryPoint):
 
 def home(request):
     if not request.user.is_authenticated:
-        if settings.LANDING_PAGE_URL:
-            return redirect(settings.LANDING_PAGE_URL)
+        if settings.MATHESAR_LANDING_PAGE_URL:
+            return redirect(settings.MATHESAR_LANDING_PAGE_URL)
         return redirect_to_login(request.get_full_path())
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)

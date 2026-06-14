@@ -23,9 +23,9 @@ from config.sso_config import load_sso_config, resolve_require_sso_login
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Application definition
+MATHESAR_DJANGO_ADMIN_ENABLED = os.environ.get('MATHESAR_DJANGO_ADMIN_ENABLED') in ['t', 'true', 'True']
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.openid_connect",
     "allauth.socialaccount.providers.github",
 ]
+
+if MATHESAR_DJANGO_ADMIN_ENABLED:
+    INSTALLED_APPS.insert(0, "django.contrib.admin")
 
 MIDDLEWARE = [
     # HealthCheckMiddleware must stay first so they are served before
@@ -280,6 +283,11 @@ MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='h
 MATHESAR_FEEDBACK_URL = os.environ.get('MATHESAR_FEEDBACK_URL', default='https://example.com/feedback')
 MATHESAR_TERMS_OF_SERVICE_URL = os.environ.get('MATHESAR_TERMS_OF_SERVICE_URL', default=None)
 MATHESAR_PRIVACY_POLICY_URL = os.environ.get('MATHESAR_PRIVACY_POLICY_URL', default=None)
+MATHESAR_INSTANCE_NAME = os.environ.get('MATHESAR_INSTANCE_NAME') or 'Mathesar'
+MATHESAR_AUTH_LOGO_URL = os.environ.get('MATHESAR_AUTH_LOGO_URL') or None
+MATHESAR_LOGIN_PAGE_HEADING = os.environ.get('MATHESAR_LOGIN_PAGE_HEADING') or None
+MATHESAR_LOGIN_PAGE_BODY = os.environ.get('MATHESAR_LOGIN_PAGE_BODY') or None
+MATHESAR_LOGIN_PAGE_BACKGROUND = os.environ.get('MATHESAR_LOGIN_PAGE_BACKGROUND') or None
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -317,7 +325,7 @@ STORAGES = {
     },
 }
 
-LANDING_PAGE_URL = os.environ.get('LANDING_PAGE_URL', default=None)
+MATHESAR_LANDING_PAGE_URL = os.environ.get('MATHESAR_LANDING_PAGE_URL') or None
 
 # Accounts
 AUTH_USER_MODEL = 'mathesar.User'

@@ -112,7 +112,8 @@ EXPOSE 8000
 FROM production_base AS minimal
 
 ENV DJANGO_SETTINGS_MODULE=config.settings.production
-RUN SECRET_KEY=temporary python manage.py collectstatic --noinput
+# Collect admin static assets so opt-in runtime admin has complete styling.
+RUN SECRET_KEY=temporary MATHESAR_DJANGO_ADMIN_ENABLED=true python manage.py collectstatic --noinput
 ENV SKIP_STATIC_COLLECTION=true
 
 RUN groupadd --system --gid 1000 mathesar \

@@ -23,6 +23,13 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Format**: An integer.
 - **Default value**: `3`
 
+### `MATHESAR_DJANGO_ADMIN_ENABLED` {: #mathesar_django_admin_enabled}
+
+- **Description**: Enables Django's built-in admin interface at `/admin/`. This is disabled by default and does not affect Mathesar's own administration pages under `/administration/`.
+- **Format**: `true` or `false`
+- **Default value**: `false`
+- **Additional information**: If you enable this after installing Mathesar directly on Linux, macOS, or WSL, start Mathesar once with `mathesar run --setup-django` so Django can apply any required admin migrations and collect admin static files.
+
 
 ## Internal database configuration {: #db}
 
@@ -180,20 +187,57 @@ The database specified in this section is used to store Mathesar's internal data
 - **Format**: An Azure Blob Storage container name
 - **Default value**: `mathesar-datafiles`
 
-## Login page links {: #login-links}
+## Public entry and login page configuration {: #public-entry}
 
 !!! info "**OPTIONAL**"
-    Only needed if you want to show links to your own terms of service and/or privacy
-    policy pages at the bottom of the login page. If both are unset, nothing displays.
+    Only needed if you want to customize the public-facing login experience or
+    redirect anonymous visitors from Mathesar's home page.
+
+### `MATHESAR_LANDING_PAGE_URL` (optional)
+
+- **Description**: URL to redirect anonymous visitors who open Mathesar's home page (`/`). If unset, anonymous visitors are sent to the login page.
+- **Format**: A URL
+- **Default value**: (none — anonymous visitors are sent to the login page)
+
+### `MATHESAR_INSTANCE_NAME` (optional)
+
+- **Description**: Name for this Mathesar instance. Currently used as accessible text for the logo on login/auth pages.
+- **Format**: Plain text
+- **Default value**: `Mathesar`
+
+### `MATHESAR_AUTH_LOGO_URL` (optional)
+
+- **Description**: URL for a custom logo shown on login/auth pages. If unset, Mathesar's default auth logo is shown.
+- **Format**: An `http://` or `https://` URL, a root-relative Mathesar path such as `/static/...`, or a small `data:image/...;base64,...` URL.
+- **Default value**: (none — Mathesar's default logo is shown)
+
+### `MATHESAR_LOGIN_PAGE_HEADING` (optional)
+
+- **Description**: Custom heading shown on the login page.
+- **Format**: Plain text
+- **Default value**: `Log in to Mathesar`
+
+### `MATHESAR_LOGIN_PAGE_BODY` (optional)
+
+- **Description**: Plain text orientation copy shown on the login page. HTML and Markdown are not rendered.
+- **Format**: Plain text
+- **Default value**: (none — no orientation copy is shown)
+
+### `MATHESAR_LOGIN_PAGE_BACKGROUND` (optional)
+
+- **Description**: CSS `background` value for the login page. This is intended for trusted administrators and can be a solid color, image URL, or layered gradient.
+- **Format**: CSS background value
+- **Default value**: (none — Mathesar's default login page background is shown)
+- **Additional information**: If you set this in a dotenv-style file and the value contains `#` characters, wrap the value in quotes so the colors are not parsed as comments.
 
 ### `MATHESAR_TERMS_OF_SERVICE_URL` (optional)
 
-- **Description**: URL for a "Terms of Service" link shown at the bottom of the login page.
+- **Description**: URL for a "Terms of Service" link used in the login page legal notice.
 - **Format**: A URL
 - **Default value**: (none — no link is shown)
 
 ### `MATHESAR_PRIVACY_POLICY_URL` (optional)
 
-- **Description**: URL for a "Privacy Policy" link shown at the bottom of the login page.
+- **Description**: URL for a "Privacy Policy" link used in the login page legal notice.
 - **Format**: A URL
 - **Default value**: (none — no link is shown)

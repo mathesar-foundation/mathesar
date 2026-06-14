@@ -73,6 +73,22 @@ x-config: &config
   # least one SSO provider is configured.
   REQUIRE_SSO_LOGIN: ${REQUIRE_SSO_LOGIN:-false}
 
+  # (Optional) Set to 'true' to enable Django's built-in admin at /admin/.
+  # This does not affect Mathesar's own /administration/ pages.
+  MATHESAR_DJANGO_ADMIN_ENABLED: ${MATHESAR_DJANGO_ADMIN_ENABLED:-false}
+
+  # (Optional) Redirect anonymous visits to "/" to an external landing page.
+  MATHESAR_LANDING_PAGE_URL: ${MATHESAR_LANDING_PAGE_URL:-}
+
+  # (Optional) Customize the instance branding shown on login/auth pages.
+  MATHESAR_INSTANCE_NAME: ${MATHESAR_INSTANCE_NAME:-Mathesar}
+  MATHESAR_AUTH_LOGO_URL: ${MATHESAR_AUTH_LOGO_URL:-}
+
+  # (Optional) Customize the heading and plain text intro shown on the login page.
+  MATHESAR_LOGIN_PAGE_HEADING: ${MATHESAR_LOGIN_PAGE_HEADING:-}
+  MATHESAR_LOGIN_PAGE_BODY: ${MATHESAR_LOGIN_PAGE_BODY:-}
+  MATHESAR_LOGIN_PAGE_BACKGROUND: ${MATHESAR_LOGIN_PAGE_BACKGROUND:-}
+
   # (Optional) Set one or both to show links to your terms of service and
   # privacy policy pages at the bottom of the login page.
   MATHESAR_TERMS_OF_SERVICE_URL: ${MATHESAR_TERMS_OF_SERVICE_URL:-}

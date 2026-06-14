@@ -1,13 +1,20 @@
 {% extends 'mathesar/login_base.html' %}
 {% load i18n static %}
-{% translate "Logging In..." as logging_in_loader_text %}
 
-{% block h1 %}{% translate "Log in to Mathesar" %}{% endblock %}
+{% block auth_page_frame_class %} auth-login-page{% endblock %}
+
+{% block auth_page_frame_attrs %}{% if login_page_background %} style="--auth-login-page-background: {{ login_page_background }};"{% endif %}{% endblock %}
+
+{% block h1 %}{{ login_page_heading }}{% endblock %}
 
 {% block box_content %}
+  {% translate "Logging In..." as logging_in_loader_text %}
+  {% if login_page_body %}
+    <p class="auth-card-intro">{{ login_page_body }}</p>
+  {% endif %}
   <form
     method="post"
-    onsubmit="showLoadingStatus({{ logging_in_loader_text }});"
+    onsubmit="showLoadingStatus('{{ logging_in_loader_text|escapejs }}');"
   >
     {% csrf_token %}
     {% if not is_sso_login_required %}
@@ -52,7 +59,7 @@
         </label>
       </div>
     {% endif %}
-    <div class="footer">
+    <div class="auth-card-actions">
       {% if form.non_field_errors %}
         <div class="message-box error-message">
           <div class="icon">&#9888;</div>
@@ -73,20 +80,20 @@
       {% get_providers as socialaccount_providers %}
       {% if socialaccount_providers %}
         {% if not is_sso_login_required %}
-          <div class="sso_divider">
+          <div class="auth-sso-divider">
             <div class="line"></div>
             <span class="or">or</span>
           </div>
         {% endif %}
-        <div class="sso_providers">
+        <div class="auth-sso-providers">
           {% for provider in socialaccount_providers %}
-            <div class="sso_provider">
+            <div class="auth-sso-provider">
               <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
                 <span>
                   <img src="{% static 'images/sso/' %}{{ provider|lower }}.svg" alt="{{ provider|capfirst }} logo"
-                    style="height:1em; vertical-align:middle; margin-right:0.5em"
+                    class="auth-sso-provider-icon"
                     onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
-                  <span>Login with {{provider|capfirst}}</span>
+                  <span>Continue with {{provider|capfirst}}</span>
                 </span>
               </a>
             </div>
@@ -109,16 +116,34 @@
     </div>
   </form>
   {% if terms_of_service_url or privacy_policy_url %}
-    <div class="login-card-footer-links">
-      {% if terms_of_service_url %}
-        <a href="{{ terms_of_service_url }}" target="_blank">{% translate "Terms of Service" %}</a>
-      {% endif %}
-      {% if terms_of_service_url and privacy_policy_url %}
-        <span> | </span>
-      {% endif %}
-      {% if privacy_policy_url %}
-        <a href="{{ privacy_policy_url }}" target="_blank">{% translate "Privacy Policy" %}</a>
-      {% endif %}
+    <div class="auth-legal-notice">
+      <p>
+        {% if terms_of_service_url and privacy_policy_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you agree to the
+            <a href="{{ terms_of_service_url }}" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+            and acknowledge the
+            <a href="{{ privacy_policy_url }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          {% endblocktranslate %}
+        {% elif terms_of_service_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you agree to the
+            <a href="{{ terms_of_service_url }}" target="_blank" rel="noopener noreferrer">Terms of Service</a>.
+          {% endblocktranslate %}
+        {% elif privacy_policy_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you acknowledge the
+            <a href="{{ privacy_policy_url }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          {% endblocktranslate %}
+        {% endif %}
+      </p>
     </div>
   {% endif %}
+{% endblock %}
+
+{% block auth_page_visuals %}
+  <svg class="auth-flight-path" viewBox="0 0 980 190" aria-hidden="true" focusable="false">
+    <path d="M26 148 C188 54 346 37 514 98 C650 148 780 130 954 46" />
+  </svg>
+  <figure class="auth-launch-plane" aria-hidden="true"></figure>
 {% endblock %}
