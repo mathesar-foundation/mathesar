@@ -15,6 +15,7 @@ from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
 
+from config.branding_config import load_branding_config
 from config.database_config import PostgresConfig, parse_port
 from config.sso_config import load_sso_config, resolve_require_sso_login
 
@@ -284,7 +285,15 @@ MATHESAR_FEEDBACK_URL = os.environ.get('MATHESAR_FEEDBACK_URL', default='https:/
 MATHESAR_TERMS_OF_SERVICE_URL = os.environ.get('MATHESAR_TERMS_OF_SERVICE_URL', default=None)
 MATHESAR_PRIVACY_POLICY_URL = os.environ.get('MATHESAR_PRIVACY_POLICY_URL', default=None)
 MATHESAR_INSTANCE_NAME = os.environ.get('MATHESAR_INSTANCE_NAME') or 'Mathesar'
-MATHESAR_AUTH_LOGO_URL = os.environ.get('MATHESAR_AUTH_LOGO_URL') or None
+MATHESAR_BRANDING_CONFIG = load_branding_config(os.environ)
+MATHESAR_AUTH_LOGO_URL = MATHESAR_BRANDING_CONFIG.logo_urls.get('auth')
+MATHESAR_AUTH_LOGO_FILE = MATHESAR_BRANDING_CONFIG.logo_files.get('auth')
+MATHESAR_APP_HEADER_LOGO_URL = MATHESAR_BRANDING_CONFIG.logo_urls.get('app-header')
+MATHESAR_APP_HEADER_LOGO_DARK_URL = MATHESAR_BRANDING_CONFIG.logo_urls.get('app-header-dark')
+MATHESAR_APP_HEADER_LOGO_FILE = MATHESAR_BRANDING_CONFIG.logo_files.get('app-header')
+MATHESAR_APP_HEADER_LOGO_DARK_FILE = MATHESAR_BRANDING_CONFIG.logo_files.get('app-header-dark')
+MATHESAR_BRANDING_ASSET_DIR = MATHESAR_BRANDING_CONFIG.asset_dir
+MATHESAR_BRANDING_CSS = MATHESAR_BRANDING_CONFIG.css
 MATHESAR_LOGIN_PAGE_HEADING = os.environ.get('MATHESAR_LOGIN_PAGE_HEADING') or None
 MATHESAR_LOGIN_PAGE_BODY = os.environ.get('MATHESAR_LOGIN_PAGE_BODY') or None
 MATHESAR_LOGIN_PAGE_BACKGROUND = os.environ.get('MATHESAR_LOGIN_PAGE_BACKGROUND') or None

@@ -108,6 +108,12 @@ Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](./environment-variabl
 
 Restart the docker containers for the configuration to take effect.
 
+### Customizing branding
+
+You can customize Mathesar's login logo, app header logo, and lightweight color theme with [branding environment variables](./environment-variables.md#public-entry) in the **CONFIG** section of the docker-compose file.
+
+If you want to use logo files instead of public URLs, mount a directory into the Mathesar service and point `MATHESAR_BRANDING_ASSET_DIR` at that mounted path. Then set filename-only values such as `MATHESAR_APP_HEADER_LOGO_FILE=app-logo.svg`.
+
 ### Modifying the number of Gunicorn workers
 
 If you're deploying Mathesar in a production or multi-user environment, you may want to increase the number of Gunicorn workers to improve performance and handle more concurrent requests.

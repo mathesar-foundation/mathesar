@@ -8,6 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
 
+from config.branding_config import logo_url_for_slot
 from config.database_config import get_internal_database_config
 from mathesar.rpc.databases.configured import list_ as databases_list
 from mathesar.rpc.explorations import list_ as explorations_list
@@ -18,10 +19,10 @@ from mathesar.rpc.users import get as get_user_info
 from mathesar.utils.download_links import get_backends as get_file_backends
 from mathesar import __version__
 
-from . import export, users, download_link, bulk_insert, data_files
+from . import branding_assets, export, users, download_link, bulk_insert, data_files
 
 
-__all__ = [export, users, download_link, bulk_insert, data_files]
+__all__ = [branding_assets, export, users, download_link, bulk_insert, data_files]
 
 
 def get_database_list(request):
@@ -137,6 +138,15 @@ def get_anonymous_common_data(request):
 def get_base_common_data(request):
     return {
         'current_release_tag_name': __version__,
+        'mathesar_instance_name': settings.MATHESAR_INSTANCE_NAME,
+        'mathesar_app_header_logo_url': (
+            logo_url_for_slot(settings.MATHESAR_BRANDING_CONFIG, 'app-header')
+            or getattr(settings, 'MATHESAR_APP_HEADER_LOGO_URL', None)
+        ),
+        'mathesar_app_header_logo_dark_url': (
+            logo_url_for_slot(settings.MATHESAR_BRANDING_CONFIG, 'app-header-dark')
+            or getattr(settings, 'MATHESAR_APP_HEADER_LOGO_DARK_URL', None)
+        ),
         'is_authenticated': not request.user.is_anonymous,
         'is_sso_login_required': settings.REQUIRE_SSO_LOGIN,
         'per_user_databases_enabled': settings.PER_USER_DATABASES_ENABLED,

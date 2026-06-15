@@ -306,7 +306,7 @@ If you prefer nginx or another proxy, please refer to their documentation.
   ALLOWED_HOSTS=xMATHESAR_DEPLOY_DOMAIN_NAMEx
   ```
 - If there multiple values for `ALLOWED_HOSTS`, they should be comma-separated, with no spaces.
-- Please refer to the list of [environment variables](./environment-variables.md) to further configure Mathesar.
+- Please refer to the list of [environment variables](./environment-variables.md) to further configure Mathesar, including optional [branding and lightweight theming](./environment-variables.md#public-entry).
 - Once the environment variables are configured, restart the Mathesar service:
   ```
   sudo systemctl restart mathesar.service

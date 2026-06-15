@@ -21,6 +21,9 @@ type WithStatus<D> =
 
 export interface BaseCommonData {
   current_release_tag_name: string;
+  mathesar_instance_name: string;
+  mathesar_app_header_logo_url: string | null;
+  mathesar_app_header_logo_dark_url: string | null;
   supported_languages: Record<string, string>;
   is_authenticated: boolean;
   is_sso_login_required: boolean;

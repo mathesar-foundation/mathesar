@@ -71,3 +71,4 @@ Here are some other things you can do to complete your Mathesar setup, depending
 
 - [Connect your existing database(s) to Mathesar](../user-guide/databases.md#connection) to begin working with your data.
 - [Set up a custom domain name using DigitalOcean's control panel](https://docs.digitalocean.com/products/app-platform/how-to/manage-domains/#custom-domain) if you don't want to use their default domain e.g. `https://mathesar-*.ondigitalocean.app/`.
+- [Customize Mathesar's branding](./environment-variables.md#public-entry) by adding branding environment variables in App Platform. For logos, use a public HTTPS image URL or a small `data:image/...;base64,...` URL.

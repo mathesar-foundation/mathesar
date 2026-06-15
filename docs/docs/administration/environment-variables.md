@@ -187,7 +187,7 @@ The database specified in this section is used to store Mathesar's internal data
 - **Format**: An Azure Blob Storage container name
 - **Default value**: `mathesar-datafiles`
 
-## Public entry and login page configuration {: #public-entry}
+## Branding, public entry, and login page configuration {: #public-entry}
 
 !!! info "**OPTIONAL**"
     Only needed if you want to customize the public-facing login experience or
@@ -201,7 +201,7 @@ The database specified in this section is used to store Mathesar's internal data
 
 ### `MATHESAR_INSTANCE_NAME` (optional)
 
-- **Description**: Name for this Mathesar instance. Currently used as accessible text for the logo on login/auth pages.
+- **Description**: Name for this Mathesar instance. Used in accessible text for configured logos.
 - **Format**: Plain text
 - **Default value**: `Mathesar`
 
@@ -210,6 +210,46 @@ The database specified in this section is used to store Mathesar's internal data
 - **Description**: URL for a custom logo shown on login/auth pages. If unset, Mathesar's default auth logo is shown.
 - **Format**: An `http://` or `https://` URL, a root-relative Mathesar path such as `/static/...`, or a small `data:image/...;base64,...` URL.
 - **Default value**: (none — Mathesar's default logo is shown)
+
+### `MATHESAR_BRANDING_ASSET_DIR` (optional)
+
+- **Description**: Directory containing logo image files referenced by the `*_LOGO_FILE` variables below. This is useful for Docker bind mounts, Kubernetes ConfigMap/Secret volumes, Render secret files, Fly `[[files]]`, and direct Linux installs.
+- **Format**: Absolute path to a directory inside the Mathesar container or host runtime.
+- **Default value**: (none — file-backed logos are disabled)
+- **Additional information**: Logo file variables must be filenames only, not paths. Supported file extensions are `.svg`, `.png`, `.jpg`, `.jpeg`, and `.webp`. If a configured file cannot be served, Mathesar falls back to the default logo for that slot.
+
+### `MATHESAR_AUTH_LOGO_FILE` (optional)
+
+- **Description**: Filename for a custom logo shown on login/auth pages, served from `MATHESAR_BRANDING_ASSET_DIR`.
+- **Format**: Filename only, for example `auth-logo.svg`.
+- **Default value**: (none)
+
+### `MATHESAR_APP_HEADER_LOGO_URL` (optional)
+
+- **Description**: URL for a custom logo shown in the authenticated Mathesar app header. If unset, Mathesar's default app logo is shown.
+- **Format**: An `http://` or `https://` URL, a root-relative Mathesar path such as `/static/...`, or a small `data:image/...;base64,...` URL.
+- **Default value**: (none — Mathesar's default app logo is shown)
+
+### `MATHESAR_APP_HEADER_LOGO_DARK_URL` (optional)
+
+- **Description**: URL for the app header logo to use when a user is viewing Mathesar in dark mode. If unset, `MATHESAR_APP_HEADER_LOGO_URL` is used in all themes.
+- **Format**: An `http://` or `https://` URL, a root-relative Mathesar path such as `/static/...`, or a small `data:image/...;base64,...` URL.
+- **Default value**: (none)
+
+### `MATHESAR_APP_HEADER_LOGO_FILE` (optional)
+
+- **Description**: Filename for a custom authenticated app header logo, served from `MATHESAR_BRANDING_ASSET_DIR`.
+- **Format**: Filename only, for example `app-logo.svg`.
+- **Default value**: (none)
+
+### `MATHESAR_APP_HEADER_LOGO_DARK_FILE` (optional)
+
+- **Description**: Filename for the authenticated app header logo to use in dark mode, served from `MATHESAR_BRANDING_ASSET_DIR`.
+- **Format**: Filename only, for example `app-logo-dark.svg`.
+- **Default value**: (none)
+
+!!! tip "Choosing a logo source"
+    A public HTTPS URL is the simplest option across deployment platforms. For small SVG logos, a `data:image/svg+xml;base64,...` URL can work well when a platform does not make file mounting convenient. File-backed logos are best when you can mount files into the Mathesar runtime. Root-relative `/static/...` paths only work when the logo is bundled into your deployed Mathesar image.
 
 ### `MATHESAR_LOGIN_PAGE_HEADING` (optional)
 
@@ -229,6 +269,44 @@ The database specified in this section is used to store Mathesar's internal data
 - **Format**: CSS background value
 - **Default value**: (none — Mathesar's default login page background is shown)
 - **Additional information**: If you set this in a dotenv-style file and the value contains `#` characters, wrap the value in quotes so the colors are not parsed as comments.
+
+## Lightweight app theming {: #lightweight-app-theming}
+
+!!! info "**OPTIONAL**"
+    Only needed if you want to override a small set of bright, non-semantic colors in Mathesar. Values must be 3- or 6-digit hex colors such as `#e65846` or `#abc`. Semantic colors, text colors, backgrounds, borders, links, and system selection colors are not configurable. These variables only affect Mathesar's bright identity, accent, and relationship/annotation colors.
+
+!!! note "Choosing theme colors"
+    Mathesar validates color format only. Choose colors that remain legible in both light and dark mode, and avoid using colors that may be confused with semantic app states such as errors or warnings.
+
+### Brand and interaction colors
+
+| Environment variable | Palette role |
+| --- | --- |
+| `MATHESAR_THEME_COLOR_BRAND_ACCENT` | Primary brand accent used by Mathesar brand surfaces. |
+| `MATHESAR_THEME_COLOR_MUTED_BRAND_ACCENT` | Muted brand accent used for quieter branded calls to action. |
+| `MATHESAR_THEME_COLOR_PRIMARY_ACTION` | Primary action accent used for main action controls. |
+| `MATHESAR_THEME_COLOR_SECONDARY_ACTION` | Secondary action accent used for lower-emphasis action controls. |
+| `MATHESAR_THEME_COLOR_NAVIGATION_ACCENT` | Navigation accent used where navigation needs a distinct brand-tinted color. |
+| `MATHESAR_THEME_COLOR_REFERENCE_ACCENT` | Reference accent used for current or source items, such as today in date pickers and the base table in relationship diagrams. |
+| `MATHESAR_THEME_COLOR_FOCUS_ACCENT` | Focus accent used for selected or targeted items, such as selected dates and relationship targets. |
+| `MATHESAR_THEME_COLOR_CONFIRMATION_ACCENT` | Confirmation accent used for resolved, affirmative, or connecting items, such as relationship mapping items and Yes indicators. |
+
+### Product identity colors
+
+| Environment variable | Identity role |
+| --- | --- |
+| `MATHESAR_THEME_COLOR_DATABASE_IDENTITY` | Database identity color. |
+| `MATHESAR_THEME_COLOR_SCHEMA_IDENTITY` | Schema identity color. |
+| `MATHESAR_THEME_COLOR_TABLE_IDENTITY` | Table identity color. |
+| `MATHESAR_THEME_COLOR_VIEW_IDENTITY` | View identity color. |
+| `MATHESAR_THEME_COLOR_COLUMN_IDENTITY` | Column identity color. |
+| `MATHESAR_THEME_COLOR_RECORD_IDENTITY` | Record identity color. |
+| `MATHESAR_THEME_COLOR_FOREIGN_RECORD_IDENTITY` | Linked or foreign record identity color. |
+| `MATHESAR_THEME_COLOR_EXPLORATION_IDENTITY` | Exploration identity color. |
+| `MATHESAR_THEME_COLOR_DATA_FORM_IDENTITY` | Data form identity color. |
+
+!!! note "Setting color variables in dotenv files"
+    Because `#` begins a comment in many dotenv-style files, wrap color values in quotes, for example `MATHESAR_THEME_COLOR_BRAND_ACCENT="#e65846"`.
 
 ### `MATHESAR_TERMS_OF_SERVICE_URL` (optional)
 

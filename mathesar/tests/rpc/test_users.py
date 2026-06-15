@@ -135,7 +135,8 @@ def test_users_delete(rf, monkeypatch):
     users.delete(user_id=user_id)
 
 
-def test_users_patch_self(rf, monkeypatch):
+def test_users_patch_self(rf, settings, monkeypatch):
+    settings.REQUIRE_SSO_LOGIN = False
     request = rf.post('/api/rpc/v0', data={})
     request.user = User(id=2, username='alice', password='pass1234')
     _user_id = 2
@@ -228,7 +229,8 @@ def test_users_other(rf, monkeypatch):
     assert actual_user_info == expected_user_info
 
 
-def test_users_replace_own(rf, monkeypatch):
+def test_users_replace_own(rf, settings, monkeypatch):
+    settings.REQUIRE_SSO_LOGIN = False
     request = rf.post('/api/rpc/v0', data={})
     request.user = User(id=2, username='bob', password='bobs_old_password')
     request.user.set_password('bobs_old_password')

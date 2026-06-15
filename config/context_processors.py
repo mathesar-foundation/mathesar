@@ -3,6 +3,7 @@ from django.templatetags.static import static
 from urllib.parse import splitport
 
 
+from config.branding_config import logo_url_for_slot
 from mathesar.utils.frontend import get_manifest_data
 
 
@@ -11,6 +12,10 @@ def frontend_settings(request):
     development_mode = settings.MATHESAR_MODE == 'DEVELOPMENT'
     display_language = get_display_language_from_request(request)
     fallback_language = settings.FALLBACK_LANGUAGE
+    mathesar_auth_logo_url = (
+        getattr(settings, 'MATHESAR_AUTH_LOGO_URL', None)
+        or logo_url_for_slot(settings.MATHESAR_BRANDING_CONFIG, 'auth')
+    )
 
     frontend_settings = {
         'development_mode': development_mode,
@@ -18,7 +23,8 @@ def frontend_settings(request):
         'display_language': display_language,
         'include_i18n_fallback': display_language != fallback_language,
         'mathesar_instance_name': settings.MATHESAR_INSTANCE_NAME,
-        'mathesar_auth_logo_url': settings.MATHESAR_AUTH_LOGO_URL,
+        'mathesar_auth_logo_url': mathesar_auth_logo_url,
+        'mathesar_branding_css': getattr(settings, 'MATHESAR_BRANDING_CSS', ''),
     }
     # Only include development URL if we're in development mode.
     if frontend_settings['development_mode'] is True:

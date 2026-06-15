@@ -1,6 +1,5 @@
 {% extends 'mathesar/app_styled_base.html' %}
 {% load i18n static %}
-{% translate "Finalizing Installation..." as creating_user_loader_text %}
 
 {% block title %}
 {% translate "Complete Installation" %}
@@ -145,6 +144,7 @@
 {% endblock %}
 
 {% block content %}
+{% translate "Finalizing Installation..." as creating_user_loader_text %}
 <div class="container">
   <div class="heading">
     <div class="logo">

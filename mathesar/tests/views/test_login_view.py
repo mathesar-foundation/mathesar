@@ -13,6 +13,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 
+from config.branding_config import BrandingConfig
 from mathesar.views.users.login import MathesarLoginView
 from mathesar.views.users.password_reset import MathesarPasswordResetConfirmView
 
@@ -43,8 +44,14 @@ class _StartTagParser(HTMLParser):
         self.tags.append((tag, dict(attrs)))
 
 
-def _login_page_html(rf, settings):
-    return _render_auth_view(rf, settings, MathesarLoginView.as_view(), '/auth/login/')
+def _login_page_html(rf, settings, branding_config=None):
+    return _render_auth_view(
+        rf,
+        settings,
+        MathesarLoginView.as_view(),
+        '/auth/login/',
+        branding_config=branding_config,
+    )
 
 
 def _password_reset_page_html(rf, settings, admin_user):
@@ -57,8 +64,9 @@ def _password_reset_page_html(rf, settings, admin_user):
     )
 
 
-def _render_auth_view(rf, settings, view, path, user=None):
+def _render_auth_view(rf, settings, view, path, user=None, branding_config=None):
     settings.MATHESAR_MODE = 'DEVELOPMENT'
+    settings.MATHESAR_BRANDING_CONFIG = branding_config or BrandingConfig()
     settings.STORAGES = {
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {
@@ -231,6 +239,17 @@ def test_login_page_renders_custom_background(rf, settings):
 
 
 @pytest.mark.django_db
+def test_login_page_includes_branding_css(rf, settings):
+    settings.MATHESAR_BRANDING_CSS = 'body.mathesar-has-branding { --color-brand: #123456; }'
+
+    html = _login_page_html(rf, settings)
+
+    assert '<body class="mathesar-has-branding auth-page">' in html
+    assert 'id="mathesar-branding-overrides"' in html
+    assert 'body.mathesar-has-branding { --color-brand: #123456; }' in html
+
+
+@pytest.mark.django_db
 def test_login_page_renders_custom_heading(rf, settings):
     settings.MATHESAR_LOGIN_PAGE_HEADING = 'Welcome to Mathesar Cloud'
     settings.MATHESAR_LOGIN_PAGE_BODY = None
@@ -268,6 +287,29 @@ def test_login_page_renders_custom_auth_logo(rf, settings):
     assert logo[0]['alt'] == 'Mathesar Cloud Logo'
     assert logo[0]['title'] == 'Mathesar Cloud'
     assert 'red-logo-with-text.svg' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_falls_back_when_auth_logo_file_is_invalid(rf, settings, tmp_path):
+    settings.MATHESAR_INSTANCE_NAME = 'Mathesar'
+    settings.MATHESAR_AUTH_LOGO_URL = None
+
+    html = _login_page_html(
+        rf,
+        settings,
+        branding_config=BrandingConfig(
+            asset_dir=str(tmp_path),
+            logo_files={'auth': 'missing.svg'},
+        ),
+    )
+
+    assert '/branding-assets/auth/' not in html
+    logo = _find_start_tags(
+        html,
+        'img',
+        src='/static/images/red-logo-with-text.svg',
+    )
+    assert len(logo) == 1
 
 
 @pytest.mark.django_db

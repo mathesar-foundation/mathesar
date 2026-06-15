@@ -32,8 +32,11 @@
       }
     </style>
     {% block styles %} {% endblock %}
+    {% if mathesar_branding_css %}
+      <style id="mathesar-branding-overrides" type="text/css">{{ mathesar_branding_css|safe }}</style>
+    {% endif %}
   </head>
-  <body class="{% block body_class %}{% endblock %}">
+  <body class="{% if mathesar_branding_css %}mathesar-has-branding {% endif %}{% block body_class %}{% endblock %}">
     {% block scripts %} {% endblock %}
 
     {% block content %} {% endblock %}

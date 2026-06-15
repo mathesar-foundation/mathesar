@@ -43,3 +43,4 @@ Here are some other things you can do to complete your Mathesar setup, depending
 
 - [Connect your existing database(s) to Mathesar](../user-guide/databases.md#connection) or create a new database in the Mathesar UI to begin working with your data.
 - [Set up a custom domain name in Railway](https://docs.railway.com/guides/public-networking#custom-domains) if you don't want to use their default domain e.g. `https://mathesar-*.up.railway.app`.
+- [Customize Mathesar's branding](./environment-variables.md#public-entry) by adding branding environment variables to your Railway service. For logos, use a public HTTPS image URL or a small `data:image/...;base64,...` URL.
