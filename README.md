@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/community/matrix/" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a> • <a href="https://github.com/orgs/mathesar-foundation/projects/2" target="_blank">Roadmap</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://mathesar.cloud" target="_blank">Mathesar Cloud</a> • <a href="https://wiki.mathesar.org/community/matrix/" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a> • <a href="https://github.com/orgs/mathesar-foundation/projects/2" target="_blank">Roadmap</a>
 </p>
 
 # Mathesar
@@ -59,6 +59,8 @@ We are currently in the **public beta** stage.
 ## Install Mathesar
 
 Please see [our documentation](https://docs.mathesar.org/?ref=github-readme-installing) for instructions on installing Mathesar on your own server.
+
+Want to use Mathesar without installing it? [Mathesar Cloud](https://mathesar.cloud) is in now early beta and has a free plan.
 
 ## Join our community
 
