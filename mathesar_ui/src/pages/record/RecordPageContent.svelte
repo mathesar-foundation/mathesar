@@ -198,8 +198,7 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     overflow-y: auto;
   }
   .record-page-header {
-    --AppSecondaryHeader__background:
-      linear-gradient(
+    --AppSecondaryHeader__background: linear-gradient(
         90deg,
         color-mix(in srgb, var(--color-record), transparent 48%) 0%,
         color-mix(in srgb, var(--color-record), transparent 72%) 38%,
@@ -214,12 +213,8 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
         color-mix(in srgb, var(--color-bg-base), var(--color-table) 5%) 82%,
         var(--color-bg-base) 100%
       );
-    --AppSecondaryHeader__background-size:
-      100% 3px,
-      100% 100%;
-    --AppSecondaryHeader__background-position:
-      left top,
-      left top;
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
     --AppSecondaryHeader__background-repeat: no-repeat;
     --AppSecondaryHeader__margin-bottom: var(--sm1);
     --page-padding-x: 6rem;

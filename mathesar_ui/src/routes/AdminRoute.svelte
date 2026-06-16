@@ -76,8 +76,7 @@
 
 <style lang="scss">
   .admin-page-header {
-    --AppSecondaryHeader__background:
-      linear-gradient(
+    --AppSecondaryHeader__background: linear-gradient(
         90deg,
         color-mix(in srgb, var(--color-navigation), transparent 52%) 0%,
         color-mix(in srgb, var(--color-navigation), transparent 76%) 46%,
@@ -86,20 +85,15 @@
       ),
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--color-bg-base), var(--color-navigation) 10%)
-          0%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-navigation) 10%) 0%,
         color-mix(in srgb, var(--color-bg-base), var(--color-bg-supporting) 20%)
           42%,
         color-mix(in srgb, var(--color-bg-base), var(--color-brand-subtle) 4%)
           80%,
         var(--color-bg-base) 100%
       );
-    --AppSecondaryHeader__background-size:
-      100% 3px,
-      100% 100%;
-    --AppSecondaryHeader__background-position:
-      left top,
-      left top;
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
     --AppSecondaryHeader__background-repeat: no-repeat;
   }
 </style>

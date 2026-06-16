@@ -49,8 +49,7 @@
     background-repeat: var(--AppSecondaryHeader__background-repeat, repeat);
     box-shadow: var(
       --AppSecondaryHeader__box-shadow,
-      inset 0 -1px
-        color-mix(in srgb, var(--color-border-base), transparent 45%)
+      inset 0 -1px color-mix(in srgb, var(--color-border-base), transparent 45%)
     );
   }
   .content {

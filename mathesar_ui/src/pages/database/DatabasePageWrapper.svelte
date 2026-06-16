@@ -224,8 +224,7 @@
 
 <style>
   .database-page-header {
-    --AppSecondaryHeader__background:
-      linear-gradient(
+    --AppSecondaryHeader__background: linear-gradient(
         90deg,
         color-mix(in srgb, var(--color-database), transparent 42%) 0%,
         color-mix(in srgb, var(--color-database), transparent 62%) 42%,
@@ -240,12 +239,8 @@
         color-mix(in srgb, var(--color-bg-base), var(--color-schema) 5%) 78%,
         var(--color-bg-base) 100%
       );
-    --AppSecondaryHeader__background-size:
-      100% 3px,
-      100% 100%;
-    --AppSecondaryHeader__background-position:
-      left top,
-      left top;
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
     --AppSecondaryHeader__background-repeat: no-repeat;
     --entity-name-color: var(--color-database);
   }

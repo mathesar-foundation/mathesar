@@ -54,8 +54,7 @@
   $breakpoint: 50rem;
 
   .home-page-header {
-    --AppSecondaryHeader__background:
-      linear-gradient(
+    --AppSecondaryHeader__background: linear-gradient(
         90deg,
         color-mix(in srgb, var(--color-brand), transparent 45%) 0%,
         color-mix(in srgb, var(--color-database), transparent 58%) 38%,
@@ -64,19 +63,14 @@
       ),
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--color-bg-base), var(--color-database) 14%)
-          0%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-database) 14%) 0%,
         color-mix(in srgb, var(--color-bg-base), var(--color-bg-supporting) 26%)
           36%,
         color-mix(in srgb, var(--color-bg-base), var(--color-record-fk) 8%) 78%,
         var(--color-bg-base) 100%
       );
-    --AppSecondaryHeader__background-size:
-      100% 3px,
-      100% 100%;
-    --AppSecondaryHeader__background-position:
-      left top,
-      left top;
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
     --AppSecondaryHeader__background-repeat: no-repeat;
   }
 
