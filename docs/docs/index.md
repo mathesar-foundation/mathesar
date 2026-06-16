@@ -4,7 +4,9 @@ Mathesar is a web application that makes working with PostgreSQL databases both 
 
 ## Try Mathesar
 
-This is a quick way to play with Mathesar locally, but is not appropriate for saving data that you care about or setting up a long-term installation.
+!!! info "[Mathesar Cloud](https://mathesar.cloud/) is in early beta and is the quickest way to try and use Mathesar."
+
+If you'd like to test out Mathesar locally, you can use our Docker image. This is suitable to play with but is not appropriate for saving data that you care about or setting up a long-term installation.
 
 1. With [Docker](https://docs.docker.com/get-docker/) installed, run:
 
