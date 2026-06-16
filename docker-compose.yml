@@ -84,9 +84,9 @@ x-config: &config
   MATHESAR_INSTANCE_NAME: ${MATHESAR_INSTANCE_NAME:-Mathesar}
   MATHESAR_AUTH_LOGO_URL: ${MATHESAR_AUTH_LOGO_URL:-}
 
-  # (Optional) Customize the heading and plain text intro shown on the login page.
-  MATHESAR_LOGIN_PAGE_HEADING: ${MATHESAR_LOGIN_PAGE_HEADING:-}
-  MATHESAR_LOGIN_PAGE_BODY: ${MATHESAR_LOGIN_PAGE_BODY:-}
+  # (Optional) Customize localized plain text copy shown on the login page
+  # instead of a login_page.yml configuration file.
+  MATHESAR_LOGIN_PAGE_TEXT_DICT: ${MATHESAR_LOGIN_PAGE_TEXT_DICT:-{}}
   MATHESAR_LOGIN_PAGE_BACKGROUND: ${MATHESAR_LOGIN_PAGE_BACKGROUND:-}
 
   # (Optional) Set one or both to show links to your terms of service and
@@ -238,6 +238,9 @@ services:
       # - ./file_storage.yml:/code/file_storage.yml
       # Uncomment the following to mount sso.yml and enable Single Sign-On (SSO).
       # - ./sso.yml:/code/sso.yml
+      # Uncomment the following to mount login_page.yml and customize localized
+      # plain text copy on the login page.
+      # - ./login_page.yml:/code/login_page.yml
     depends_on:
       db:
         condition: service_healthy

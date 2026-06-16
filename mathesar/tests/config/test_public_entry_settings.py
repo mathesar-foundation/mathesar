@@ -10,8 +10,7 @@ PUBLIC_ENTRY_ENV_NAMES = (
     'MATHESAR_LANDING_PAGE_URL',
     'MATHESAR_INSTANCE_NAME',
     'MATHESAR_AUTH_LOGO_URL',
-    'MATHESAR_LOGIN_PAGE_HEADING',
-    'MATHESAR_LOGIN_PAGE_BODY',
+    'MATHESAR_LOGIN_PAGE_TEXT_DICT',
     'MATHESAR_LOGIN_PAGE_BACKGROUND',
     'MATHESAR_TERMS_OF_SERVICE_URL',
     'MATHESAR_PRIVACY_POLICY_URL',
@@ -21,8 +20,7 @@ PUBLIC_ENTRY_SETTING_NAMES = (
     'MATHESAR_LANDING_PAGE_URL',
     'MATHESAR_INSTANCE_NAME',
     'MATHESAR_AUTH_LOGO_URL',
-    'MATHESAR_LOGIN_PAGE_HEADING',
-    'MATHESAR_LOGIN_PAGE_BODY',
+    'MATHESAR_LOGIN_PAGE_TEXT',
     'MATHESAR_LOGIN_PAGE_BACKGROUND',
     'MATHESAR_TERMS_OF_SERVICE_URL',
     'MATHESAR_PRIVACY_POLICY_URL',
@@ -61,8 +59,7 @@ def test_public_entry_settings_default_values():
         'MATHESAR_LANDING_PAGE_URL': None,
         'MATHESAR_INSTANCE_NAME': 'Mathesar',
         'MATHESAR_AUTH_LOGO_URL': None,
-        'MATHESAR_LOGIN_PAGE_HEADING': None,
-        'MATHESAR_LOGIN_PAGE_BODY': None,
+        'MATHESAR_LOGIN_PAGE_TEXT': {},
         'MATHESAR_LOGIN_PAGE_BACKGROUND': None,
         'MATHESAR_TERMS_OF_SERVICE_URL': None,
         'MATHESAR_PRIVACY_POLICY_URL': None,
@@ -74,8 +71,11 @@ def test_public_entry_settings_read_mathesar_env_vars():
         'MATHESAR_LANDING_PAGE_URL': 'https://example.com/start',
         'MATHESAR_INSTANCE_NAME': 'Mathesar Cloud',
         'MATHESAR_AUTH_LOGO_URL': 'https://example.com/logo.svg',
-        'MATHESAR_LOGIN_PAGE_HEADING': 'Welcome to Mathesar Cloud',
-        'MATHESAR_LOGIN_PAGE_BODY': 'Sign in to start working.',
+        'MATHESAR_LOGIN_PAGE_TEXT_DICT': (
+            '{"heading": "Welcome to your Mathesar workspace",'
+            ' "body": "Sign in to start working.",'
+            ' "translations": {"es": {"heading": "Bienvenido"}}}'
+        ),
         'MATHESAR_LOGIN_PAGE_BACKGROUND': 'linear-gradient(#123842, #0b222b)',
         'MATHESAR_TERMS_OF_SERVICE_URL': 'https://example.com/terms',
         'MATHESAR_PRIVACY_POLICY_URL': 'https://example.com/privacy',
@@ -83,8 +83,11 @@ def test_public_entry_settings_read_mathesar_env_vars():
         'MATHESAR_LANDING_PAGE_URL': 'https://example.com/start',
         'MATHESAR_INSTANCE_NAME': 'Mathesar Cloud',
         'MATHESAR_AUTH_LOGO_URL': 'https://example.com/logo.svg',
-        'MATHESAR_LOGIN_PAGE_HEADING': 'Welcome to Mathesar Cloud',
-        'MATHESAR_LOGIN_PAGE_BODY': 'Sign in to start working.',
+        'MATHESAR_LOGIN_PAGE_TEXT': {
+            'heading': 'Welcome to your Mathesar workspace',
+            'body': 'Sign in to start working.',
+            'translations': {'es': {'heading': 'Bienvenido'}},
+        },
         'MATHESAR_LOGIN_PAGE_BACKGROUND': 'linear-gradient(#123842, #0b222b)',
         'MATHESAR_TERMS_OF_SERVICE_URL': 'https://example.com/terms',
         'MATHESAR_PRIVACY_POLICY_URL': 'https://example.com/privacy',
@@ -96,14 +99,12 @@ def test_new_public_entry_settings_treat_empty_strings_as_unset():
         'MATHESAR_LANDING_PAGE_URL': '',
         'MATHESAR_INSTANCE_NAME': '',
         'MATHESAR_AUTH_LOGO_URL': '',
-        'MATHESAR_LOGIN_PAGE_HEADING': '',
-        'MATHESAR_LOGIN_PAGE_BODY': '',
+        'MATHESAR_LOGIN_PAGE_TEXT_DICT': '',
         'MATHESAR_LOGIN_PAGE_BACKGROUND': '',
     })
 
     assert settings['MATHESAR_LANDING_PAGE_URL'] is None
     assert settings['MATHESAR_INSTANCE_NAME'] == 'Mathesar'
     assert settings['MATHESAR_AUTH_LOGO_URL'] is None
-    assert settings['MATHESAR_LOGIN_PAGE_HEADING'] is None
-    assert settings['MATHESAR_LOGIN_PAGE_BODY'] is None
+    assert settings['MATHESAR_LOGIN_PAGE_TEXT'] == {}
     assert settings['MATHESAR_LOGIN_PAGE_BACKGROUND'] is None

@@ -211,17 +211,29 @@ The database specified in this section is used to store Mathesar's internal data
 - **Format**: An `http://` or `https://` URL, a root-relative Mathesar path such as `/static/...`, or a small `data:image/...;base64,...` URL.
 - **Default value**: (none — Mathesar's default logo is shown)
 
-### `MATHESAR_LOGIN_PAGE_HEADING` (optional)
+### `MATHESAR_LOGIN_PAGE_TEXT_DICT` (optional)
 
-- **Description**: Custom heading shown on the login page.
-- **Format**: Plain text
-- **Default value**: `Log in to Mathesar`
+- **Description**: Localized plain text copy shown on the login page. If unset, Mathesar uses the translated default heading (`Log in to Mathesar`) and no orientation copy.
+- **Format**: A stringified JSON representation of the config in a `login_page.yml` file. HTML and Markdown are not rendered.
+- **Default value**: `{}` (no custom login page copy)
+- **Example**:
 
-### `MATHESAR_LOGIN_PAGE_BODY` (optional)
+    ```env
+    MATHESAR_LOGIN_PAGE_TEXT_DICT="{\"heading\":\"Welcome to your Mathesar workspace\",\"body\":\"Log in to continue working with your data.\",\"translations\":{\"es\":{\"heading\":\"Bienvenido a tu espacio de trabajo de Mathesar\",\"body\":\"Inicia sesión para seguir trabajando con tus datos.\"}}}"
+    ```
 
-- **Description**: Plain text orientation copy shown on the login page. HTML and Markdown are not rendered.
-- **Format**: Plain text
-- **Default value**: (none — no orientation copy is shown)
+- **Additional information**: For Docker Compose, direct installations, and Kubernetes deployments that can mount files, prefer a `login_page.yml` file at Mathesar's installation root. The file uses the same shape:
+
+    ```yaml
+    heading: Welcome to your Mathesar workspace
+    body: Log in to continue working with your data.
+    translations:
+      es:
+        heading: Bienvenido a tu espacio de trabajo de Mathesar
+        body: Inicia sesión para seguir trabajando con tus datos.
+    ```
+
+    `MATHESAR_LOGIN_PAGE_TEXT_DICT` takes precedence over `login_page.yml`. If custom copy is provided without translations, that custom copy is shown for all selected languages.
 
 ### `MATHESAR_LOGIN_PAGE_BACKGROUND` (optional)
 
