@@ -105,12 +105,23 @@
 <style>
   .schema-page-header {
     --AppSecondaryHeader__background: linear-gradient(
-      135deg,
-      var(--color-schema-10) 10%,
-      var(--color-bg-supporting) 50%,
-      var(--color-schema-15) 90%,
-      var(--color-brand-10) 100%
-    );
+        90deg,
+        color-mix(in srgb, var(--color-schema), transparent 48%) 0%,
+        color-mix(in srgb, var(--color-schema), transparent 70%) 40%,
+        color-mix(in srgb, var(--color-table), transparent 76%) 72%,
+        transparent 100%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-bg-base), var(--color-schema) 13%) 0%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-bg-supporting) 22%)
+          36%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-table) 7%) 80%,
+        var(--color-bg-base) 100%
+      );
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
+    --AppSecondaryHeader__background-repeat: no-repeat;
     --entity-name-color: var(--color-schema);
   }
 

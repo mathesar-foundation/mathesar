@@ -199,13 +199,23 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
   .record-page-header {
     --AppSecondaryHeader__background: linear-gradient(
-      135deg,
-      var(--color-bg-base),
-      15%,
-      var(--color-record-10) 40%,
-      var(--color-bg-base) 60%,
-      var(--color-record-20) 100%
-    );
+        90deg,
+        color-mix(in srgb, var(--color-record), transparent 48%) 0%,
+        color-mix(in srgb, var(--color-record), transparent 72%) 38%,
+        color-mix(in srgb, var(--color-table), transparent 82%) 68%,
+        transparent 100%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-bg-base), var(--color-record) 13%) 0%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-bg-supporting) 18%)
+          40%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-table) 5%) 82%,
+        var(--color-bg-base) 100%
+      );
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
+    --AppSecondaryHeader__background-repeat: no-repeat;
     --AppSecondaryHeader__margin-bottom: var(--sm1);
     --page-padding-x: 6rem;
     --entity-name-color: var(--color-record);
