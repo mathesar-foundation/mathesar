@@ -16,6 +16,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
 from config.database_config import PostgresConfig, parse_port
+from config.login_page_config import load_login_page_text_config
 from config.sso_config import load_sso_config, resolve_require_sso_login
 
 
@@ -285,8 +286,10 @@ MATHESAR_TERMS_OF_SERVICE_URL = os.environ.get('MATHESAR_TERMS_OF_SERVICE_URL', 
 MATHESAR_PRIVACY_POLICY_URL = os.environ.get('MATHESAR_PRIVACY_POLICY_URL', default=None)
 MATHESAR_INSTANCE_NAME = os.environ.get('MATHESAR_INSTANCE_NAME') or 'Mathesar'
 MATHESAR_AUTH_LOGO_URL = os.environ.get('MATHESAR_AUTH_LOGO_URL') or None
-MATHESAR_LOGIN_PAGE_HEADING = os.environ.get('MATHESAR_LOGIN_PAGE_HEADING') or None
-MATHESAR_LOGIN_PAGE_BODY = os.environ.get('MATHESAR_LOGIN_PAGE_BODY') or None
+MATHESAR_LOGIN_PAGE_TEXT = load_login_page_text_config(
+    env_value=os.environ.get('MATHESAR_LOGIN_PAGE_TEXT_DICT'),
+    config_file=BASE_DIR.joinpath('login_page.yml'),
+)
 MATHESAR_LOGIN_PAGE_BACKGROUND = os.environ.get('MATHESAR_LOGIN_PAGE_BACKGROUND') or None
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

@@ -29,7 +29,7 @@ PRIVACY_LINK = (
 )
 CUSTOM_LOGO_URL = 'https://example.com/logo.svg'
 CUSTOM_INSTANCE_NAME = 'Mathesar Cloud'
-CUSTOM_HEADING = 'Welcome to Mathesar Cloud'
+CUSTOM_HEADING = 'Welcome to your Mathesar workspace'
 CUSTOM_BODY = '<strong>Sign in to start working.</strong>'
 CUSTOM_BACKGROUND = 'linear-gradient(#123842, #0b222b)'
 
@@ -43,8 +43,11 @@ class _StartTagParser(HTMLParser):
         self.tags.append((tag, dict(attrs)))
 
 
-def _login_page_html(rf, settings):
-    return _render_auth_view(rf, settings, MathesarLoginView.as_view(), '/auth/login/')
+def _login_page_html(rf, settings, language_code='en'):
+    return _render_auth_view(
+        rf, settings, MathesarLoginView.as_view(), '/auth/login/',
+        language_code=language_code,
+    )
 
 
 def _password_reset_page_html(rf, settings, admin_user):
@@ -57,7 +60,7 @@ def _password_reset_page_html(rf, settings, admin_user):
     )
 
 
-def _render_auth_view(rf, settings, view, path, user=None):
+def _render_auth_view(rf, settings, view, path, user=None, language_code='en'):
     settings.MATHESAR_MODE = 'DEVELOPMENT'
     settings.STORAGES = {
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
@@ -67,7 +70,7 @@ def _render_auth_view(rf, settings, view, path, user=None):
     }
     request = rf.get(path)
     request.user = user or AnonymousUser()
-    request.LANGUAGE_CODE = 'en'
+    request.LANGUAGE_CODE = language_code
     SessionMiddleware(lambda request: None).process_request(request)
     request._messages = FallbackStorage(request)
     response = view(request)
@@ -168,7 +171,7 @@ def test_login_view_context_includes_custom_urls_when_set(rf, settings):
 
 
 def test_login_view_context_login_page_heading_defaults_to_original_heading(rf, settings):
-    settings.MATHESAR_LOGIN_PAGE_HEADING = None
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {}
     view = MathesarLoginView()
     view.setup(rf.get('/auth/login/'))
     ctx = view.get_context_data(form=view.get_form())
@@ -176,15 +179,17 @@ def test_login_view_context_login_page_heading_defaults_to_original_heading(rf, 
 
 
 def test_login_view_context_includes_login_page_copy_when_set(rf, settings):
-    settings.MATHESAR_LOGIN_PAGE_HEADING = 'Welcome to Mathesar Cloud'
-    settings.MATHESAR_LOGIN_PAGE_BODY = 'Sign in to start working with your database.'
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {
+        'heading': 'Welcome to your Mathesar workspace',
+        'body': 'Sign in to start working with your database.',
+    }
     settings.MATHESAR_LOGIN_PAGE_BACKGROUND = CUSTOM_BACKGROUND
 
     view = MathesarLoginView()
     view.setup(rf.get('/auth/login/'))
     ctx = view.get_context_data(form=view.get_form())
 
-    assert ctx['login_page_heading'] == 'Welcome to Mathesar Cloud'
+    assert ctx['login_page_heading'] == 'Welcome to your Mathesar workspace'
     assert ctx['login_page_body'] == 'Sign in to start working with your database.'
     assert ctx['login_page_background'] == CUSTOM_BACKGROUND
 
@@ -193,8 +198,7 @@ def test_login_view_context_includes_login_page_copy_when_set(rf, settings):
 def test_login_page_preserves_default_heading_and_logo(rf, settings):
     settings.MATHESAR_INSTANCE_NAME = 'Mathesar'
     settings.MATHESAR_AUTH_LOGO_URL = None
-    settings.MATHESAR_LOGIN_PAGE_HEADING = None
-    settings.MATHESAR_LOGIN_PAGE_BODY = None
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {}
     settings.MATHESAR_LOGIN_PAGE_BACKGROUND = None
 
     html = _login_page_html(rf, settings)
@@ -207,6 +211,12 @@ def test_login_page_preserves_default_heading_and_logo(rf, settings):
     _assert_tag_with_class(html, 'main', 'auth-card')
     _assert_tag_with_class(html, 'figure', 'auth-launch-plane')
     _assert_tag_with_class(html, 'svg', 'auth-flight-path')
+    language_select = _find_start_tags(html, 'select', name='language')
+    assert len(language_select) == 1
+    assert language_select[0]['onchange'] == 'this.form.submit()'
+    next_input = _find_start_tags(html, 'input', name='next', type='hidden')
+    assert len(next_input) == 1
+    assert next_input[0]['value'] == '/auth/login/'
     assert '<link rel="stylesheet" href="/static/css/auth.css" />' in html
     assert "showLoadingStatus('Logging In...');" in html
     assert 'Log in to Mathesar' in html
@@ -231,21 +241,23 @@ def test_login_page_renders_custom_background(rf, settings):
 
 
 @pytest.mark.django_db
-def test_login_page_renders_custom_heading(rf, settings):
-    settings.MATHESAR_LOGIN_PAGE_HEADING = 'Welcome to Mathesar Cloud'
-    settings.MATHESAR_LOGIN_PAGE_BODY = None
+def test_login_page_renders_top_level_custom_heading(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {
+        'heading': 'Welcome to your Mathesar workspace',
+    }
     settings.MATHESAR_LOGIN_PAGE_BACKGROUND = None
 
     html = _login_page_html(rf, settings)
 
-    assert 'Welcome to Mathesar Cloud' in html
+    assert 'Welcome to your Mathesar workspace' in html
     assert 'Log in to Mathesar' not in html
 
 
 @pytest.mark.django_db
 def test_login_page_renders_custom_body_as_plain_text(rf, settings):
-    settings.MATHESAR_LOGIN_PAGE_HEADING = None
-    settings.MATHESAR_LOGIN_PAGE_BODY = '<strong>Sign in to start working.</strong>'
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {
+        'body': '<strong>Sign in to start working.</strong>',
+    }
     settings.MATHESAR_LOGIN_PAGE_BACKGROUND = None
 
     html = _login_page_html(rf, settings)
@@ -253,6 +265,64 @@ def test_login_page_renders_custom_body_as_plain_text(rf, settings):
     _assert_tag_with_class(html, 'p', 'auth-card-intro')
     assert '&lt;strong&gt;Sign in to start working.&lt;/strong&gt;' in html
     assert '<strong>Sign in to start working.</strong>' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_renders_exact_locale_custom_copy(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {
+        'heading': 'Welcome to your Mathesar workspace',
+        'body': 'Sign up or log in.',
+        'translations': {
+            'es': {
+                'heading': 'Bienvenido a tu espacio de trabajo de Mathesar',
+                'body': 'Regístrate o inicia sesión.',
+            },
+        },
+    }
+
+    html = _login_page_html(rf, settings, language_code='es')
+
+    assert 'Bienvenido a tu espacio de trabajo de Mathesar' in html
+    assert 'Regístrate o inicia sesión.' in html
+    assert 'Welcome to your Mathesar workspace' not in html
+    assert 'Sign up or log in.' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_renders_base_language_custom_copy(rf, settings):
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {
+        'heading': 'Welcome to your Mathesar workspace',
+        'translations': {
+            'es': {
+                'heading': 'Bienvenido a tu espacio de trabajo de Mathesar',
+            },
+        },
+    }
+
+    html = _login_page_html(rf, settings, language_code='es-mx')
+
+    assert 'Bienvenido a tu espacio de trabajo de Mathesar' in html
+    assert 'Welcome to your Mathesar workspace' not in html
+
+
+@pytest.mark.django_db
+def test_login_page_uses_top_level_body_when_localized_body_is_missing(
+        rf, settings
+):
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {
+        'heading': 'Welcome to your Mathesar workspace',
+        'body': 'Sign up or log in.',
+        'translations': {
+            'es': {
+                'heading': 'Bienvenido a tu espacio de trabajo de Mathesar',
+            },
+        },
+    }
+
+    html = _login_page_html(rf, settings, language_code='es')
+
+    assert 'Bienvenido a tu espacio de trabajo de Mathesar' in html
+    assert 'Sign up or log in.' in html
 
 
 @pytest.mark.django_db
@@ -364,8 +434,10 @@ def test_login_page_renders_cloud_configuration_when_sso_is_required(
     _configure_github_sso_provider(settings)
     settings.MATHESAR_INSTANCE_NAME = CUSTOM_INSTANCE_NAME
     settings.MATHESAR_AUTH_LOGO_URL = CUSTOM_LOGO_URL
-    settings.MATHESAR_LOGIN_PAGE_HEADING = CUSTOM_HEADING
-    settings.MATHESAR_LOGIN_PAGE_BODY = CUSTOM_BODY
+    settings.MATHESAR_LOGIN_PAGE_TEXT = {
+        'heading': CUSTOM_HEADING,
+        'body': CUSTOM_BODY,
+    }
     settings.MATHESAR_TERMS_OF_SERVICE_URL = TERMS_URL
     settings.MATHESAR_PRIVACY_POLICY_URL = PRIVACY_URL
 
