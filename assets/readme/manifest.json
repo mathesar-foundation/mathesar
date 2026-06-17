@@ -8,7 +8,12 @@
   "database": {
     "name": "readme_showcase",
     "nickname": "Mathesar Showcase",
-    "sampleData": ["library_management", "bike_shop", "movie_rentals"]
+    "sampleData": [
+      "library_management",
+      "bike_shop",
+      "ice_cream_employees",
+      "movie_rentals"
+    ]
   },
   "supportingState": {
     "viewer": {
@@ -21,8 +26,13 @@
       "name": "readme_viewer",
       "password": "readme-viewer-role-password"
     },
-    "formName": "Library checkout request",
-    "explorationName": "Recent library checkouts"
+    "formName": "Service Requests Form",
+    "explorationName": "Customer requests",
+    "permissionsRoles": {
+      "intern": "Intern",
+      "summerIntern": "Summer Intern",
+      "assistantManager": "Assistant Manager"
+    }
   },
   "captures": [
     {
@@ -50,15 +60,15 @@
       "id": "table-inspector",
       "heading": "Working with tables",
       "filename": "04-table-inspector.png",
-      "alt": "Mathesar table view for library books with the table inspector open.",
-      "target": "Books table page with table inspector open."
+      "alt": "Mathesar table view for ice cream shop timesheets with the table inspector open.",
+      "target": "Ice Cream Employee Management Timesheets table page with the table inspector open."
     },
     {
       "id": "record-selector",
       "heading": "Finding a nested record",
       "filename": "05-record-selector.png",
-      "alt": "Mathesar table view with a foreign-key record selector open for choosing a related book.",
-      "target": "Record selector dropdown for a foreign-key field such as Items.Book."
+      "alt": "Mathesar table view with nested record selection open for choosing a timesheet employee.",
+      "target": "Nested record selector for the Timesheets employee field, including a filtered Employees picker."
     },
     {
       "id": "relationship-creation",
@@ -71,43 +81,43 @@
       "id": "table-permissions",
       "heading": "Managing table permissions",
       "filename": "07-table-permissions.png",
-      "alt": "Mathesar table permissions interface showing privileges for a read-only collaborator role.",
-      "target": "Table permissions UI showing the read-only collaborator role."
+      "alt": "Mathesar table permissions interface showing read-only and custom role privileges.",
+      "target": "Table permissions UI showing inherited and custom privileges for showcase roles."
     },
     {
       "id": "record-page",
       "heading": "Viewing a single record with related records",
       "filename": "08-record-page.png",
-      "alt": "Mathesar single-record page showing a library item and its related book details.",
-      "target": "Single record page for a Library item or book with related records visible."
+      "alt": "Mathesar single-record page for a library item with related checkout records visible.",
+      "target": "Single record page for a Library item with related checkout records visible."
     },
     {
       "id": "form-builder",
       "heading": "Building a form",
       "filename": "09-form-builder.png",
-      "alt": "Mathesar form builder for a library checkout request form.",
-      "target": "Form builder for Library checkout request."
+      "alt": "Mathesar form builder for a bike shop service request form with field rules open.",
+      "target": "Form builder for Service Requests Form with the Mechanic field selected and field rules visible."
     },
     {
       "id": "form-fill-example",
       "heading": "Filling out a form",
       "filename": "10-form-fill-example.png",
-      "alt": "Public Mathesar form for submitting a library checkout request.",
-      "target": "Public shared form page for Library checkout request."
+      "alt": "Public Mathesar service request form being filled with a mechanic search.",
+      "target": "Public shared Service Requests Form with a mechanic search in progress."
     },
     {
       "id": "viewing-exploration",
       "heading": "Viewing an Exploration (query result)",
       "filename": "11-viewing-exploration.png",
-      "alt": "Mathesar exploration page showing query results for recent library checkouts.",
-      "target": "Saved exploration results table."
+      "alt": "Mathesar exploration page showing bike shop customers with related service requests.",
+      "target": "Saved Customer requests exploration showing summarized service request lists."
     },
     {
       "id": "building-exploration",
       "heading": "Building an Exploration (query)",
       "filename": "12-building-exploration.png",
-      "alt": "Mathesar Data Explorer query builder with selected columns and transformations.",
-      "target": "Data Explorer builder with selected columns and filter or join state."
+      "alt": "Mathesar Data Explorer query builder showing a service request list aggregation.",
+      "target": "Data Explorer builder for Customer requests with a summarization/list aggregation state."
     },
     {
       "id": "disconnect-db",

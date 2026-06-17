@@ -168,6 +168,7 @@ async function getSchemaData(rpc, databaseId) {
   const schemas = await rpc('schemas.list', { database_id: databaseId });
   const librarySchema = byName(schemas, 'Library Management', 'schema');
   const bikeSchema = byName(schemas, 'Bike Shop', 'schema');
+  const iceCreamSchema = byName(schemas, 'Ice Cream Employee Management', 'schema');
   const movieSchema = byName(schemas, 'movie_rentals', 'schema');
   const libraryTables = await rpc('tables.list', {
     database_id: databaseId,
@@ -177,6 +178,10 @@ async function getSchemaData(rpc, databaseId) {
     database_id: databaseId,
     schema_oid: bikeSchema.oid,
   });
+  const iceCreamTables = await rpc('tables.list', {
+    database_id: databaseId,
+    schema_oid: iceCreamSchema.oid,
+  });
   const movieTables = await rpc('tables.list', {
     database_id: databaseId,
     schema_oid: movieSchema.oid,
@@ -185,13 +190,20 @@ async function getSchemaData(rpc, databaseId) {
     schemas,
     librarySchema,
     bikeSchema,
+    iceCreamSchema,
     movieSchema,
     tables: {
       books: byName(libraryTables, 'Books', 'table'),
       items: byName(libraryTables, 'Items', 'table'),
       checkouts: byName(libraryTables, 'Checkouts', 'table'),
       patrons: byName(libraryTables, 'Patrons', 'table'),
+      customers: byName(bikeTables, 'Customers', 'table'),
+      equipment: byName(bikeTables, 'Equipment', 'table'),
+      mechanics: byName(bikeTables, 'Mechanics', 'table'),
+      serviceMilestones: byName(bikeTables, 'Service Milestones', 'table'),
       serviceRequests: byName(bikeTables, 'Service Requests', 'table'),
+      timesheets: byName(iceCreamTables, 'Timesheets', 'table'),
+      employees: byName(iceCreamTables, 'Employees', 'table'),
       movies: byName(movieTables, 'movies', 'table'),
     },
   };
@@ -267,23 +279,64 @@ async function ensureViewerRoleAndCollaborator(rpc, database) {
   return { role, configuredRole, viewer };
 }
 
-async function ensureReadOnlyTablePrivileges(rpc, databaseId, tableOid, roleOid) {
+async function ensureRole(rpc, databaseId, name, { login = false, password = null } = {}) {
+  const roles = await rpc('roles.list', { database_id: databaseId });
+  const existing = roles.find((candidate) => candidate.name === name);
+  if (existing) return existing;
+  return rpc('roles.add', {
+    database_id: databaseId,
+    rolename: name,
+    login,
+    password,
+  });
+}
+
+async function ensurePermissionShowcaseRoles(rpc, database) {
+  const roleNames = manifest.supportingState.permissionsRoles;
+  const intern = await ensureRole(rpc, database.id, roleNames.intern);
+  const summerIntern = await ensureRole(rpc, database.id, roleNames.summerIntern);
+  const assistantManager = await ensureRole(
+    rpc,
+    database.id,
+    roleNames.assistantManager,
+  );
+  await rpc('roles.set_members', {
+    database_id: database.id,
+    parent_role_oid: intern.oid,
+    members: [summerIntern.oid],
+  });
+  return { intern, summerIntern, assistantManager };
+}
+
+async function ensureTablePrivileges(rpc, databaseId, tableOid, privileges) {
   await rpc('tables.privileges.replace_for_roles', {
     database_id: databaseId,
     table_oid: tableOid,
-    privileges: [
-      {
-        role_oid: roleOid,
-        direct: ['SELECT'],
-      },
-    ],
+    privileges,
   });
+}
+
+async function ensureSchemaPrivileges(rpc, databaseId, schemaOid, privileges) {
+  await rpc('schemas.privileges.replace_for_roles', {
+    database_id: databaseId,
+    schema_oid: schemaOid,
+    privileges,
+  });
+}
+
+async function ensureReadOnlyTablePrivileges(rpc, databaseId, tableOid, roleOid) {
+  await ensureTablePrivileges(rpc, databaseId, tableOid, [
+    {
+      role_oid: roleOid,
+      direct: ['SELECT'],
+    },
+  ]);
 }
 
 async function ensureShowcaseForm(rpc, database, schemaData, configuredRole) {
   const existingForms = await rpc('forms.list', {
     database_id: database.id,
-    schema_oid: schemaData.librarySchema.oid,
+    schema_oid: schemaData.bikeSchema.oid,
   });
   const existing = existingForms.find(
     (form) => form.name === manifest.supportingState.formName,
@@ -297,59 +350,94 @@ async function ensureShowcaseForm(rpc, database, schemaData, configuredRole) {
     return existing;
   }
 
-  const columns = await getColumns(rpc, database.id, schemaData.tables.checkouts.oid);
+  const columns = await getColumns(rpc, database.id, schemaData.tables.serviceRequests.oid);
   const form = await rpc('forms.add', {
     database_id: database.id,
     form_def: {
       name: manifest.supportingState.formName,
-      description: 'Collect a checkout request and save it directly to PostgreSQL.',
+      description: 'Capture a customer service request and assign the work.',
       version: 1,
-      schema_oid: schemaData.librarySchema.oid,
-      base_table_oid: schemaData.tables.checkouts.oid,
+      schema_oid: schemaData.bikeSchema.oid,
+      base_table_oid: schemaData.tables.serviceRequests.oid,
       associated_role_id: configuredRole.id,
       header_title: { text: manifest.supportingState.formName },
       header_subtitle: {
-        text: 'Choose the item and patron, then Mathesar creates the record.',
+        text: 'Choose the customer, equipment, and mechanic for the repair.',
       },
-      submit_message: { text: 'Thanks, your checkout request was saved.' },
+      submit_message: { text: 'Thanks, your service request was saved.' },
       submit_redirect_url: null,
-      submit_button_label: 'Submit request',
+      submit_button_label: 'Submit',
       fields: [
         {
-          key: 'item',
+          key: 'customer',
           index: 0,
-          label: 'Item',
-          help: 'Search for the library item being checked out.',
+          label: 'Customer',
+          help: '',
           kind: 'foreign_key',
-          column_attnum: columns.get('Item').id,
-          related_table_oid: schemaData.tables.items.oid,
+          column_attnum: columns.get('customer_id').id,
+          related_table_oid: schemaData.tables.customers.oid,
           fk_interaction_rule: 'must_pick',
           styling: { size: 'regular' },
           is_required: true,
           child_fields: [],
         },
         {
-          key: 'patron',
+          key: 'equipment',
           index: 1,
-          label: 'Patron',
-          help: 'Search for the patron checking out the item.',
+          label: 'Equipment',
+          help: '',
           kind: 'foreign_key',
-          column_attnum: columns.get('Patron').id,
-          related_table_oid: schemaData.tables.patrons.oid,
+          column_attnum: columns.get('equipment_id').id,
+          related_table_oid: schemaData.tables.equipment.oid,
           fk_interaction_rule: 'must_pick',
           styling: { size: 'regular' },
           is_required: true,
           child_fields: [],
         },
         {
-          key: 'due_date',
+          key: 'mechanic',
           index: 2,
-          label: 'Due date',
-          help: 'Set the expected return date.',
-          kind: 'scalar_column',
-          column_attnum: columns.get('Due Date').id,
+          label: 'Mechanic',
+          help: '',
+          kind: 'foreign_key',
+          column_attnum: columns.get('mechanic_id').id,
+          related_table_oid: schemaData.tables.mechanics.oid,
+          fk_interaction_rule: 'must_pick',
           styling: { size: 'regular' },
           is_required: true,
+          child_fields: [],
+        },
+        {
+          key: 'description',
+          index: 3,
+          label: 'Description',
+          help: '',
+          kind: 'scalar_column',
+          column_attnum: columns.get('request_description').id,
+          styling: { size: 'regular' },
+          is_required: true,
+          child_fields: [],
+        },
+        {
+          key: 'cost',
+          index: 4,
+          label: 'Cost',
+          help: '',
+          kind: 'scalar_column',
+          column_attnum: columns.get('cost').id,
+          styling: { size: 'regular' },
+          is_required: false,
+          child_fields: [],
+        },
+        {
+          key: 'time_in',
+          index: 5,
+          label: 'Time In',
+          help: '',
+          kind: 'scalar_column',
+          column_attnum: columns.get('time_in').id,
+          styling: { size: 'regular' },
+          is_required: false,
           child_fields: [],
         },
       ],
@@ -366,77 +454,152 @@ async function ensureShowcaseForm(rpc, database, schemaData, configuredRole) {
 async function ensureShowcaseExploration(rpc, database, schemaData) {
   const existingExplorations = await rpc('explorations.list', {
     database_id: database.id,
-    schema_oid: schemaData.librarySchema.oid,
+    schema_oid: schemaData.bikeSchema.oid,
   });
   const existing = existingExplorations.find(
     (exploration) => exploration.name === manifest.supportingState.explorationName,
   );
   if (existing) return existing;
 
-  const checkoutColumns = await getColumns(rpc, database.id, schemaData.tables.checkouts.oid);
-  const itemColumns = await getColumns(rpc, database.id, schemaData.tables.items.oid);
-  const bookColumns = await getColumns(rpc, database.id, schemaData.tables.books.oid);
+  const customerColumns = await getColumns(rpc, database.id, schemaData.tables.customers.oid);
+  const serviceRequestColumns = await getColumns(
+    rpc,
+    database.id,
+    schemaData.tables.serviceRequests.oid,
+  );
+  const joinableTables = await rpc('tables.list_joinable', {
+    database_id: database.id,
+    table_oid: schemaData.tables.customers.oid,
+    max_depth: 1,
+  });
+  const serviceRequestsJoin = joinableTables.joinable_tables.find(
+    (joinable) =>
+      joinable.target === schemaData.tables.serviceRequests.oid &&
+      joinable.fkey_path?.[0]?.[1],
+  );
+  if (!serviceRequestsJoin) {
+    throw new Error('Unable to find reverse join from Customers to Service Requests.');
+  }
   const initialColumns = [
     {
-      alias: 'checkout_time',
-      attnum: checkoutColumns.get('Checkout Time').id,
+      alias: 'first_name',
+      attnum: customerColumns.get('first_name').id,
     },
     {
-      alias: 'due_date',
-      attnum: checkoutColumns.get('Due Date').id,
+      alias: 'last_name',
+      attnum: customerColumns.get('last_name').id,
     },
     {
-      alias: 'item_barcode',
-      attnum: itemColumns.get('Barcode').id,
-      join_path: [
-        [
-          [schemaData.tables.checkouts.oid, checkoutColumns.get('Item').id],
-          [schemaData.tables.items.oid, itemColumns.get('id').id],
-        ],
-      ],
+      alias: 'email',
+      attnum: customerColumns.get('email').id,
     },
     {
-      alias: 'book_title',
-      attnum: bookColumns.get('Title').id,
-      join_path: [
-        [
-          [schemaData.tables.checkouts.oid, checkoutColumns.get('Item').id],
-          [schemaData.tables.items.oid, itemColumns.get('id').id],
-        ],
-        [
-          [schemaData.tables.items.oid, itemColumns.get('Book').id],
-          [schemaData.tables.books.oid, bookColumns.get('id').id],
-        ],
-      ],
+      alias: 'phone',
+      attnum: customerColumns.get('phone').id,
+    },
+    {
+      alias: 'requests',
+      attnum: serviceRequestColumns.get('request_description').id,
+      join_path: serviceRequestsJoin.join_path,
     },
   ];
   return rpc('explorations.add', {
     database_id: database.id,
     exploration_def: {
       database_id: database.id,
-      schema_oid: schemaData.librarySchema.oid,
-      base_table_oid: schemaData.tables.checkouts.oid,
+      schema_oid: schemaData.bikeSchema.oid,
+      base_table_oid: schemaData.tables.customers.oid,
       name: manifest.supportingState.explorationName,
-      description: 'Library checkout records joined to item and book details.',
+      description: 'Customers grouped with their related bike service requests.',
       initial_columns: initialColumns,
       transformations: [
         {
-          type: 'filter',
+          type: 'summarize',
           spec: {
-            not_null: [{ column_name: ['book_title'] }],
+            base_grouping_column: 'first_name',
+            grouping_expressions: [
+              {
+                input_alias: 'first_name',
+                output_alias: 'first_name_grouped',
+              },
+              {
+                input_alias: 'last_name',
+                output_alias: 'last_name_grouped',
+              },
+              {
+                input_alias: 'email',
+                output_alias: 'email_grouped',
+              },
+              {
+                input_alias: 'phone',
+                output_alias: 'phone_grouped',
+              },
+            ],
+            aggregation_expressions: [
+              {
+                input_alias: 'requests',
+                output_alias: 'requests_list',
+                function: 'distinct_aggregate_to_array',
+              },
+            ],
           },
         },
-        {
-          type: 'order',
-          spec: [{ field: 'checkout_time', direction: 'desc' }],
-        },
       ],
-      display_options: null,
+      display_options: {
+        columnDisplayOptions: {
+          0: {
+            column: {
+              name: 'first_name_grouped',
+              index: 0,
+              type: { name: 'string' },
+            },
+            displayOptions: { display_width: 80 },
+          },
+          1: {
+            column: {
+              name: 'last_name_grouped',
+              index: 1,
+              type: { name: 'string' },
+            },
+            displayOptions: { display_width: 80 },
+          },
+          2: {
+            column: {
+              name: 'email_grouped',
+              index: 2,
+              type: { name: 'email' },
+            },
+            displayOptions: { display_width: 130 },
+          },
+          3: {
+            column: {
+              name: 'phone_grouped',
+              index: 3,
+              type: { name: 'string' },
+            },
+            displayOptions: { display_width: 120 },
+          },
+          4: {
+            column: {
+              name: 'requests_list',
+              index: 4,
+              type: { name: 'array', item_type: 'string' },
+            },
+            displayOptions: { display_width: 250 },
+          },
+        },
+      },
       display_names: {
-        checkout_time: 'Checkout time',
-        due_date: 'Due date',
-        item_barcode: 'Item barcode',
-        book_title: 'Book title',
+        first_name: 'First Name',
+        last_name: 'Last Name',
+        email: 'Email',
+        phone: 'Phone',
+        requests: 'Requests',
+        first_name_grouped: 'First Name',
+        last_name_grouped: 'Last Name',
+        email_grouped: 'Email',
+        phone_grouped: 'Phone',
+        requests_list: 'Requests',
       },
     },
   });
@@ -462,13 +625,63 @@ async function setupShowcaseData(options, rpc) {
     database = result.database;
   }
   const schemaData = await getSchemaData(rpc, database.id);
+  const employeeColumns = await getColumns(
+    rpc,
+    database.id,
+    schemaData.tables.employees.oid,
+  );
+  const employeeRoleColumn = employeeColumns.get('role');
+  if (!employeeRoleColumn) {
+    throw new Error('Unable to find Employees.role for the record selector screenshot.');
+  }
   const collaboratorState = await ensureViewerRoleAndCollaborator(rpc, database);
+  const permissionRoles = await ensurePermissionShowcaseRoles(rpc, database);
   await ensureReadOnlyTablePrivileges(
     rpc,
     database.id,
     schemaData.tables.books.oid,
     collaboratorState.role.oid,
   );
+  await ensureSchemaPrivileges(rpc, database.id, schemaData.bikeSchema.oid, [
+    {
+      role_oid: collaboratorState.role.oid,
+      direct: ['USAGE'],
+    },
+  ]);
+  await ensureTablePrivileges(rpc, database.id, schemaData.tables.customers.oid, [
+    {
+      role_oid: collaboratorState.role.oid,
+      direct: ['SELECT'],
+    },
+  ]);
+  await ensureTablePrivileges(rpc, database.id, schemaData.tables.equipment.oid, [
+    {
+      role_oid: collaboratorState.role.oid,
+      direct: ['SELECT'],
+    },
+  ]);
+  await ensureTablePrivileges(rpc, database.id, schemaData.tables.mechanics.oid, [
+    {
+      role_oid: collaboratorState.role.oid,
+      direct: ['SELECT'],
+    },
+  ]);
+  await ensureTablePrivileges(rpc, database.id, schemaData.tables.serviceRequests.oid, [
+    {
+      role_oid: collaboratorState.role.oid,
+      direct: ['INSERT', 'SELECT'],
+    },
+  ]);
+  await ensureTablePrivileges(rpc, database.id, schemaData.tables.serviceMilestones.oid, [
+    {
+      role_oid: permissionRoles.intern.oid,
+      direct: ['SELECT'],
+    },
+    {
+      role_oid: permissionRoles.assistantManager.oid,
+      direct: ['INSERT', 'SELECT', 'UPDATE'],
+    },
+  ]);
   const form = await ensureShowcaseForm(
     rpc,
     database,
@@ -480,8 +693,10 @@ async function setupShowcaseData(options, rpc) {
     database,
     schemaData,
     collaboratorState,
+    permissionRoles,
     form,
     exploration,
+    employeeRoleColumnId: employeeRoleColumn.id,
   };
 }
 
@@ -594,6 +809,10 @@ async function openCreateDatabaseDialog(page) {
     page.getByLabel(/bike shop/i),
   ]);
   await checkFirstVisible(page, [
+    page.getByRole('checkbox', { name: /ice\s*cream/i }),
+    page.getByLabel(/ice\s*cream/i),
+  ]);
+  await checkFirstVisible(page, [
     page.getByRole('checkbox', { name: /movie rentals/i }),
     page.getByLabel(/movie rentals/i),
   ]);
@@ -601,16 +820,26 @@ async function openCreateDatabaseDialog(page) {
 }
 
 async function openInspector(page) {
-  await clickFirstVisible(page, [
-    page.getByRole('button', { name: /inspector/i }),
-    page.getByRole('button', { name: /details/i }),
-    page.locator('[aria-label*="Inspector" i]'),
-    page.locator('[title*="Inspector" i]'),
-  ]);
+  const inspectorTab = page.getByRole('tab', { name: /^table$/i }).first();
+  if (await inspectorTab.isVisible().catch(() => false)) return;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await clickFirstVisible(page, [
+      page.getByRole('button', { name: /inspector/i }),
+      page.getByRole('button', { name: /details/i }),
+      page.locator('[aria-label*="Inspector" i]'),
+      page.locator('[title*="Inspector" i]'),
+    ]);
+    await inspectorTab.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {});
+    if (await inspectorTab.isVisible().catch(() => false)) return;
+  }
 }
 
-async function openRecordSelector(page) {
+async function openRecordSelector(page, employeeRoleColumnId) {
+  await openInspector(page);
   await clickFirstVisible(page, [
+    page.getByText(/^Kelli Turner$/i).first(),
+    page.getByText(/^David Mclaughlin$/i).first(),
+    page.locator('[role="gridcell"]').filter({ hasText: /Kelli Turner|David Mclaughlin/i }).first(),
     page.getByRole('button', { name: /pick record/i }),
     page.locator('button.dropdown-button[aria-label*="Pick" i]'),
   ]);
@@ -626,7 +855,15 @@ async function openRecordSelector(page) {
       await page.locator('.modal-record-selector, .record-selector-window').first()
         .waitFor({ state: 'visible', timeout: 5000 });
     });
-  await page.waitForTimeout(500);
+  const visibleDialog = page.locator('.modal-record-selector, .record-selector-window, [role="dialog"]')
+    .filter({ hasText: /employees/i })
+    .first();
+  const roleSearch = visibleDialog
+    .locator(`.record-selector-input.column-${employeeRoleColumnId}`)
+    .first();
+  await roleSearch.waitFor({ state: 'visible', timeout: 5000 });
+  await roleSearch.fill('Forklift');
+  await page.waitForTimeout(700);
 }
 
 async function openRelationshipCreation(page) {
@@ -646,9 +883,14 @@ async function openRelationshipCreation(page) {
     page.locator('.select button, button.dropdown.trigger').filter({ hasText: /select/i }),
   ]);
   await clickFirstVisible(page, [
-    page.getByRole('option', { name: /patrons/i }),
-    page.getByRole('menuitem', { name: /patrons/i }),
-    page.getByText(/^Patrons$/i),
+    page.getByRole('option', { name: /customers/i }),
+    page.getByRole('menuitem', { name: /customers/i }),
+    page.getByText(/^Customers$/i),
+  ]);
+  await clickFirstVisible(page, [
+    page.getByRole('radio', { name: /many to many/i }),
+    page.locator('label').filter({ hasText: /many to many/i }),
+    page.getByText(/many to many/i),
   ]);
   await page.waitForTimeout(500);
 }
@@ -659,6 +901,17 @@ async function openPermissionsDialog(page) {
     page.getByRole('link', { name: /permission/i }),
     page.getByText(/permissions/i),
   ]);
+  await page.getByText(/permissions for/i).first()
+    .waitFor({ state: 'visible', timeout: 5000 });
+  await clickFirstVisible(page, [
+    page.getByText(/assistant manager/i).first(),
+    page.locator('[role="dialog"]').getByText(/assistant manager/i).first(),
+  ]);
+  await clickFirstVisible(page, [
+    page.getByText(/^role privileges$/i).first(),
+    page.locator('[role="dialog"]').getByText(/^role privileges$/i).first(),
+  ]);
+  await page.waitForTimeout(500);
 }
 
 async function openAddCollaboratorDialog(page) {
@@ -699,22 +952,98 @@ async function openExplorationBuilderState(page) {
     page.getByRole('button', { name: /transform results/i }),
     page.getByText(/transform results/i),
   ]);
+  await clickFirstVisible(page, [
+    page.getByRole('columnheader', { name: /requests/i }),
+    page.locator('[role="columnheader"]').filter({ hasText: /requests/i }).first(),
+  ]);
+  await clickFirstVisible(page, [
+    page.getByRole('button', { name: /^list$/i }),
+    page.locator('button').filter({ hasText: /^list$/i }).first(),
+  ]);
   await page.waitForTimeout(500);
+}
+
+async function openExplorationResultState(page) {
+  const inspectorTab = page.getByRole('tab', { name: /^exploration$/i }).first();
+  if (await inspectorTab.isVisible().catch(() => false)) {
+    await clickFirstVisible(page, [
+      page.getByRole('button', { name: /inspector/i }),
+      page.locator('[aria-label*="Inspector" i]'),
+      page.locator('[title*="Inspector" i]'),
+    ]);
+  }
+  await page.waitForTimeout(500);
+}
+
+async function openFormBuilderState(page) {
+  await page.mouse.click(95, 545);
+  await page.waitForTimeout(500);
+  await clickFirstVisible(page, [
+    page.getByText(/^Mechanic$/i).first(),
+    page.locator('label').filter({ hasText: /^Mechanic$/i }).first(),
+  ]);
+  await clickFirstVisible(page, [
+    page.getByRole('button', { name: /can only choose/i }),
+    page.locator('button').filter({ hasText: /can only choose/i }).first(),
+    page.getByText(/can only choose/i).first(),
+  ]);
+  await page.waitForTimeout(500);
+}
+
+async function fillPublicFormExample(page) {
+  const mechanicLabel = page.getByText(/^Mechanic$/i).first();
+  await mechanicLabel.scrollIntoViewIfNeeded().catch(() => {});
+  await clickFirstVisible(page, [
+    page.locator('xpath=//*[normalize-space()="Mechanic"]/following::button[1]'),
+    page.getByLabel(/^Mechanic$/i),
+  ]);
+  await page.mouse.click(850, 330);
+  await page.waitForTimeout(300);
+  const filled = await fillFirstVisible(page, [
+    page.locator('[role="dialog"], .dropdown, .popover, .floating-ui-portal')
+      .getByRole('textbox')
+      .first(),
+    page.getByPlaceholder(/search/i),
+    page.locator('input[type="search"]').first(),
+  ], 'Rob');
+  if (!filled) {
+    await page.keyboard.type('Rob');
+  }
+  await page.waitForTimeout(500);
+}
+
+async function frameRecordAndRelatedRecords(page) {
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    const content = document.querySelector('.record-page-content');
+    if (content) {
+      content.scrollTop = 520;
+      return;
+    }
+    const scrollable = document.scrollingElement ?? document.documentElement;
+    scrollable.scrollTo(0, 520);
+  });
+  await waitForApp(page);
 }
 
 function routes(state) {
   const { database, schemaData, form, exploration } = state;
   const schemaBase = `/db/${database.id}/schemas/${schemaData.librarySchema.oid}`;
+  const bikeSchemaBase = `/db/${database.id}/schemas/${schemaData.bikeSchema.oid}`;
+  const iceCreamSchemaBase = `/db/${database.id}/schemas/${schemaData.iceCreamSchema.oid}`;
   return {
     databaseHome: `/db/${database.id}/schemas/`,
     collaborators: `/db/${database.id}/settings/collaborators/`,
     schema: `${schemaBase}/`,
     booksTable: `${schemaBase}/tables/${schemaData.tables.books.oid}/`,
     itemsTable: `${schemaBase}/tables/${schemaData.tables.items.oid}/`,
-    recordPage: `${schemaBase}/tables/${schemaData.tables.items.oid}/1`,
-    formBuilder: `${schemaBase}/forms/${form.id}/`,
+    itemRecordPage: `${schemaBase}/tables/${schemaData.tables.items.oid}/1`,
+    timesheetsTable: `${iceCreamSchemaBase}/tables/${schemaData.tables.timesheets.oid}/`,
+    customersTable: `${bikeSchemaBase}/tables/${schemaData.tables.customers.oid}/`,
+    serviceMilestonesTable: `${bikeSchemaBase}/tables/${schemaData.tables.serviceMilestones.oid}/`,
+    formBuilder: `${bikeSchemaBase}/forms/${form.id}/`,
     publicForm: `/shares/forms/${form.token}/`,
-    exploration: `${schemaBase}/explorations/${exploration.id}/`,
+    exploration: `${bikeSchemaBase}/explorations/${exploration.id}/`,
     settings: `/db/${database.id}/settings/`,
   };
 }
@@ -733,32 +1062,37 @@ async function prepareCapture(page, capture, state) {
       await goto(page, r.schema);
       break;
     case 'table-inspector':
-      await goto(page, r.booksTable);
+      await goto(page, r.timesheetsTable);
       await openInspector(page);
       break;
     case 'record-selector':
-      await goto(page, r.itemsTable);
-      await openRecordSelector(page);
+      await goto(page, r.timesheetsTable);
+      await openRecordSelector(page, state.employeeRoleColumnId);
       break;
     case 'relationship-creation':
-      await goto(page, r.booksTable);
+      await goto(page, r.serviceMilestonesTable);
       await openRelationshipCreation(page);
       break;
     case 'table-permissions':
-      await goto(page, r.booksTable);
+      await goto(page, r.serviceMilestonesTable);
+      await openInspector(page);
       await openPermissionsDialog(page);
       break;
     case 'record-page':
-      await goto(page, r.recordPage);
+      await goto(page, r.itemRecordPage);
+      await frameRecordAndRelatedRecords(page);
       break;
     case 'form-builder':
       await goto(page, r.formBuilder);
+      await openFormBuilderState(page);
       break;
     case 'form-fill-example':
       await goto(page, r.publicForm);
+      await fillPublicFormExample(page);
       break;
     case 'viewing-exploration':
       await goto(page, r.exploration);
+      await openExplorationResultState(page);
       break;
     case 'building-exploration':
       await goto(page, r.exploration);

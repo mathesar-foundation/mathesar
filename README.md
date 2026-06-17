@@ -109,13 +109,13 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 ### Working with tables
 
 <p align="center">
-  <img src="./assets/readme/screenshots/04-table-inspector.png" width="900" alt="Mathesar table view for library books with the table inspector open." />
+  <img src="./assets/readme/screenshots/04-table-inspector.png" width="900" alt="Mathesar table view for ice cream shop timesheets with the table inspector open." />
 </p>
 
 ### Finding a nested record
 
 <p align="center">
-  <img src="./assets/readme/screenshots/05-record-selector.png" width="900" alt="Mathesar table view with a foreign-key record selector open for choosing a related book." />
+  <img src="./assets/readme/screenshots/05-record-selector.png" width="900" alt="Mathesar table view with nested record selection open for choosing a timesheet employee." />
 </p>
 
 ### Linking two tables together
@@ -127,37 +127,37 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 ### Managing table permissions
 
 <p align="center">
-  <img src="./assets/readme/screenshots/07-table-permissions.png" width="900" alt="Mathesar table permissions interface showing privileges for a read-only collaborator role." />
+  <img src="./assets/readme/screenshots/07-table-permissions.png" width="900" alt="Mathesar table permissions interface showing read-only and custom role privileges." />
 </p>
 
 ### Viewing a single record with related records
 
 <p align="center">
-  <img src="./assets/readme/screenshots/08-record-page.png" width="900" alt="Mathesar single-record page showing a library item and its related book details." />
+  <img src="./assets/readme/screenshots/08-record-page.png" width="900" alt="Mathesar single-record page for a library item with related checkout records visible." />
 </p>
 
 ### Building a form
 
 <p align="center">
-  <img src="./assets/readme/screenshots/09-form-builder.png" width="900" alt="Mathesar form builder for a library checkout request form." />
+  <img src="./assets/readme/screenshots/09-form-builder.png" width="900" alt="Mathesar form builder for a bike shop service request form with field rules open." />
 </p>
 
 ### Filling out a form
 
 <p align="center">
-  <img src="./assets/readme/screenshots/10-form-fill-example.png" width="900" alt="Public Mathesar form for submitting a library checkout request." />
+  <img src="./assets/readme/screenshots/10-form-fill-example.png" width="900" alt="Public Mathesar service request form being filled with a mechanic search." />
 </p>
 
 ### Viewing an Exploration (query result)
 
 <p align="center">
-  <img src="./assets/readme/screenshots/11-viewing-exploration.png" width="900" alt="Mathesar exploration page showing query results for recent library checkouts." />
+  <img src="./assets/readme/screenshots/11-viewing-exploration.png" width="900" alt="Mathesar exploration page showing bike shop customers with related service requests." />
 </p>
 
 ### Building an Exploration (query)
 
 <p align="center">
-  <img src="./assets/readme/screenshots/12-building-exploration.png" width="900" alt="Mathesar Data Explorer query builder with selected columns and transformations." />
+  <img src="./assets/readme/screenshots/12-building-exploration.png" width="900" alt="Mathesar Data Explorer query builder showing a service request list aggregation." />
 </p>
 
 ### Disconnecting a database
