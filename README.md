@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/community/matrix/" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a> • <a href="https://github.com/orgs/mathesar-foundation/projects/2" target="_blank">Roadmap</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme-top" target="_blank">Docs</a> • <a href="https://mathesar.cloud" target="_blank">Mathesar Cloud</a> • <a href="https://wiki.mathesar.org/community/matrix/" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Contributor Wiki</a> • <a href="https://github.com/orgs/mathesar-foundation/projects/2" target="_blank">Roadmap</a>
 </p>
 
 # Mathesar
@@ -60,6 +60,8 @@ We are currently in the **public beta** stage.
 
 Please see [our documentation](https://docs.mathesar.org/?ref=github-readme-installing) for instructions on installing Mathesar on your own server.
 
+Want to use Mathesar without installing it? [Mathesar Cloud](https://mathesar.cloud) is in now early beta and has a free plan.
+
 ## Join our community
 
 The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list.
@@ -88,43 +90,81 @@ We actively encourage contribution! Get started by reading our [Contributor Guid
 
 ### Connecting a database
 
-![connect-db](https://github.com/user-attachments/assets/d7188c8d-a040-4bc4-8350-28b2a6fd1661)
+<p align="center">
+  <img src="./assets/readme/screenshots/01-connect-db.png" width="900" alt="Mathesar dialog for creating a PostgreSQL database with sample dataset options." />
+</p>
 
 ### Adding collaborators
-![add-collaborator](https://github.com/user-attachments/assets/9bac7016-4a15-4a76-9abb-427dd6369305)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/02-add-collaborator.png" width="900" alt="Mathesar collaborators page showing a read-only user added to the showcase database." />
+</p>
 
 ### Viewing a Postgres schema
-![schema-page](https://github.com/user-attachments/assets/59c89bed-d240-4de4-ad33-91625ebe20ab)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/03-schema-page.png" width="900" alt="Mathesar schema page showing the Library Management tables, forms, and explorations." />
+</p>
 
 ### Working with tables
-![table-inspector](https://github.com/user-attachments/assets/89212249-2fd6-4ef6-a4ef-3e4df32bfb89)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/04-table-inspector.png" width="900" alt="Mathesar table view for ice cream shop timesheets with the table inspector open." />
+</p>
 
 ### Finding a nested record
-![record-selector](https://github.com/user-attachments/assets/d88f4787-9994-4b56-a92f-322205abc6a1)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/05-record-selector.png" width="900" alt="Mathesar table view with nested record selection open for choosing a timesheet employee." />
+</p>
 
 ### Linking two tables together
-![relationship-creation](https://github.com/user-attachments/assets/4240955e-3bc5-4f9c-ad4e-eac79cf42e63)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/06-relationship-creation.png" width="900" alt="Mathesar relationship creation interface for linking two PostgreSQL tables." />
+</p>
 
 ### Managing table permissions
-![table-permissions](https://github.com/user-attachments/assets/74357082-3bf1-47c0-bf85-6c5eab77ef0f)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/07-table-permissions.png" width="900" alt="Mathesar table permissions interface showing read-only and custom role privileges." />
+</p>
 
 ### Viewing a single record with related records
-![record-page](https://github.com/user-attachments/assets/d2e621e3-5597-44ef-ae87-482bec0b9bcc)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/08-record-page.png" width="900" alt="Mathesar single-record page for a library item with related checkout records visible." />
+</p>
 
 ### Building a form
-![form-builder](https://raw.githubusercontent.com/mathesar-foundation/mathesar/develop/docs/docs/assets/releases/0.5.0/form-builder.png)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/09-form-builder.png" width="900" alt="Mathesar form builder for a bike shop service request form with field rules open." />
+</p>
 
 ### Filling out a form
-![form-fill-example](https://raw.githubusercontent.com/mathesar-foundation/mathesar/develop/docs/docs/assets/releases/0.5.0/form-fill-example.png)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/10-form-fill-example.png" width="900" alt="Public Mathesar service request form being filled with a mechanic search." />
+</p>
 
 ### Viewing an Exploration (query result)
-![viewing-exploration](https://github.com/user-attachments/assets/410cb99f-a583-411b-9706-7967bff673e6)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/11-viewing-exploration.png" width="900" alt="Mathesar exploration page showing bike shop customers with related service requests." />
+</p>
 
 ### Building an Exploration (query)
-![building-exploration](https://github.com/user-attachments/assets/de662d3c-1efa-42e6-a960-17e00432c8db)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/12-building-exploration.png" width="900" alt="Mathesar Data Explorer query builder showing a service request list aggregation." />
+</p>
 
 ### Disconnecting a database
-![disconnect-db](https://github.com/user-attachments/assets/f22e9c78-3c92-40c8-8ef9-dcb4cf8e8aea)
+
+<p align="center">
+  <img src="./assets/readme/screenshots/13-disconnect-db.png" width="900" alt="Mathesar confirmation dialog for disconnecting the showcase database." />
+</p>
 
 ## Mathesar in action
 
