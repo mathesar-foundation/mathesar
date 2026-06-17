@@ -14,7 +14,7 @@
 
 # Mathesar
 
-Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It’s self hosted, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.
+Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface, with no code needed. It’s self hosted, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.
 
 Mathesar is as scalable as Postgres and supports any size or complexity of data, making it ideal for workflows involving production databases. It requires minimal setup, and integrates into your existing infrastructure. Because Mathesar is self-hosted, your data never leaves your servers, and access control based on Postgres roles and privileges keeps your database secure without adding unnecessary risk.
 
@@ -174,7 +174,7 @@ https://github.com/user-attachments/assets/6bdfb178-17b4-4abf-aac4-9781e1d841ab
 
 Using databases shouldn't require technical expertise or expensive, closed-off tools. Databases are incredibly powerful, but they're often trapped behind complex interfaces that are hard to use or limit how people can access and share their data. We want to change that by building user-friendly tools that unlock the power of existing databases without sacrificing accessibility, portability, or extensibility.
 
-Mathesar is our answer: an open-source platform designed to unlock the full potential of PostgreSQL, one of the most powerful and trusted open-source databases. Mathesar is easy to use, interoperable, and extensible, while also giving you complete control over your data. As a nonprofit, we're committed to keeping Mathesar 100% open source and available to everyone—because better ways to work with data mean better decisions, and better decisions lead to a better world.
+Mathesar is our answer: an open-source platform designed to unlock the full potential of PostgreSQL, one of the most powerful and trusted open-source databases. Mathesar is easy to use, interoperable, and extensible, while also giving you complete control over your data. As a nonprofit, we're committed to keeping Mathesar 100% open source and available to everyone. Better ways to work with data mean better decisions, and better decisions lead to a better world.
 
 ## Bugs and troubleshooting
 
