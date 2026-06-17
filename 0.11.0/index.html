@@ -12,7 +12,7 @@
       
       
       
-        <link rel="next" href="administration/install-via-docker-compose/">
+        <link rel="next" href="administration/try-mathesar-locally/">
       
       
       <link rel="icon" href="assets/images/favicon.ico">
@@ -95,6 +95,23 @@
       
     </div>
     <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+              <button class="md-banner__button md-icon" aria-label="Don't show this again">
+                
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              </button>
+            
+            
+  <a href="https://mathesar.cloud/">Mathesar Cloud</a> is in early beta and is the quickest way to try and use Mathesar.
+
+          </div>
+          
+            <script>var el=document.querySelector("[data-md-component=announce]");if(el){var content=el.querySelector(".md-typeset");__md_hash(content.innerHTML)===__md_get("__announce")&&(el.hidden=!0)}</script>
+          
+        </aside>
       
     </div>
     
@@ -325,18 +342,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#try-mathesar" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
-      Try Mathesar
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-mathesar" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install Mathesar
+      Getting started
     </span>
   </a>
   
@@ -403,6 +411,29 @@
             Install Mathesar
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="administration/try-mathesar-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Try Mathesar locally
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2359,18 +2390,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#try-mathesar" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
-      Try Mathesar
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-mathesar" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install Mathesar
+      Getting started
     </span>
   </a>
   
@@ -2405,50 +2427,37 @@
 
 
 <h1 id="mathesar-documentation">Mathesar Documentation<a class="headerlink" href="#mathesar-documentation" title="Permanent link">&para;</a></h1>
-<p>Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It has native database-level access control, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions. The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.</p>
-<h2 id="try-mathesar">Try Mathesar<a class="headerlink" href="#try-mathesar" title="Permanent link">&para;</a></h2>
-<p>This is a quick way to play with Mathesar locally, but is not appropriate for saving data that you care about or setting up a long-term installation.</p>
-<ol>
-<li>
-<p>With <a href="https://docs.docker.com/get-docker/">Docker</a> installed, run:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
-</span></code></pre></div>
-</li>
-<li>
-<p>Visit <a href="http://localhost:8000/">http://localhost:8000/</a> to set up an admin user account and create a database connection.</p>
-<details class="tip">
-<summary>Tips when trying Mathesar locally</summary>
+<p>Mathesar is a web application that makes working with PostgreSQL databases both simple and powerful. It empowers users of all technical skill levels to view, edit, query, and collaborate on data with a familiar spreadsheet-like interface—no code needed. It has native database-level access control, can be deployed in minutes, and works directly with PostgreSQL databases, schemas, and tables without extra abstractions.</p>
+<p>The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(3) nonprofit.</p>
+<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<div class="admonition info">
+<p class="admonition-title"><a href="https://mathesar.cloud/">Mathesar Cloud</a> is in early beta and is the quickest way to try and use Mathesar.</p>
+</div>
+<p>You can install Mathesar by following one of the guides below:</p>
+<div class="grid cards">
 <ul>
 <li>
-<p>To open a <a href="https://www.postgresql.org/docs/current/app-psql.html">psql</a> shell within the container, run:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker exec -it mathesar sudo -u postgres psql
-</span></code></pre></div>
+<p><img alt="🧪" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f9ea.svg" title=":test_tube:" />  <strong>Test out Mathesar</strong></p>
+<p>Get Mathesar quickly up and running in just one command.</p>
+<p><a href="administration/try-mathesar-locally/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Try Mathesar locally</a></p>
 </li>
 <li>
-<p>To stop Mathesar, press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the shell where it is running.</p>
+<p><img alt="🐳" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f433.svg" title=":whale:" />  <strong>Install using Docker</strong></p>
+<p>Run a production setup with separate reverse-proxy and database containers.</p>
+<p><a href="administration/install-via-docker-compose/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Use Docker Compose</a></p>
 </li>
 <li>
-<p>To start again, run <code>docker start mathesar</code>.</p>
+<p><img alt="✨" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" title=":sparkles:" />  <strong>Custom installation</strong></p>
+<p>Install Mathesar directly, without using containers.</p>
+<p><a href="administration/install-from-scratch/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Install from scratch</a></p>
 </li>
 <li>
-<p>To remove the Docker container, run <code>docker rm mathesar</code> .</p>
-<p>⚠️ This will also delete the data that you&rsquo;ve saved within Mathesar!</p>
+<p><img alt="🧱" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f9f1.svg" title=":bricks:" />  <strong>Install on a managed platform</strong></p>
+<p>Deploy Mathesar in your own DigitalOcean or Railway account.</p>
+<p><a href="administration/install-digitalocean/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> DigitalOcean</a> or <a href="administration/install-railway/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Railway</a></p>
 </li>
 </ul>
-</details>
-</li>
-</ol>
-<h2 id="install-mathesar">Install Mathesar<a class="headerlink" href="#install-mathesar" title="Permanent link">&para;</a></h2>
-<p>You can self-host Mathesar by following one of the guides below:</p>
-<ul>
-<li><a href="administration/install-via-docker-compose/">Using Docker Compose</a> — a production setup with separate reverse-proxy and database containers.</li>
-<li><a href="administration/install-from-scratch/">Directly on Linux, macOS, or WSL</a> — an advanced setup that doesn&rsquo;t rely on Docker.</li>
-<li>Via one-click, GUI-only installation:<ul>
-<li><a href="administration/install-digitalocean/">DigitalOcean</a></li>
-<li><a href="administration/install-railway/">Railway</a></li>
-</ul>
-</li>
-</ul>
+</div>
 <h2 id="help-out">Help out<a class="headerlink" href="#help-out" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://mathesar.org/donate">Make a donation</a> - We&rsquo;re a non-profit organization and your donations help sustain our core team.</li>
@@ -2504,7 +2513,7 @@
     
     
       
-      <script id="__config" type="application/json">{"base": ".", "features": ["content.tabs.link", "content.code.copy", "navigation.sections", "navigation.expand"], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": ".", "features": ["content.tabs.link", "content.code.copy", "navigation.sections", "navigation.expand", "announce.dismiss"], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
       <script src="assets/javascripts/bundle.13a4f30d.min.js"></script>
