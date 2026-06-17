@@ -8,7 +8,7 @@ The project is 100% open source and maintained by Mathesar Foundation, a 501(c)(
 
 !!! info "[Mathesar Cloud](https://mathesar.cloud/) is in early beta and is the quickest way to try and use Mathesar."
 
-You can self-host Mathesar by following one of the guides below:
+You can install Mathesar by following one of the guides below:
 
 <div class="grid cards" markdown="1">
 
