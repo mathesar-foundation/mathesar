@@ -1,0 +1,120 @@
+{
+  "outputDir": "./screenshots",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "deviceScaleFactor": 2
+  },
+  "database": {
+    "name": "readme_showcase",
+    "nickname": "Mathesar Showcase",
+    "sampleData": ["library_management", "bike_shop", "movie_rentals"]
+  },
+  "supportingState": {
+    "viewer": {
+      "username": "readme_viewer_user",
+      "email": "readme_viewer@example.com",
+      "fullName": "README Viewer",
+      "password": "readme-viewer-password"
+    },
+    "viewerRole": {
+      "name": "readme_viewer",
+      "password": "readme-viewer-role-password"
+    },
+    "formName": "Library checkout request",
+    "explorationName": "Recent library checkouts"
+  },
+  "captures": [
+    {
+      "id": "connect-db",
+      "heading": "Connecting a database",
+      "filename": "01-connect-db.png",
+      "alt": "Mathesar dialog for creating a PostgreSQL database with sample dataset options.",
+      "target": "Create/connect database dialog with readme_showcase and sample datasets visible."
+    },
+    {
+      "id": "add-collaborator",
+      "heading": "Adding collaborators",
+      "filename": "02-add-collaborator.png",
+      "alt": "Mathesar collaborators page showing a read-only user added to the showcase database.",
+      "target": "Database collaborators UI with readme_viewer added or shown."
+    },
+    {
+      "id": "schema-page",
+      "heading": "Viewing a Postgres schema",
+      "filename": "03-schema-page.png",
+      "alt": "Mathesar schema page showing the Library Management tables, forms, and explorations.",
+      "target": "Library Management schema page showing related tables, forms, and explorations."
+    },
+    {
+      "id": "table-inspector",
+      "heading": "Working with tables",
+      "filename": "04-table-inspector.png",
+      "alt": "Mathesar table view for library books with the table inspector open.",
+      "target": "Books table page with table inspector open."
+    },
+    {
+      "id": "record-selector",
+      "heading": "Finding a nested record",
+      "filename": "05-record-selector.png",
+      "alt": "Mathesar table view with a foreign-key record selector open for choosing a related book.",
+      "target": "Record selector dropdown for a foreign-key field such as Items.Book."
+    },
+    {
+      "id": "relationship-creation",
+      "heading": "Linking two tables together",
+      "filename": "06-relationship-creation.png",
+      "alt": "Mathesar relationship creation interface for linking two PostgreSQL tables.",
+      "target": "Relationship creation UI using a safe modeling state in the showcase database."
+    },
+    {
+      "id": "table-permissions",
+      "heading": "Managing table permissions",
+      "filename": "07-table-permissions.png",
+      "alt": "Mathesar table permissions interface showing privileges for a read-only collaborator role.",
+      "target": "Table permissions UI showing the read-only collaborator role."
+    },
+    {
+      "id": "record-page",
+      "heading": "Viewing a single record with related records",
+      "filename": "08-record-page.png",
+      "alt": "Mathesar single-record page showing a library item and its related book details.",
+      "target": "Single record page for a Library item or book with related records visible."
+    },
+    {
+      "id": "form-builder",
+      "heading": "Building a form",
+      "filename": "09-form-builder.png",
+      "alt": "Mathesar form builder for a library checkout request form.",
+      "target": "Form builder for Library checkout request."
+    },
+    {
+      "id": "form-fill-example",
+      "heading": "Filling out a form",
+      "filename": "10-form-fill-example.png",
+      "alt": "Public Mathesar form for submitting a library checkout request.",
+      "target": "Public shared form page for Library checkout request."
+    },
+    {
+      "id": "viewing-exploration",
+      "heading": "Viewing an Exploration (query result)",
+      "filename": "11-viewing-exploration.png",
+      "alt": "Mathesar exploration page showing query results for recent library checkouts.",
+      "target": "Saved exploration results table."
+    },
+    {
+      "id": "building-exploration",
+      "heading": "Building an Exploration (query)",
+      "filename": "12-building-exploration.png",
+      "alt": "Mathesar Data Explorer query builder with selected columns and transformations.",
+      "target": "Data Explorer builder with selected columns and filter or join state."
+    },
+    {
+      "id": "disconnect-db",
+      "heading": "Disconnecting a database",
+      "filename": "13-disconnect-db.png",
+      "alt": "Mathesar confirmation dialog for disconnecting the showcase database.",
+      "target": "Disconnect confirmation dialog for readme_showcase, not submitted during capture."
+    }
+  ]
+}
