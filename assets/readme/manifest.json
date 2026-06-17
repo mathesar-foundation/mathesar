@@ -1,8 +1,8 @@
 {
   "outputDir": "./screenshots",
   "viewport": {
-    "width": 1440,
-    "height": 900,
+    "width": 1180,
+    "height": 714,
     "deviceScaleFactor": 2
   },
   "database": {

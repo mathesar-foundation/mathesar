@@ -561,14 +561,26 @@ async function openCreateDatabaseDialog(page) {
     page.getByText(/create database/i),
   ]);
   await clickFirstVisible(page, [
-    page.getByRole('button').filter({ hasText: /create a new database/i }),
-    page.locator('.connect-option button').filter({ hasText: /create a new database/i }),
-    page.getByText(/create a new database/i),
+    page.getByRole('button').filter({ hasText: /connect to an existing database/i }),
+    page.locator('.connect-option button').filter({ hasText: /connect to an existing database/i }),
+    page.getByText(/connect to an existing database/i),
   ]);
   await fillFirstVisible(page, [
-    page.getByLabel(/database name/i),
+    page.getByLabel(/host/i),
     page.locator('input[type="text"]').nth(0),
+  ], 'db');
+  await fillFirstVisible(page, [
+    page.getByLabel(/database name/i),
+    page.locator('input[type="text"]').nth(1),
   ], manifest.database.name);
+  await fillFirstVisible(page, [
+    page.getByLabel(/role name/i),
+    page.locator('input[type="text"]').nth(2),
+  ], 'mathesar');
+  await fillFirstVisible(page, [
+    page.getByLabel(/password/i),
+    page.locator('input[type="password"]').nth(0),
+  ], 'password');
   await clickFirstVisible(page, [
     page.getByLabel(/custom nickname/i),
     page.getByText(/custom nickname/i),
@@ -649,6 +661,16 @@ async function openPermissionsDialog(page) {
   ]);
 }
 
+async function openAddCollaboratorDialog(page) {
+  await clickFirstVisible(page, [
+    page.getByRole('button', { name: /add collaborator/i }),
+    page.locator('button').filter({ hasText: /add collaborator/i }),
+  ]);
+  await page.getByText(/^add collaborator$/i).first()
+    .waitFor({ state: 'visible', timeout: 5000 });
+  await page.waitForTimeout(500);
+}
+
 async function openDisconnectDialog(page) {
   const openedDirectly = await clickFirstVisible(page, [
     page.getByRole('button', { name: /disconnect/i }),
@@ -705,6 +727,7 @@ async function prepareCapture(page, capture, state) {
       break;
     case 'add-collaborator':
       await goto(page, r.collaborators);
+      await openAddCollaboratorDialog(page);
       break;
     case 'schema-page':
       await goto(page, r.schema);
@@ -785,7 +808,16 @@ async function capturePage(page, capture) {
       ${captureSpecificStyle}
     `,
   });
+  const metadata = await sharp(outPath).metadata();
+  const screenshotWidth = metadata.width ?? 0;
+  const screenshotHeight = metadata.height ?? 0;
+  const frameSvg = Buffer.from(`
+    <svg width="${screenshotWidth}" height="${screenshotHeight}" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="${screenshotWidth - 2}" height="${screenshotHeight - 2}" fill="none" stroke="#24292f" stroke-width="2" />
+    </svg>
+  `);
   await sharp(outPath)
+    .composite([{ input: frameSvg }])
     .png({ compressionLevel: 9, adaptiveFiltering: true, palette: true })
     .toBuffer()
     .then((buffer) => fs.writeFile(outPath, buffer));
