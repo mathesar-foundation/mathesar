@@ -25,11 +25,11 @@ Keep in mind that your ability to alter tables may be limited by [access control
 
     - `SELECT` - Allows reading data from the table
     - `INSERT` - Allows creation of new records within the table.
-    - `UPDATE` - Allow updating existing records within the table.
-    - `DELETE` - Allow deletion of records from the table.
+    - `UPDATE` - Allows updating existing records within the table.
+    - `DELETE` - Allows deletion of records from the table.
     - `TRUNCATE` - Allows the deletion of all records from the table at once
-    - `REFERENCES` - Allow creation of foreign key constraints that [reference](./relationships.md) the table.
-    - `TRIGGER` - Allow creation of triggers on the table.
+    - `REFERENCES` - Allows creation of foreign key constraints that [reference](./relationships.md) the table.
+    - `TRIGGER` - Allows creation of triggers on the table.
 
 See the [PostgreSQL docs](https://www.postgresql.org/docs/17/ddl-priv.html) for more info.
 

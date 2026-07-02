@@ -132,7 +132,7 @@ Now **one** person can have **many** email addresses, hence the name "one-to-man
 
 ### Many-to-one relationships
 
-A many-to-one relationships is structurally equivalent to a one-to-many relationships, but with the perspective reversed. The two terms are often used interchangeably.
+A many-to-one relationship is structurally equivalent to a one-to-many relationship, but with the perspective reversed. The two terms are often used interchangeably.
 
 ### Many-to-many relationships
 

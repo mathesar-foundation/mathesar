@@ -1,3 +1,3 @@
 default_app_config = 'mathesar.apps.MathesarConfig'
 
-__version__ = "0.11.0"
+__version__ = "0.12.0"

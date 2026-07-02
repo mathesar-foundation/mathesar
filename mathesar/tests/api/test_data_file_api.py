@@ -177,6 +177,16 @@ def test_data_file_create_non_unicode_file(client, non_unicode_csv_filepath):
     assert response.status_code == 201
 
 
+def test_data_file_create_persists_encoding(client, non_unicode_csv_filepath):
+    with open(non_unicode_csv_filepath, 'rb') as non_unicode_file:
+        expected_encoding = csv.get_file_encoding(non_unicode_file)
+        response = client.post('/api/db/v0/data_files/', data={'file': non_unicode_file}, format='multipart')
+    assert response.status_code == 201
+    data_file = DataFile.objects.get(id=response.json()['id'])
+    assert data_file.encoding == expected_encoding
+    assert data_file.encoding != 'utf-8'
+
+
 def test_data_file_create_multiple_source_fields(client, patents_csv_filepath, paste_filename):
     with open(paste_filename, 'r') as paste_file:
         paste_text = paste_file.read()

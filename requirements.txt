@@ -16,3 +16,5 @@ requests==2.33.0
 s3fs==2025.7.0
 SQLAlchemy==1.4.54
 whitenoise==6.7.0
+azure-identity==1.25.3
+adlfs==2026.4.0

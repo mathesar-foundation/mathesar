@@ -16,6 +16,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
 from config.database_config import PostgresConfig, parse_port
+from config.login_page_config import load_login_page_text_config
 from config.sso_config import load_sso_config, resolve_require_sso_login
 
 
@@ -23,9 +24,9 @@ from config.sso_config import load_sso_config, resolve_require_sso_login
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Application definition
+MATHESAR_DJANGO_ADMIN_ENABLED = os.environ.get('MATHESAR_DJANGO_ADMIN_ENABLED') in ['t', 'true', 'True']
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -41,7 +42,13 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.github",
 ]
 
+if MATHESAR_DJANGO_ADMIN_ENABLED:
+    INSTALLED_APPS.insert(0, "django.contrib.admin")
+
 MIDDLEWARE = [
+    # HealthCheckMiddleware must stay first so they are served before
+    # host validation, SSL redirect, and auth.
+    "mathesar.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -55,6 +62,20 @@ MIDDLEWARE = [
     "mathesar.middleware.PasswordChangeNeededMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
 
 # SSO_CONFIG_DICT is the canonical env var; OIDC_CONFIG_DICT is kept as a
 # backwards compatible alias for installs that predate the v2 schema
@@ -250,17 +271,6 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
-# Datafiles storage configuration (for CSV/TSV imports)
-# The storage backend config here is technically deprecated at the time of
-# writing, but we'll fix that at the point where we upgrade to Django 6.
-DATA_FILES_STORAGE_BACKEND = os.environ.get('DATA_FILES_STORAGE_BACKEND', 'local')
-
-if DATA_FILES_STORAGE_BACKEND == 'azure':
-    DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-    AZURE_CONTAINER = os.environ.get('DATA_FILES_AZURE_CONTAINER', 'mathesar-datafiles')
-    AZURE_CONNECTION_STRING = os.environ.get('DATA_FILES_AZURE_CONNECTION_STRING', '')
-else:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Mathesar settings
 MATHESAR_MODE = os.environ.get('MODE', default='PRODUCTION')
@@ -272,6 +282,15 @@ MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/stati
 MATHESAR_ANALYTICS_URL = os.environ.get('MATHESAR_ANALYTICS_URL', default='https://example.com/collector')
 MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='https://example.com/hello')
 MATHESAR_FEEDBACK_URL = os.environ.get('MATHESAR_FEEDBACK_URL', default='https://example.com/feedback')
+MATHESAR_TERMS_OF_SERVICE_URL = os.environ.get('MATHESAR_TERMS_OF_SERVICE_URL', default=None)
+MATHESAR_PRIVACY_POLICY_URL = os.environ.get('MATHESAR_PRIVACY_POLICY_URL', default=None)
+MATHESAR_INSTANCE_NAME = os.environ.get('MATHESAR_INSTANCE_NAME') or 'Mathesar'
+MATHESAR_AUTH_LOGO_URL = os.environ.get('MATHESAR_AUTH_LOGO_URL') or None
+MATHESAR_LOGIN_PAGE_TEXT = load_login_page_text_config(
+    env_value=os.environ.get('MATHESAR_LOGIN_PAGE_TEXT_DICT'),
+    config_file=BASE_DIR.joinpath('login_page.yml'),
+)
+MATHESAR_LOGIN_PAGE_BACKGROUND = os.environ.get('MATHESAR_LOGIN_PAGE_BACKGROUND') or None
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -279,13 +298,43 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # https://vitejs.dev/guide/assets.html
 # https://vitejs.dev/guide/backend-integration.html
 STATICFILES_DIRS = [MATHESAR_UI_SOURCE_LOCATION, MATHESAR_STATIC_NON_CODE_FILES_LOCATION] if MATHESAR_MODE == 'DEVELOPMENT' else [MATHESAR_UI_BUILD_LOCATION, MATHESAR_STATIC_NON_CODE_FILES_LOCATION]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Datafiles storage configuration (for CSV/TSV imports)
+# Selects the backend used for the "default" storage (uploaded datafiles/media).
+# Set DATA_FILES_STORAGE_BACKEND=azure to store datafiles in Azure Blob Storage.
+DATA_FILES_STORAGE_BACKEND = os.environ.get('DATA_FILES_STORAGE_BACKEND', 'local')
+
+if DATA_FILES_STORAGE_BACKEND == 'azure':
+    # Authentication uses DefaultAzureCredential, which resolves credentials from
+    # the environment (managed identity, workload identity, `az login`, etc.,)
+    from azure.identity import DefaultAzureCredential
+    _default_storage = {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": os.environ.get('DATA_FILES_AZURE_ACCOUNT_NAME'),
+            "azure_container": os.environ.get('DATA_FILES_AZURE_CONTAINER', 'mathesar-datafiles'),
+            "token_credential": DefaultAzureCredential(),
+        },
+    }
+else:
+    _default_storage = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    }
+
+STORAGES = {
+    "default": _default_storage,
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+MATHESAR_LANDING_PAGE_URL = os.environ.get('MATHESAR_LANDING_PAGE_URL') or None
 
 # Accounts
 AUTH_USER_MODEL = 'mathesar.User'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = LOGIN_URL
+LOGOUT_REDIRECT_URL = '/'
 
 # List of Template names that contains additional script tags to be added to the base template
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
