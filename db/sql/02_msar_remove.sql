@@ -18,7 +18,7 @@ DECLARE
 BEGIN
   INSERT INTO msar.all_mathesar_objects
     SELECT oid::regclass::text AS obj_name, 'TABLE' AS obj_kind, null AS custom_type
-    FROM pg_class
+    FROM pg_catalog.pg_class
     WHERE
       relnamespace::regnamespace::text='mathesar_inference_schema'
       AND relkind='r'
@@ -27,7 +27,7 @@ BEGIN
 
   INSERT INTO msar.all_mathesar_objects
     SELECT oid::regprocedure::text AS obj_name, 'FUNCTION' AS obj_kind, null AS custom_type
-    FROM pg_proc
+    FROM pg_catalog.pg_proc
     WHERE pronamespace::regnamespace::text='msar' AND proname='drop_all_msar_objects'
     ON CONFLICT DO NOTHING;
 

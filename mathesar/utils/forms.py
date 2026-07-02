@@ -9,6 +9,7 @@ from mathesar.models.base import (
     Database, Form, FormField, ConfiguredRole, UserDatabaseRoleMap, ColumnMetaData
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
+from mathesar.utils.tables import get_table_meta_data
 
 
 def validate_and_get_associated_role(user, database_id, associated_role_id=None):
@@ -104,8 +105,8 @@ def create_form_fields(form_model, fields_def_list):
 
 
 @transaction.atomic
-def create_form(form_def, user):
-    database = Database.objects.get(id=form_def["database_id"])
+def create_form(form_def, user, database_id):
+    database = Database.objects.get(id=database_id)
     associated_role = validate_and_get_associated_role(user, database.id, associated_role_id=form_def.get("associated_role_id"))
     form_model = Form.objects.create(
         token=uuid4(),
@@ -157,22 +158,22 @@ def list_forms(database_id, schema_oid):
     return Form.objects.filter(database__id=database_id, schema_oid=schema_oid)
 
 
-def regen_form_token(form_id):
-    form_model = Form.objects.get(id=form_id)
+def regen_form_token(form_id, database_id):
+    form_model = Form.objects.get(id=form_id, database__id=database_id)
     form_model.token = uuid4()
     form_model.save()
     return form_model.token
 
 
-def set_form_public_setting(form_id, publish_public):
-    form_model = Form.objects.get(id=form_id)
+def set_form_public_setting(form_id, publish_public, database_id):
+    form_model = Form.objects.get(id=form_id, database__id=database_id)
     form_model.publish_public = publish_public
     form_model.save()
     return form_model.publish_public
 
 
-def delete_form(form_id):
-    Form.objects.get(id=form_id).delete()
+def delete_form(form_id, database_id):
+    Form.objects.get(id=form_id, database__id=database_id).delete()
 
 
 def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
@@ -204,10 +205,65 @@ def iterate_form_fields(fields, parent_field=None, depth=0, fields_to_pick=[]):
         )
 
 
-def submit_form(form_token, values):
+def _inject_user_tracking_fields(field_info_list, values, user, database_id):
+    """
+    Inject synthetic field entries for the user-tracking column in each insertion context.
+
+    For each unique (table_oid, parent_key, depth) insertion context in the form,
+    looks up the table's user_tracking_attnum and, if set and not already covered
+    by an explicit field, adds a synthetic field entry that sets that column to
+    the current user's ID.
+    """
+    insertion_contexts = {
+        (fi['table_oid'], fi['parent_key'], fi['depth'])
+        for fi in field_info_list
+    }
+    existing_columns = {
+        (fi['table_oid'], fi['parent_key'], fi['column_attnum'])
+        for fi in field_info_list
+    }
+    table_meta_cache = {}
+    synthetic_count = 0
+
+    for table_oid, parent_key, depth in insertion_contexts:
+        if table_oid not in table_meta_cache:
+            table_meta_cache[table_oid] = get_table_meta_data(table_oid, database_id)
+        table_meta = table_meta_cache[table_oid]
+        tracking_attnum = table_meta.user_tracking_attnum if table_meta else None
+        if not tracking_attnum:
+            continue
+
+        key_tuple = (table_oid, parent_key, tracking_attnum)
+        if key_tuple in existing_columns:
+            continue
+
+        synthetic_count += 1
+        key = f"__user_tracking_{table_oid}_{tracking_attnum}_{synthetic_count}"
+        field_info_list.append({
+            "key": key,
+            "parent_key": parent_key,
+            "column_attnum": tracking_attnum,
+            "table_oid": table_oid,
+            "depth": depth,
+        })
+        values[key] = user.id
+        existing_columns.add(key_tuple)
+
+
+def submit_form(form_token, values, user=None):
+    """
+    Submit a form.
+
+    Args:
+        form_token: The unique token of the form.
+        values: A dict describing the values to insert.
+        user: Optional Django user object. If provided and authenticated,
+            the table's user_tracking_attnum column will be set to the user's ID.
+            If None or anonymous, that column will remain unset (NULL).
+    """
     form_model = Form.objects.get(token=form_token)
     assert form_model.publish_public, 'This form does not accept submissions'
-    fields_to_pick = [i for i in values.keys() if isinstance(values[i], dict) and values[i].get('type') == 'pick']
+    fields_to_pick = [k for k, v in values.items() if isinstance(v, dict) and v.get('type') == 'pick']
     field_info_list = [
         {
             "key": field.key,
@@ -220,13 +276,18 @@ def submit_form(form_token, values):
             fields_to_pick=fields_to_pick
         )
     ]
+    values = dict(values)
+
+    if user and user.is_authenticated:
+        _inject_user_tracking_fields(field_info_list, values, user, form_model.database.id)
+
     with form_model.connection as conn:
         form_insert(field_info_list, values, conn)
 
 
 @transaction.atomic
-def patch_form(update_form_def, user):
-    form_model = Form.objects.get(id=update_form_def["id"])
+def patch_form(update_form_def, user, database_id):
+    form_model = Form.objects.get(id=update_form_def["id"], database__id=database_id)
     associated_role = validate_and_get_associated_role(
         user,
         database_id=form_model.database.id,
@@ -247,4 +308,4 @@ def patch_form(update_form_def, user):
         submit_redirect_url=update_form_def.get("submit_redirect_url"),
         submit_button_label=update_form_def.get("submit_button_label")
     )
-    return Form.objects.get(id=update_form_def["id"])
+    return Form.objects.get(id=update_form_def["id"], database__id=database_id)

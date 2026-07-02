@@ -1,0 +1,130 @@
+{
+  "outputDir": "./screenshots",
+  "viewport": {
+    "width": 1180,
+    "height": 714,
+    "deviceScaleFactor": 2
+  },
+  "database": {
+    "name": "readme_showcase",
+    "nickname": "Mathesar Showcase",
+    "sampleData": [
+      "library_management",
+      "bike_shop",
+      "ice_cream_employees",
+      "movie_rentals"
+    ]
+  },
+  "supportingState": {
+    "viewer": {
+      "username": "readme_viewer_user",
+      "email": "readme_viewer@example.com",
+      "fullName": "README Viewer",
+      "password": "readme-viewer-password"
+    },
+    "viewerRole": {
+      "name": "readme_viewer",
+      "password": "readme-viewer-role-password"
+    },
+    "formName": "Service Requests Form",
+    "explorationName": "Customer requests",
+    "permissionsRoles": {
+      "intern": "Intern",
+      "summerIntern": "Summer Intern",
+      "assistantManager": "Assistant Manager"
+    }
+  },
+  "captures": [
+    {
+      "id": "connect-db",
+      "heading": "Connecting a database",
+      "filename": "01-connect-db.png",
+      "alt": "Mathesar dialog for creating a PostgreSQL database with sample dataset options.",
+      "target": "Create/connect database dialog with readme_showcase and sample datasets visible."
+    },
+    {
+      "id": "add-collaborator",
+      "heading": "Adding collaborators",
+      "filename": "02-add-collaborator.png",
+      "alt": "Mathesar collaborators page showing a read-only user added to the showcase database.",
+      "target": "Database collaborators UI with readme_viewer added or shown."
+    },
+    {
+      "id": "schema-page",
+      "heading": "Viewing a Postgres schema",
+      "filename": "03-schema-page.png",
+      "alt": "Mathesar schema page showing the Library Management tables, forms, and explorations.",
+      "target": "Library Management schema page showing related tables, forms, and explorations."
+    },
+    {
+      "id": "table-inspector",
+      "heading": "Working with tables",
+      "filename": "04-table-inspector.png",
+      "alt": "Mathesar table view for ice cream shop timesheets with the table inspector open.",
+      "target": "Ice Cream Employee Management Timesheets table page with the table inspector open."
+    },
+    {
+      "id": "record-selector",
+      "heading": "Finding a nested record",
+      "filename": "05-record-selector.png",
+      "alt": "Mathesar table view with nested record selection open for choosing a timesheet employee.",
+      "target": "Nested record selector for the Timesheets employee field, including a filtered Employees picker."
+    },
+    {
+      "id": "relationship-creation",
+      "heading": "Linking two tables together",
+      "filename": "06-relationship-creation.png",
+      "alt": "Mathesar relationship creation interface for linking two PostgreSQL tables.",
+      "target": "Relationship creation UI using a safe modeling state in the showcase database."
+    },
+    {
+      "id": "table-permissions",
+      "heading": "Managing table permissions",
+      "filename": "07-table-permissions.png",
+      "alt": "Mathesar table permissions interface showing read-only and custom role privileges.",
+      "target": "Table permissions UI showing inherited and custom privileges for showcase roles."
+    },
+    {
+      "id": "record-page",
+      "heading": "Viewing a single record with related records",
+      "filename": "08-record-page.png",
+      "alt": "Mathesar single-record page for a library item with related checkout records visible.",
+      "target": "Single record page for a Library item with related checkout records visible."
+    },
+    {
+      "id": "form-builder",
+      "heading": "Building a form",
+      "filename": "09-form-builder.png",
+      "alt": "Mathesar form builder for a bike shop service request form with field rules open.",
+      "target": "Form builder for Service Requests Form with the Mechanic field selected and field rules visible."
+    },
+    {
+      "id": "form-fill-example",
+      "heading": "Filling out a form",
+      "filename": "10-form-fill-example.png",
+      "alt": "Public Mathesar service request form being filled with a mechanic search.",
+      "target": "Public shared Service Requests Form with a mechanic search in progress."
+    },
+    {
+      "id": "viewing-exploration",
+      "heading": "Viewing an Exploration (query result)",
+      "filename": "11-viewing-exploration.png",
+      "alt": "Mathesar exploration page showing bike shop customers with related service requests.",
+      "target": "Saved Customer requests exploration showing summarized service request lists."
+    },
+    {
+      "id": "building-exploration",
+      "heading": "Building an Exploration (query)",
+      "filename": "12-building-exploration.png",
+      "alt": "Mathesar Data Explorer query builder showing a service request list aggregation.",
+      "target": "Data Explorer builder for Customer requests with a summarization/list aggregation state."
+    },
+    {
+      "id": "disconnect-db",
+      "heading": "Disconnecting a database",
+      "filename": "13-disconnect-db.png",
+      "alt": "Mathesar confirmation dialog for disconnecting the showcase database.",
+      "target": "Disconnect confirmation dialog for readme_showcase, not submitted during capture."
+    }
+  ]
+}

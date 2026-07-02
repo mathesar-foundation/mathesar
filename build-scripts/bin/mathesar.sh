@@ -223,6 +223,7 @@ run_mathesar() {
     config.wsgi
     -b "${MATHESAR_ADDR}:${MATHESAR_PORT}"
     --chdir "${BASE_DIR}"
+    --timeout 180
   )
   if [[ "${DEBUG}" = "true" ]]; then
     gunicorn_args+=("--log-level=debug")

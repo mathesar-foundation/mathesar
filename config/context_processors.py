@@ -17,6 +17,8 @@ def frontend_settings(request):
         'manifest_data': manifest_data,
         'display_language': display_language,
         'include_i18n_fallback': display_language != fallback_language,
+        'mathesar_instance_name': settings.MATHESAR_INSTANCE_NAME,
+        'mathesar_auth_logo_url': settings.MATHESAR_AUTH_LOGO_URL,
     }
     # Only include development URL if we're in development mode.
     if frontend_settings['development_mode'] is True:

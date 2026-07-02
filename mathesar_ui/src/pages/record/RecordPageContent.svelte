@@ -41,10 +41,12 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   $: canDeleteTableRecords = $currentRolePrivileges.has('DELETE');
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
-  $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
-    processedColumn: c,
-    field: optionalField($fieldValues.get(c.id)),
-  }));
+  $: fieldPropsObjects = [...$processedColumns.values()]
+    .filter((c) => !c.isUserTrackingColumn)
+    .map((c) => ({
+      processedColumn: c,
+      field: optionalField($fieldValues.get(c.id)),
+    }));
   $: formFields = Object.fromEntries(
     fieldPropsObjects.map((o) => [o.processedColumn.id, o.field]),
   );
@@ -64,14 +66,14 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
     const processedColumn = $processedColumns.get(columnId);
     if (!processedColumn) return false;
 
-    // Only patch columns that are not primary keys.
+    // Only patch columns that are not primary keys and not auto-managed columns
+    // (e.g. user-tracking columns that are auto-populated by the backend).
     //
     // See https://github.com/mathesar-foundation/mathesar/issues/4318
-    //
-    // It would probably be better to check if the column is editable but we
-    // don't have that information here. It would be good to include that in the
-    // columns API response at some point.
-    return !processedColumn.column.primary_key;
+    return (
+      !processedColumn.column.primary_key &&
+      !processedColumn.isUserTrackingColumn
+    );
   }
 
   async function save() {
@@ -150,12 +152,14 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   <InsetPageLayout>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-        <DirectField
-          {record}
-          {processedColumn}
-          {field}
-          {canUpdateTableRecords}
-        />
+        {#if !processedColumn.isUserTrackingColumn}
+          <DirectField
+            {record}
+            {processedColumn}
+            {field}
+            {canUpdateTableRecords}
+          />
+        {/if}
       {/each}
     </div>
     <div class="submit">
@@ -195,13 +199,23 @@ TODO: Resolve code duplication between this file and RecordViewContent.svelte.
   }
   .record-page-header {
     --AppSecondaryHeader__background: linear-gradient(
-      135deg,
-      var(--color-bg-base),
-      15%,
-      var(--color-record-10) 40%,
-      var(--color-bg-base) 60%,
-      var(--color-record-20) 100%
-    );
+        90deg,
+        color-mix(in srgb, var(--color-record), transparent 48%) 0%,
+        color-mix(in srgb, var(--color-record), transparent 72%) 38%,
+        color-mix(in srgb, var(--color-table), transparent 82%) 68%,
+        transparent 100%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-bg-base), var(--color-record) 13%) 0%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-bg-supporting) 18%)
+          40%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-table) 5%) 82%,
+        var(--color-bg-base) 100%
+      );
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
+    --AppSecondaryHeader__background-repeat: no-repeat;
     --AppSecondaryHeader__margin-bottom: var(--sm1);
     --page-padding-x: 6rem;
     --entity-name-color: var(--color-record);

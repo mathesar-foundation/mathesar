@@ -18,12 +18,15 @@ export class Collaborator {
     return this._configuredRoleId;
   }
 
+  readonly userInfo;
+
   readonly database;
 
   constructor(props: { database: Database; rawCollaborator: RawCollaborator }) {
     this.id = props.rawCollaborator.id;
     this.userId = props.rawCollaborator.user_id;
     this._configuredRoleId = writable(props.rawCollaborator.configured_role_id);
+    this.userInfo = props.rawCollaborator.user_info;
     this.database = props.database;
   }
 

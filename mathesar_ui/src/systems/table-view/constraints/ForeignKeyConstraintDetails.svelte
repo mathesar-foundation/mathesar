@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
@@ -7,23 +6,27 @@
   import { Icon, Spinner, iconError } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { databasesStore } from '@mathesar/stores/databases';
-  import { currentTablesData } from '@mathesar/stores/tables';
+  import type { Database } from '@mathesar/models/Database';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
 
+  export let database: Database;
   export let constraint: RawConstraint;
 
-  $: referentTable =
+  $: referentTableOid =
     constraint.type === 'foreignkey'
-      ? $currentTablesData.tablesMap.get(constraint.referent_table_oid)
+      ? constraint.referent_table_oid
       : undefined;
+
+  const tableFetch = new AsyncStore(getTableFromStoreOrApi);
+  $: referentTableOid
+    ? void tableFetch.run({ database, tableOid: referentTableOid })
+    : tableFetch.reset();
+  $: referentTable = $tableFetch.resolvedValue;
 
   async function getReferentColumns(_constraint: RawConstraint) {
     if (_constraint.type !== 'foreignkey') {
       return [];
-    }
-    const database = get(databasesStore.currentDatabase);
-    if (!database) {
-      throw new Error('Current database not set');
     }
     const referentTableColumns = await api.columns
       .list_with_metadata({

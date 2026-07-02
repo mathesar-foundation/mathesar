@@ -214,7 +214,7 @@ Return the OID of a schema, or NULL if the schema does not exist.
 Args :
   sch_name: The name of the schema, UNQUOTED.
 */
-SELECT oid FROM pg_namespace WHERE nspname=sch_name;
+SELECT oid FROM pg_catalog.pg_namespace WHERE nspname=sch_name;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -228,7 +228,7 @@ Args:
 */
 DECLARE sch_name text;
 BEGIN
-  SELECT nspname INTO sch_name FROM pg_namespace WHERE oid=sch_id;
+  SELECT nspname INTO sch_name FROM pg_catalog.pg_namespace WHERE oid=sch_id;
 
   IF sch_name IS NULL THEN
     RAISE EXCEPTION 'No schema with OID % exists.', sch_id
@@ -301,7 +301,7 @@ Args:
 */
 DECLARE rel_name text;
 BEGIN
-  SELECT relname INTO rel_name FROM pg_class WHERE oid=rel_oid;
+  SELECT relname INTO rel_name FROM pg_catalog.pg_class WHERE oid=rel_oid;
 
   IF rel_name IS NULL THEN
     RAISE EXCEPTION 'Relation with OID % does not exist', rel_oid
@@ -346,7 +346,7 @@ Most useful for getting the OID of the schema of a given table.
 Args:
   rel_id: The OID of the relation whose namespace we want to find.
 */
-SELECT relnamespace FROM pg_class WHERE oid=rel_id;
+SELECT relnamespace FROM pg_catalog.pg_class WHERE oid=rel_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -362,7 +362,7 @@ Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id AND NOT attisdropped;
+SELECT attname::text FROM pg_catalog.pg_attribute WHERE attrelid=rel_id AND attnum=col_id AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -381,7 +381,7 @@ Args:
   rel_id:  The OID of the relation.
   col_name:  The unquoted name of the column in the relation.
 */
-SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name AND NOT attisdropped;
+SELECT attname::text FROM pg_catalog.pg_attribute WHERE attrelid=rel_id AND attname=col_name AND NOT attisdropped;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -424,7 +424,7 @@ Args:
   rel_id: The relation where we'll look for the attribute.
   att_name: The name of the attribute, unquoted.
 */
-SELECT attnum FROM pg_attribute WHERE attrelid=rel_id AND attname=att_name;
+SELECT attnum FROM pg_catalog.pg_attribute WHERE attrelid=rel_id AND attname=att_name;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -437,7 +437,7 @@ Args:
   col_id:  The attnum of the column in the relation.
 */
 SELECT EXISTS (
-  SELECT 1 FROM pg_constraint WHERE
+  SELECT 1 FROM pg_catalog.pg_constraint WHERE
     ARRAY[col_id::smallint] <@ conkey AND conrelid=rel_id AND contype='p'
 );
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
@@ -454,7 +454,7 @@ TODO: resolve potential code duplication between this function and `get_pk_colum
 Args:
   rel_id:  The OID of the relation.
 */
-SELECT conkey[1] FROM pg_constraint
+SELECT conkey[1] FROM pg_catalog.pg_constraint
 WHERE
   conrelid = rel_id
   AND cardinality(conkey) = 1
@@ -492,7 +492,7 @@ SELECT
   OR
   -- Other generated columns show up here.
   (attgenerated <> '')
-FROM pg_attribute LEFT JOIN pg_attrdef ON attrelid=adrelid AND attnum=adnum
+FROM pg_catalog.pg_attribute LEFT JOIN pg_catalog.pg_attrdef ON attrelid=adrelid AND attnum=adnum
 WHERE attrelid=tab_id AND attnum=col_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -510,7 +510,7 @@ Args:
   col_id: The attnum of the column in question
 */
 SELECT col_id=1 AND attname='id' AND atttypid='integer'::regtype::oid AND attidentity <> ''
-FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -651,7 +651,7 @@ Args:
   con_id: The OID of the constraint.
 */
 BEGIN
-  RETURN conname::text FROM pg_constraint WHERE pg_constraint.oid = con_id;
+  RETURN conname::text FROM pg_catalog.pg_constraint WHERE pg_constraint.oid = con_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -672,7 +672,7 @@ WITH obj_cte AS (
         WHEN 'p' THEN 'PROCEDURE'
         ELSE 'FUNCTION'
       END AS obj_kind
-    FROM pg_proc
+    FROM pg_catalog.pg_proc
     WHERE pronamespace=ANY(sch_ids)
   ) UNION (
     SELECT
@@ -680,7 +680,7 @@ WITH obj_cte AS (
       msar.get_schema_name(typnamespace) AS obj_schema,
       typname AS obj_name,
       'TYPE' AS obj_kind
-    FROM pg_type
+    FROM pg_catalog.pg_type
     WHERE typnamespace=ANY(sch_ids)
   ) UNION (
     SELECT
@@ -698,7 +698,7 @@ WITH obj_cte AS (
         WHEN 'c' THEN 'TYPE'
         WHEN 'f' THEN 'FOREIGN TABLE'
       END AS obj_kind
-    FROM pg_class
+    FROM pg_catalog.pg_class
     WHERE relnamespace=ANY(sch_ids)
   )
 ) SELECT DISTINCT obj_id, obj_schema, obj_name, obj_kind FROM obj_cte WHERE obj_kind IS NOT NULL;
@@ -715,7 +715,7 @@ Args:
   rel_id: The OID of the relation.
 */
 SELECT CASE WHEN array_length(conkey, 1) = 1 THEN conkey[1] END
-FROM pg_constraint
+FROM pg_catalog.pg_constraint
 WHERE contype='p'
 AND conrelid=rel_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -730,7 +730,7 @@ Args:
   col_id: The attnum of the column in the relation.
 */
 SELECT atttypid::regtype
-FROM pg_attribute
+FROM pg_catalog.pg_attribute
 WHERE attnum = col_id
 AND attrelid = rel_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -851,7 +851,7 @@ Args:
   att_id: The attnum of the attribute in the relation.
 */
 SELECT EXISTS (
-  SELECT 1 FROM pg_depend WHERE refobjid=rel_id AND refobjsubid=att_id AND deptype='n'
+  SELECT 1 FROM pg_catalog.pg_depend WHERE refobjid=rel_id AND refobjsubid=att_id AND deptype='n'
 );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -869,7 +869,7 @@ Args:
   tab_id: The OID of the table containing the foreign key columns to map.
 */
 SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
-FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
+FROM pg_catalog.pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
 WHERE
   pgc.conrelid = tab_id
   AND pgc.contype='f'
@@ -988,7 +988,7 @@ object has the keys:
   value: A string giving the value (as an SQL expression) of the default.
   is_dynamic: A boolean giving whether the default is (likely to be) dynamic.
 */
-SELECT coalesce(jsonb_agg(column_data), '[]'::jsonb)
+SELECT coalesce(jsonb_agg(column_data ORDER BY column_data.id ASC), '[]'::jsonb)
 FROM msar.column_info_table(tab_id) AS column_data;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -1416,7 +1416,7 @@ SELECT jsonb_build_object(
   'current_role', msar.get_role(current_role),
   'parent_roles', COALESCE(array_remove(
     array_agg(
-      CASE WHEN pg_has_role(current_role, role_data.name, 'USAGE')
+      CASE WHEN pg_catalog.pg_has_role(current_role, role_data.name, 'USAGE')
       THEN msar.get_role(role_data.name) END
     ), NULL
   ), ARRAY[]::jsonb[])
@@ -2245,14 +2245,14 @@ SELECT jsonb_agg(
     -- We only copy non-dynamic default expressions to new table to avoid double-use of sequences.
     -- Sequences are owned by a specific column, and can't be reused without error.
     CASE WHEN NOT msar.is_default_possibly_dynamic(tab_id, col_id) THEN
-      pg_get_expr(adbin, tab_id)
+      pg_catalog.pg_get_expr(adbin, tab_id)
     END
   )
 )
-FROM pg_attribute AS pg_columns
+FROM pg_catalog.pg_attribute AS pg_columns
   JOIN unnest(col_ids) AS columns_to_copy(col_id)
     ON pg_columns.attnum=columns_to_copy.col_id
-  LEFT JOIN pg_attrdef AS pg_column_defaults
+  LEFT JOIN pg_catalog.pg_attrdef AS pg_column_defaults
     ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
 WHERE pg_columns.attrelid=tab_id AND NOT msar.is_pkey_col(tab_id, col_id);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
@@ -2341,10 +2341,10 @@ BEGIN
   typ_id := typ_name::regtype::oid;
   -- This is a lookup of the function name for the typmodin function associated with the type, if
   -- one exists.
-  typmodin_func := typmodin::text FROM pg_type WHERE oid=typ_id AND typmodin<>0;
+  typmodin_func := typmodin::text FROM pg_catalog.pg_type WHERE oid=typ_id AND typmodin<>0;
   -- This flag is needed since timespan types need special handling when converting the options into
   -- the form needed to call the typmodin function.
-  timespan_flag := typcategory='T' FROM pg_type WHERE oid=typ_id;
+  timespan_flag := typcategory='T' FROM pg_catalog.pg_type WHERE oid=typ_id;
   IF (
     jsonb_typeof(typ_options) = 'null'  -- The caller passed no type options
     OR typ_options IS NULL -- The caller didn't even pass the type options key
@@ -2515,7 +2515,7 @@ optional. If an empty object {} is given, the resulting column will have a defau
 'Column <n>' and type TEXT. It will allow nulls and have a null default value.
 */
 WITH attnum_cte AS (
-  SELECT MAX(attnum) AS m_attnum FROM pg_attribute WHERE attrelid=tab_id
+  SELECT MAX(attnum) AS m_attnum FROM pg_catalog.pg_attribute WHERE attrelid=tab_id
 ), col_create_cte AS (
   SELECT (
     -- build a name for the column
@@ -2633,7 +2633,7 @@ BEGIN
     PERFORM msar.drop_columns(tab_id, msar.get_pk_column(tab_id));
   END IF;
   PERFORM msar.drop_constraint(tab_id, oid)
-    FROM pg_constraint WHERE conrelid=tab_id AND contype='p';
+    FROM pg_catalog.pg_constraint WHERE conrelid=tab_id AND contype='p';
   EXECUTE format(
     'ALTER TABLE %I.%I ADD COLUMN %I %s;',
     msar.get_relation_schema_name(tab_id),
@@ -2672,7 +2672,7 @@ BEGIN
     PERFORM msar.drop_columns(tab_id, msar.get_pk_column(tab_id));
   END IF;
   PERFORM msar.drop_constraint(tab_id, oid)
-    FROM pg_constraint WHERE conrelid=tab_id AND contype='p';
+    FROM pg_catalog.pg_constraint WHERE conrelid=tab_id AND contype='p';
   PERFORM msar.add_constraints(
     tab_id,
     jsonb_build_array(jsonb_build_object('type', 'p', 'columns', jsonb_build_array(col_id)))
@@ -2684,7 +2684,7 @@ BEGIN
         ALTER TABLE %1$I.%2$I
           ALTER COLUMN %3$I TYPE integer USING msar.cast_to_integer(%3$I),
           ALTER COLUMN %3$I ADD GENERATED BY DEFAULT AS IDENTITY;
-        SELECT setval(pg_get_serial_sequence('%1$I.%2$I', '%3$s'), max(%3$I)) FROM %1$I.%2$I;
+        SELECT setval(pg_catalog.pg_get_serial_sequence('%1$I.%2$I', '%3$s'), max(%3$I)) FROM %1$I.%2$I;
         $s$
       WHEN default_type = 'UUIDv4' THEN
         'ALTER TABLE %1$I.%2$I ALTER COLUMN %3$I SET DEFAULT gen_random_uuid();'
@@ -2916,7 +2916,7 @@ BEGIN
     __msar.get_qualified_relation_name(tab_id),
     variadic con_create_defs
   );
-  RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
+  RETURN array_agg(oid) FROM pg_catalog.pg_constraint WHERE conrelid=tab_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2944,7 +2944,7 @@ Args:
   to_col_id: The column ID to be added to the original's conkey in the copy.
 */
 WITH
-  con_cte AS (SELECT * FROM pg_constraint WHERE oid=con_id AND contype='u'),
+  con_cte AS (SELECT * FROM pg_catalog.pg_constraint WHERE oid=con_id AND contype='u'),
   con_def_cte AS (
     SELECT jsonb_agg(
       jsonb_build_object(
@@ -2976,7 +2976,7 @@ BEGIN
       'name', coalesce(copy_name, msar.build_unique_column_name(tab_id, col_id)),
       'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
       'not_null', false,  -- Required since the column will initially be empty.
-      'default', CASE WHEN copy_data THEN pg_get_expr(adbin, tab_id) END,
+      'default', CASE WHEN copy_data THEN pg_catalog.pg_get_expr(adbin, tab_id) END,
       'description', msar.col_description(tab_id, attnum)
     ),
     raw_default => true
@@ -2996,12 +2996,12 @@ BEGIN
   END IF;
   IF copy_constraints THEN
     PERFORM msar.copy_constraint(oid, col_id, created_col_id)
-    FROM pg_constraint
+    FROM pg_catalog.pg_constraint
     WHERE conrelid=tab_id AND ARRAY[col_id] <@ conkey;
     PERFORM msar.set_not_null(
       tab_id, created_col_id, attnotnull
     )
-    FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+    FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
   END IF;
   RETURN created_col_id;
 END;
@@ -3031,9 +3031,9 @@ SELECT jsonb_agg(
     'fkey_match_type', confmatchtype
   )
 )
-FROM pg_constraint
+FROM pg_catalog.pg_constraint
   JOIN unnest(col_ids) AS columns_to_copy(col_id) ON pg_constraint.conkey[1]=columns_to_copy.col_id
-  JOIN pg_attribute
+  JOIN pg_catalog.pg_attribute
     ON pg_attribute.attnum=columns_to_copy.col_id AND pg_attribute.attrelid=pg_constraint.conrelid
 WHERE pg_constraint.conrelid=tab_id AND (pg_constraint.contype='f' OR pg_constraint.contype='u');
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
@@ -3835,7 +3835,7 @@ BEGIN
       (col_alter_obj -> 'delete')::boolean AS delete_,
       msar.build_type_text_complete(col_alter_obj -> 'type', format_type(pga.atttypid, null)) AS new_type,
       COALESCE((col_alter_obj -> 'cast_options')::jsonb, '{}'::jsonb) AS cast_options,
-      pg_get_expr(adbin, tab_id) AS old_default,
+      pg_catalog.pg_get_expr(adbin, tab_id) AS old_default,
       col_alter_obj -> 'default' AS new_default,
 
       col_alter_obj->>'description' AS comment_,
@@ -4444,7 +4444,7 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 CREATE OR REPLACE FUNCTION msar.get_pkey_order(tab_id oid) RETURNS jsonb AS $$
 SELECT jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc'))
-FROM pg_constraint, LATERAL unnest(conkey) attnum
+FROM pg_catalog.pg_constraint, LATERAL unnest(conkey) attnum
 WHERE contype='p' AND conrelid=tab_id AND has_column_privilege(tab_id, attnum, 'SELECT');
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -6102,13 +6102,13 @@ WITH cte AS (
   INNER JOIN jsonb_each(values_) AS vals ON vals.key = fields.key
   LEFT JOIN pg_catalog.pg_attribute pga ON pga.attnum = fields.column_attnum AND pga.attrelid = fields.table_oid
 
-  LEFT JOIN pg_constraint pgc
+  LEFT JOIN pg_catalog.pg_constraint pgc
     ON fields.column_attnum = ANY(pgc.conkey)
     AND pgc.conrelid = fields.table_oid
     AND pgc.contype = 'f'
   LEFT JOIN unnest(pgc.conkey) WITH ORDINALITY AS ck(attnum, ord) ON ck.attnum = fields.column_attnum
   LEFT JOIN unnest(pgc.confkey) WITH ORDINALITY AS fk(attnum, ord) ON fk.ord = ck.ord
-  LEFT JOIN pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
+  LEFT JOIN pg_catalog.pg_attribute ref_attr ON ref_attr.attrelid = pgc.confrelid AND ref_attr.attnum = fk.attnum
 ), multi_fks_cte AS (
   SELECT msar.raise_exception(
     'Inserting into a column with foreign key constraints referencing multiple columns is currently unsupported.'

@@ -11,6 +11,7 @@ from django.test import Client as APIClient
 
 from db import connection
 from mathesar.models.users import User
+from mathesar.rpc.decorators import models
 
 
 @pytest.fixture
@@ -41,6 +42,16 @@ def mocked_select_from_msar_func():
     """
     with patch.object(connection, "select_from_msar_func") as mock:
         mock.return_value = mock
+        yield mock
+
+
+@pytest.fixture(autouse=True)
+def always_authorized():
+    """
+    Bypass endpoint db authorization check while testing.
+    """
+    with patch.object(models.UserDatabaseRoleMap.objects, "get") as mock:
+        mock.return_value = object()
         yield mock
 
 

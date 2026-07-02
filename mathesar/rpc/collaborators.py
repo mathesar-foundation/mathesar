@@ -3,6 +3,7 @@ from typing import TypedDict
 from mathesar.models.base import UserDatabaseRoleMap, Database, ConfiguredRole
 from mathesar.models.users import User
 from mathesar.rpc.decorators import mathesar_rpc_method
+from mathesar.rpc.users import UserInfo
 
 
 class CollaboratorInfo(TypedDict):
@@ -19,6 +20,7 @@ class CollaboratorInfo(TypedDict):
     user_id: int
     database_id: int
     configured_role_id: int
+    user_info: UserInfo
 
     @classmethod
     def from_model(cls, model):
@@ -26,16 +28,15 @@ class CollaboratorInfo(TypedDict):
             id=model.id,
             user_id=model.user.id,
             database_id=model.database.id,
-            configured_role_id=model.configured_role.id
+            configured_role_id=model.configured_role.id,
+            user_info=UserInfo.from_model(model.user)
         )
 
 
 @mathesar_rpc_method(name="collaborators.list", auth="login")
-def list_(*, database_id: int = None, **kwargs) -> list[CollaboratorInfo]:
+def list_(*, database_id: int, **kwargs) -> list[CollaboratorInfo]:
     """
     List information about collaborators. Exposed as `list`.
-
-    If called with no `database_id`, all collaborators for all databases are listed.
 
     Args:
         database_id: The Django id of the database associated with the collaborators.
@@ -43,11 +44,7 @@ def list_(*, database_id: int = None, **kwargs) -> list[CollaboratorInfo]:
     Returns:
         A list of collaborators.
     """
-    if database_id is not None:
-        user_database_role_map_qs = UserDatabaseRoleMap.objects.filter(database__id=database_id)
-    else:
-        user_database_role_map_qs = UserDatabaseRoleMap.objects.all()
-
+    user_database_role_map_qs = UserDatabaseRoleMap.objects.filter(database__id=database_id).select_related()
     return [CollaboratorInfo.from_model(db_model) for db_model in user_database_role_map_qs]
 
 

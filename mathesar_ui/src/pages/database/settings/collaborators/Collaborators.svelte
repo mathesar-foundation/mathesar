@@ -35,27 +35,18 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
 
-  $: ({
-    database,
-    configuredRoles,
-    collaborators,
-    users,
-    databaseRouteContext,
-  } = $routeContext);
+  $: ({ database, configuredRoles, databaseRouteContext } = $routeContext);
+  $: ({ collaborators } = databaseRouteContext.collaborationFeaturesContext);
 
   $: void AsyncRpcApiStore.runBatchConservatively([
     collaborators.batchRunner(),
     configuredRoles.batchRunner(),
   ]);
-  $: void users.runConservatively();
-  $: isLoading =
-    $collaborators.isLoading || $configuredRoles.isLoading || $users.isLoading;
-  $: isSuccess = $collaborators.isOk && $configuredRoles.isOk && $users.isOk;
-  $: errors = [
-    $collaborators.error,
-    $configuredRoles.error,
-    $users.error,
-  ].filter((entry): entry is RpcError | string => isDefinedNonNullable(entry));
+  $: isLoading = $collaborators.isLoading || $configuredRoles.isLoading;
+  $: isSuccess = $collaborators.isOk && $configuredRoles.isOk;
+  $: errors = [$collaborators.error, $configuredRoles.error].filter(
+    (entry): entry is RpcError => isDefinedNonNullable(entry),
+  );
   $: collaboratorsList = [...($collaborators.resolvedValue?.values() ?? [])];
 
   let targetCollaborator: Collaborator | undefined;
@@ -125,20 +116,18 @@
   {/if}
 </SettingsContentLayout>
 
-{#if $users.resolvedValue && $configuredRoles.resolvedValue && $collaborators.resolvedValue}
+{#if isMathesarAdmin && $configuredRoles.resolvedValue && $collaborators.resolvedValue}
   <AddCollaboratorModel
     controller={addCollaboratorModal}
-    usersMap={$users.resolvedValue}
     configuredRolesMap={$configuredRoles.resolvedValue}
     collaboratorsMap={$collaborators.resolvedValue}
     onAdd={checkAndHandleSideEffects}
   />
 {/if}
 
-{#if $configuredRoles.resolvedValue && $users.resolvedValue && targetCollaborator}
+{#if $configuredRoles.resolvedValue && targetCollaborator}
   <EditRoleForCollaboratorModal
     collaborator={targetCollaborator}
-    usersMap={$users.resolvedValue}
     controller={editCollaboratorRoleModal}
     configuredRolesMap={$configuredRoles.resolvedValue}
     onUpdateRole={checkAndHandleSideEffects}
