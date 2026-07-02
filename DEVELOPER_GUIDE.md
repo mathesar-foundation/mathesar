@@ -191,42 +191,131 @@ _(We're currently working on a workflow for translators. This section will be up
 
 ### For Maintainers
 
-#### Automation
+#### Automation: routine string updates
 
-- We have automated sync between Transifex and the `develop` branch, via the GitHub integration feature provided by Transifex.
-- The configuration for it is specified in the `.tx/integration.yml` file, and within the Transifex admin panel.
-- Refer [Transfiex documentation](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration) for more information.
+- We have automated sync between Transifex and the `develop` branch via the GitHub integration feature provided by Transifex.
+- The configuration is specified in the `.tx/integration.yml` file and within the Transifex admin panel.
+- When translators complete or review strings on Transifex, **Transifex automatically opens a PR** against `develop` with the updated `dict.json` or `.po` file (e.g. [#4944](https://github.com/mathesar-foundation/mathesar/pull/4944)). Review and merge these PRs normally; no manual `tx pull` is needed for routine string updates.
+- Refer to the [Transifex documentation](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration) for more information on the integration.
 
-#### Manually pushing and pulling translations
+#### Activating a fully-translated language in the UI
 
-If you'd like to manually push or pull translations, follow the instructions in this section.
+When a language reaches 100% translation on Transifex (for both the `django` and `svelte` resources), a maintainer needs to wire it into the codebase. This is a one-time manual step per language; Transifex automation does **not** do this part.
 
-> **Warning**
->
-> Only push and pull translations on the `develop` branch. Do not do it for other branches since this will overwrite the existing resources within Transifex.
+Check completion percentages via the [Transifex dashboard](https://app.transifex.com/mathesar/mathesar/dashboard/) or the API:
 
-1. Install the Transifex cli tool, `tx`, if you haven't already.
+```
+curl -s -H "Authorization: Bearer $TX_TOKEN" \
+  "https://rest.api.transifex.com/resource_language_stats?filter%5Bproject%5D=o:mathesar:p:mathesar&filter%5Bresource%5D=<resource_id>"
+```
+
+Then follow these steps (using `de` for German as an example):
+
+1. Install the Transifex CLI tool, `tx`, if you haven't already:
 
     ```
     curl -o- https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
     ```
 
-    It can be installed in your host machine or on the docker container.
+1. Pull the translation files for the new language:
 
-1. **Push** the updated source translation files:
+    ```
+    TX_TOKEN=<transifex_api_token> tx pull -l de --force
+    ```
+
+    This creates:
+    - `translations/de/LC_MESSAGES/django.po`
+    - `mathesar_ui/src/i18n/languages/de/dict.json`
+
+1. Create `mathesar_ui/src/i18n/languages/de/index.ts` (copy from an existing language and substitute the code):
+
+    ```ts
+    import { type LangObject, addTranslationsToGlobalWindowObject } from '../utils';
+
+    import deDict from './dict.json';
+
+    const lang: LangObject = {
+      language: 'de',
+      dictionary: deDict,
+    };
+
+    addTranslationsToGlobalWindowObject(lang);
+
+    export default lang;
+    ```
+
+1. Update `mathesar_ui/src/i18n/languages/utils.ts` to add the code to the `Language` type:
+
+    ```ts
+    export type Language = 'de' | 'en' | 'es' | 'fr' | 'ja';
+    ```
+
+1. Update `mathesar_ui/src/global.d.ts` to add the code to `Window.Mathesar.translations`:
+
+    ```ts
+    translations: {
+      de?: LanguageDictionary;
+      // ...
+    };
+    ```
+
+1. Update `mathesar_ui/src/i18n/index.ts` to register the loader in both `loaders` and `initI18n()`:
+
+    ```ts
+    const loaders = {
+      de: () => import('./languages/de'),
+      // ...
+    };
+
+    // inside initI18n():
+    register('de', () => loadDictionaryAsync('de'));
+    ```
+
+1. Update `mathesar_ui/vite.config.js` to add a build entry point:
+
+    ```js
+    input: {
+      de: './src/i18n/languages/de/index.ts',
+      // ...
+    },
+    ```
+
+1. Update `config/settings/common_settings.py` to add to `LANGUAGES`:
+
+    ```python
+    LANGUAGES = [
+        ('de', 'German'),
+        # ...
+    ]
+    ```
+
+1. Verify the Django `.po` file compiles cleanly (the `Dockerfile` runs `compilemessages` at build time, so a broken `.po` file will break the Docker build):
+
+    ```
+    python manage.py compilemessages -l de
+    ```
+
+1. Run `npx svelte-check --tsconfig tsconfig.json --threshold warning` from `mathesar_ui/` to confirm no type errors.
+
+1. Commit and open a PR.
+
+#### Manually pushing source strings to Transifex
+
+If you need to manually push updated source strings (e.g. after a large batch of new UI strings are added):
+
+> **Warning**
+>
+> Only push translations on the `develop` branch. Do not do it for other branches since this will overwrite the existing resources within Transifex.
+
+1. Install the Transifex CLI tool (see above).
+
+1. Push the updated source files:
 
     ```
     TX_TOKEN=<transifex_api_token> tx push -s
     ```
 
-1. **Pull** the translations from Transifex:
-
-    ```
-    TX_TOKEN=<transifex_api_token> tx pull -f
-    ```
-
 1. Commit and push the changes to our repo.
-
 
 ## Opening a shell in the container
 

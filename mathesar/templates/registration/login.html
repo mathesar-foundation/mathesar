@@ -1,79 +1,105 @@
 {% extends 'mathesar/login_base.html' %}
 {% load i18n static %}
-{% translate "Logging In..." as logging_in_loader_text %}
 
-{% block h1 %}{% translate "Log in to Mathesar" %}{% endblock %}
+{% block auth_page_frame_class %} auth-login-page{% endblock %}
+
+{% block auth_page_frame_attrs %}{% if login_page_background %} style="--auth-login-page-background: {{ login_page_background }};"{% endif %}{% endblock %}
+
+{% block h1 %}{{ login_page_heading }}{% endblock %}
 
 {% block box_content %}
+  {% translate "Logging In..." as logging_in_loader_text %}
+  {% if login_page_body %}
+    <p class="auth-card-intro">{{ login_page_body }}</p>
+  {% endif %}
   <form
     method="post"
-    onsubmit="showLoadingStatus({{ logging_in_loader_text }});"
+    onsubmit="showLoadingStatus('{{ logging_in_loader_text|escapejs }}');"
   >
     {% csrf_token %}
-    <div class="labeled-input layout-stacked">
-      <label for="id_username" class="label-component">
-        <span class="label-content">
-          <span class="labeled-input-label">{% translate "Username" %}</span>
-          <span class="labeled-input-slot input">
-            <input type="text" name="username"
-            class="input-element{% if form.username.errors %} has-error{% endif %}"
-            value="{% if form.username.value %}{{form.username.value}}{% endif %}"
-            autofocus autocapitalize="none" autocomplete="username"
-            required id="id_username">
-          </span>
-          {% if form.username.errors %}
-            <span class="help error">
-              {% for error in form.username.errors %}
-                <span>{{error|escape}}</span>
-              {% endfor %}
+    {% if not is_sso_login_required %}
+      <div class="labeled-input layout-stacked">
+        <label for="id_username" class="label-component">
+          <span class="label-content">
+            <span class="labeled-input-label">{% translate "Username" %}</span>
+            <span class="labeled-input-slot input">
+              <input type="text" name="username"
+              class="input-element{% if form.username.errors %} has-error{% endif %}"
+              value="{% if form.username.value %}{{form.username.value}}{% endif %}"
+              autofocus autocapitalize="none" autocomplete="username"
+              required id="id_username">
             </span>
-          {% endif %}
-        </span>
-      </label>
-    </div>
-    <div class="labeled-input layout-stacked">
-      <label for="id_password" class="label-component">
-        <span class="label-content">
-          <span class="labeled-input-label">{% translate "Password" %}</span>
-          <span class="labeled-input-slot input">
-            <input type="password" name="password"
-            class="input-element{% if form.password.errors %} has-error{% endif %}"
-            autocomplete="current-password" required id="id_password">
+            {% if form.username.errors %}
+              <span class="help error">
+                {% for error in form.username.errors %}
+                  <span>{{error|escape}}</span>
+                {% endfor %}
+              </span>
+            {% endif %}
           </span>
-          {% if form.password.errors %}
-            <span class="help error">
-              {% for error in form.password.errors %}
-                <span>{{error|escape}}</span>
-              {% endfor %}
+        </label>
+      </div>
+      <div class="labeled-input layout-stacked">
+        <label for="id_password" class="label-component">
+          <span class="label-content">
+            <span class="labeled-input-label">{% translate "Password" %}</span>
+            <span class="labeled-input-slot input">
+              <input type="password" name="password"
+              class="input-element{% if form.password.errors %} has-error{% endif %}"
+              autocomplete="current-password" required id="id_password">
             </span>
-          {% endif %}
-        </span>
-      </label>
-    </div>
-    {% if form.non_field_errors %}
-      <div class="message-box error-message">
-        <div class="icon">&#9888;</div>
-        <div>
-          {% for error in form.non_field_errors %}
-            <span>{{error|escape}}</span>
-          {% endfor %}
-        </div>
+            {% if form.password.errors %}
+              <span class="help error">
+                {% for error in form.password.errors %}
+                  <span>{{error|escape}}</span>
+                {% endfor %}
+              </span>
+            {% endif %}
+          </span>
+        </label>
       </div>
     {% endif %}
-    <div class="footer">
-      <button class="btn btn-primary submit-button" type="submit">
-        {% translate "Log In" %}
-      </button>
-
+    <div class="auth-card-actions">
+      {% if form.non_field_errors %}
+        <div class="message-box error-message">
+          <div class="icon">&#9888;</div>
+          <div>
+            {% for error in form.non_field_errors %}
+              <span>{{error|escape}}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+      {% if not is_sso_login_required %}
+        <button class="btn btn-primary submit-button" type="submit">
+          {% translate "Log In" %}
+        </button>
+      {% endif %}
 
       {% load socialaccount %}
       {% get_providers as socialaccount_providers %}
-      {% for provider in socialaccount_providers %}
-        <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
-        <img src="{% static 'images/sso/' %}{{ provider }}.svg" alt="{{ provider|capfirst }} logo"
-          style="height:1em; vertical-align:middle; margin-right:0.5em" onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
-        Login with {{provider|capfirst}}</a>
-      {% endfor %}
+      {% if socialaccount_providers %}
+        {% if not is_sso_login_required %}
+          <div class="auth-sso-divider">
+            <div class="line"></div>
+            <span class="or">or</span>
+          </div>
+        {% endif %}
+        <div class="auth-sso-providers">
+          {% for provider in socialaccount_providers %}
+            <div class="auth-sso-provider">
+              <a class="btn btn-secondary" href="{% provider_login_url provider process='login'%}">
+                <span>
+                  <img src="{% static 'images/sso/' %}{{ provider|lower }}.svg" alt="{{ provider|capfirst }} logo"
+                    class="auth-sso-provider-icon"
+                    onerror="this.onerror=null; this.src='{% static 'images/sso/default.svg' %}';"/>
+                  <span>Continue with {{provider|capfirst}}</span>
+                </span>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
       {% if messages %}
         {% for message in messages %}
           {% if 'error' in message.tags %}
@@ -89,4 +115,35 @@
 
     </div>
   </form>
+  {% if terms_of_service_url or privacy_policy_url %}
+    <div class="auth-legal-notice">
+      <p>
+        {% if terms_of_service_url and privacy_policy_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you agree to the
+            <a href="{{ terms_of_service_url }}" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+            and acknowledge the
+            <a href="{{ privacy_policy_url }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          {% endblocktranslate %}
+        {% elif terms_of_service_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you agree to the
+            <a href="{{ terms_of_service_url }}" target="_blank" rel="noopener noreferrer">Terms of Service</a>.
+          {% endblocktranslate %}
+        {% elif privacy_policy_url %}
+          {% blocktranslate trimmed %}
+            By logging in, you acknowledge the
+            <a href="{{ privacy_policy_url }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+          {% endblocktranslate %}
+        {% endif %}
+      </p>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block auth_page_visuals %}
+  <svg class="auth-flight-path" viewBox="0 0 980 190" aria-hidden="true" focusable="false">
+    <path d="M26 148 C188 54 346 37 514 98 C650 148 780 130 954 46" />
+  </svg>
+  <figure class="auth-launch-plane" aria-hidden="true"></figure>
 {% endblock %}

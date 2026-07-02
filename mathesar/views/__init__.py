@@ -2,7 +2,8 @@ from functools import wraps
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.contrib.auth.views import redirect_to_login
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
@@ -92,16 +93,14 @@ def _get_internal_db_meta():
         }
 
 
-def get_base_common_data(request):
-    return {
-        'current_release_tag_name': __version__,
-        'is_authenticated': not request.user.is_anonymous,
-        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
-        'file_backends': get_file_backends(public_info=True),
-    }
-
-
 def get_common_data(request, database_id=None, schema_oid=None):
+    if request.user.is_authenticated:
+        return get_authorized_common_data(request, database_id, schema_oid)
+    else:
+        return get_anonymous_common_data(request)
+
+
+def get_authorized_common_data(request, database_id, schema_oid):
     databases = get_database_list(request)
     database_id_int = int(database_id) if database_id else None
     current_database = next((database for database in databases if database['id'] == database_id_int), None)
@@ -119,7 +118,7 @@ def get_common_data(request, database_id=None, schema_oid=None):
         'current_schema': current_schema_oid,
         'databases': databases,
         'internal_db': _get_internal_db_meta(),
-        'servers': get_servers_list(),
+        'servers': get_servers_list(request=request),
         'schemas': schemas,
         'tables': get_table_list(request, current_database_id, current_schema_oid),
         'user': get_user_data(request),
@@ -135,12 +134,26 @@ def get_anonymous_common_data(request):
     }
 
 
+def get_base_common_data(request):
+    return {
+        'current_release_tag_name': __version__,
+        'is_authenticated': not request.user.is_anonymous,
+        'is_sso_login_required': settings.REQUIRE_SSO_LOGIN,
+        'per_user_databases_enabled': settings.PER_USER_DATABASES_ENABLED,
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
+        'file_backends': get_file_backends(public_info=True),
+    }
+
+
 class MathesarRPCEntryPoint(RPCEntryPoint):
     pass
 
 
-@login_required
 def home(request):
+    if not request.user.is_authenticated:
+        if settings.MATHESAR_LANDING_PAGE_URL:
+            return redirect(settings.MATHESAR_LANDING_PAGE_URL)
+        return redirect_to_login(request.get_full_path())
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)
     })
@@ -179,7 +192,7 @@ def anonymous_route_home(request, **kwargs):
     if not request.session.session_key:
         request.session.save()
     return render(request, 'mathesar/index.html', {
-        'common_data': get_anonymous_common_data(request)
+        'common_data': get_common_data(request)
     })
 
 
@@ -188,6 +201,9 @@ def analytics_sample_report(request):
 
 
 def page_not_found_view(request, exception):
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request),
-    }, status=404)
+    return render(
+        request,
+        'mathesar/index.html',
+        {'common_data': get_common_data(request)},
+        status=404
+    )

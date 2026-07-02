@@ -21,7 +21,6 @@ class DataFileForm(forms.Form):
     escapechar = forms.CharField(required=False)
     quotechar = forms.CharField(required=False)
     paste = forms.CharField(required=False, empty_value=None, strip=False)
-    url = forms.URLField(required=False, empty_value=None)
 
     # TODO: consider removing, these are left
     # from when we had infra for uploading json & excel files
@@ -45,7 +44,7 @@ class DataFileForm(forms.Form):
         cleaned_data = {k: v for k, v in cleaned_data.items() if k in fields_from_request}
 
         if self.request.method == "POST":
-            source_fields = ['file', 'paste', 'url']
+            source_fields = ['file', 'paste']
             present_fields = [
                 field for field in source_fields
                 if field in cleaned_data.keys()
