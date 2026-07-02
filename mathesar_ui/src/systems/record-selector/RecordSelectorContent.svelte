@@ -7,7 +7,7 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { MiniPagination } from '@mathesar/components/mini-pagination';
   import { iconAddNew } from '@mathesar/icons';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
   import {
     type TabularData,
     extractPrimaryKeyValue,
@@ -74,10 +74,7 @@
       controller.submit(result);
     } else if ($rowType === 'navigation') {
       const { recordId } = result;
-      const recordPageUrl = $storeToGetRecordPageUrl({
-        tableId: table.oid,
-        recordId,
-      });
+      const recordPageUrl = getRecordPageUrlByTable(table, recordId);
       if (recordPageUrl) {
         router.goto(recordPageUrl);
         controller.cancel();

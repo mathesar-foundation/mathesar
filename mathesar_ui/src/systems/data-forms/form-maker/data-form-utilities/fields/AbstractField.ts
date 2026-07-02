@@ -20,7 +20,7 @@ export type AbstractFieldModifiableProps = keyof Pick<
 >;
 
 export abstract class AbstractField {
-  readonly container;
+  readonly container: FormFields;
 
   readonly key;
 

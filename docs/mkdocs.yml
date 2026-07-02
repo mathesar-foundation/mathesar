@@ -7,6 +7,7 @@ edit_uri: edit/develop/docs/docs/
 nav:
   - Introduction: index.md
   - Install Mathesar:
+      - Try Mathesar locally: administration/try-mathesar-locally.md
       - Using Docker Compose: administration/install-via-docker-compose.md
       - On Linux · macOS · WSL: administration/install-from-scratch.md
       - DigitalOcean: administration/install-digitalocean.md
@@ -40,6 +41,7 @@ nav:
           - File data type: user-guide/files.md
           - Form builder: user-guide/forms.md
           - Data Explorer: user-guide/data-explorer.md
+          - User data type: user-guide/user-type.md
       - Data management:
           - Importing data: user-guide/importing-data.md
           - Exporting data: user-guide/exporting-data.md
@@ -49,8 +51,13 @@ nav:
       - Overview: api/index.md
       - Methods: api/methods.md
   - Releases:
-      - '0.8.0': releases/0.8.0.md
+      - '0.12.0': releases/0.12.0.md
       - Previous releases:
+          - '0.11.0': releases/0.11.0.md
+          - '0.10.1': releases/0.10.1.md
+          - '0.10.0': releases/0.10.0.md
+          - '0.9.0': releases/0.9.0.md
+          - '0.8.0': releases/0.8.0.md
           - '0.7.1': releases/0.7.1.md
           - '0.7.0': releases/0.7.0.md
           - '0.6.0': releases/0.6.0.md
@@ -128,6 +135,7 @@ theme:
     - content.code.copy
     - navigation.sections
     - navigation.expand
+    - announce.dismiss
   font:
     text: Inter
     code: JetBrains Mono
@@ -154,12 +162,16 @@ markdown_extensions:
   - attr_list
   - def_list
   - codehilite
+  - md_in_html
   - pymdownx.blocks.caption
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.details
@@ -172,7 +184,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.9.0
+  mathesar_version: 0.12.0
   version:
     provider: mike
     alias: true

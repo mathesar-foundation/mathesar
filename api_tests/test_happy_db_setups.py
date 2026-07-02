@@ -183,6 +183,7 @@ def test_list_configured_roles(admin_rpc_call):
     # The only role at this point should be the initial `mathesar` role.
     result = admin_rpc_call(
         'roles.configured.list',
+        database_id=internal_db_id,
         server_id=internal_server_id,
     )
     assert len(result) == 1

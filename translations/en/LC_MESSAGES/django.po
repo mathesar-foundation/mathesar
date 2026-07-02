@@ -118,6 +118,29 @@ msgstr ""
 msgid "Log In"
 msgstr ""
 
+#: mathesar/templates/registration/login.html:123
+#, python-format
+msgid ""
+"By logging in, you agree to the <a href=\"%(terms_of_service_url)s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Terms of Service</a> and "
+"acknowledge the <a href=\"%(privacy_policy_url)s\" target=\"_blank\" "
+"rel=\"noopener noreferrer\">Privacy Policy</a>."
+msgstr ""
+
+#: mathesar/templates/registration/login.html:130
+#, python-format
+msgid ""
+"By logging in, you agree to the <a href=\"%(terms_of_service_url)s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Terms of Service</a>."
+msgstr ""
+
+#: mathesar/templates/registration/login.html:135
+#, python-format
+msgid ""
+"By logging in, you acknowledge the <a href=\"%(privacy_policy_url)s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy</a>."
+msgstr ""
+
 #: mathesar/templates/users/password_reset_confirmation.html:4
 msgid "Update Your Password"
 msgstr ""

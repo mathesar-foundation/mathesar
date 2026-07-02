@@ -60,7 +60,7 @@ WITH RECURSIVE symmetric_fkeys AS (
     c.confkey[1]::INTEGER right_col,
     false multiple_results,
     false reversed
-  FROM pg_constraint c
+  FROM pg_catalog.pg_constraint c
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 UNION ALL
   SELECT
@@ -71,7 +71,7 @@ UNION ALL
     c.conkey[1]::INTEGER right_col,
     true multiple_results,
     true reversed
-  FROM pg_constraint c
+  FROM pg_catalog.pg_constraint c
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 ),
 

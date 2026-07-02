@@ -1,4 +1,5 @@
 CairoSVG==2.9.0
+django-storages[azure]==1.14.6
 clevercsv==0.8.2
 Django==4.2.30
 django-allauth[socialaccount]==65.14.1
@@ -7,7 +8,7 @@ django-fernet-encrypted-fields==0.1.3
 frozendict==2.4.6
 fsspec==2025.7.0
 gunicorn==23.0.0
-pillow==12.1.1
+pillow==12.2.0
 psycopg[binary]==3.2.10
 psycopg2-binary==2.9.10
 pyyaml==6.0.2
@@ -15,3 +16,5 @@ requests==2.33.0
 s3fs==2025.7.0
 SQLAlchemy==1.4.54
 whitenoise==6.7.0
+azure-identity==1.25.3
+adlfs==2026.4.0

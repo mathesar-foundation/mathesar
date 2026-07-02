@@ -43,7 +43,7 @@ export class Database {
 
   constructConfiguredRolesStore() {
     return new AsyncRpcApiStore(api.roles.configured.list, {
-      staticProps: { server_id: this.server.id },
+      staticProps: { database_id: this.id, server_id: this.server.id },
       postProcess: (rawConfiguredRoles) =>
         new SortedImmutableMap(
           (v) => [...v].sort(([, a], [, b]) => a.name.localeCompare(b.name)),
