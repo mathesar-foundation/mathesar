@@ -132,6 +132,7 @@ export function explorationIsSaved(
 }
 
 export interface ExplorationRunParams {
+  database_id: number;
   exploration_def: AnonymousExploration;
   limit: number;
   offset: number;
@@ -198,17 +199,23 @@ export const explorations = {
     SavedExploration[]
   >(),
 
-  get: rpcMethodTypeContainer<{ exploration_id: number }, SavedExploration>(),
-
-  add: rpcMethodTypeContainer<
-    { exploration_def: AddableExploration },
+  get: rpcMethodTypeContainer<
+    { database_id: number; exploration_id: number },
     SavedExploration
   >(),
 
-  delete: rpcMethodTypeContainer<{ exploration_id: number }, void>(),
+  add: rpcMethodTypeContainer<
+    { database_id: number; exploration_def: AddableExploration },
+    SavedExploration
+  >(),
+
+  delete: rpcMethodTypeContainer<
+    { database_id: number; exploration_id: number },
+    void
+  >(),
 
   replace: rpcMethodTypeContainer<
-    { new_exploration: SavedExploration },
+    { database_id: number; new_exploration: SavedExploration },
     SavedExploration
   >(),
 

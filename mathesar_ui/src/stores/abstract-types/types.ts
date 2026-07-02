@@ -81,6 +81,7 @@ export interface AbstractTypeConfiguration {
   getEnabledState?: () =>
     | { enabled: false; cause: string | string[] | UntypedComponentWithProps }
     | { enabled: true };
+  getHelpInfo?: () => string | string[] | UntypedComponentWithProps;
 }
 
 export type AbstractTypeConfigurationPartialMap = Partial<

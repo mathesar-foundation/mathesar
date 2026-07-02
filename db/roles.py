@@ -1,4 +1,5 @@
 import json
+from psycopg import sql
 
 from db import connection as db_conn
 
@@ -31,6 +32,15 @@ def create_role(rolename, password, login, conn):
     return db_conn.exec_msar_func(
         conn, 'create_role', rolename, password, login
     ).fetchone()[0]
+
+
+def create_init_login_role(rolename, password, conn):
+    """Create a role without relying on msar schema."""
+    stmt = sql.SQL('CREATE USER {} ENCRYPTED PASSWORD {}').format(
+        sql.Identifier(rolename),
+        sql.Literal(password),
+    )
+    conn.execute(stmt)
 
 
 def drop_role(role_oid, conn):

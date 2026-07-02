@@ -37,11 +37,16 @@ import {
 } from '@mathesar/utils/tables';
 import {
   CancellablePromise,
+  ImmutableMap,
   type RecursivePartial,
   collapse,
 } from '@mathesar-component-library';
 
-import { currentSchema } from './schemas';
+import {
+  currentSchema,
+  fetchSchemasForCurrentDatabase,
+  schemas as schemasReadable,
+} from './schemas';
 
 const commonData = preloadCommonData();
 const isInAuthenticatedContext = commonData.routing_context !== 'anonymous';
@@ -62,7 +67,42 @@ function makeEmptyTablesData(): TablesData {
   };
 }
 
-const tablesStore = writable(makeEmptyTablesData());
+type DatabaseTablesEntry = {
+  tablesByOid: ImmutableMap<Table['oid'], Table>;
+  statusBySchema: ImmutableMap<Schema['oid'], RequestStatus>;
+};
+
+const blankDatabaseTablesEntry = (): DatabaseTablesEntry => ({
+  tablesByOid: new ImmutableMap(),
+  statusBySchema: new ImmutableMap(),
+});
+
+const baseStore = writable(
+  new ImmutableMap<Database['id'], DatabaseTablesEntry>(),
+);
+
+function updateDatabase(
+  databaseId: Database['id'],
+  mutator: (entry: DatabaseTablesEntry) => DatabaseTablesEntry,
+): void {
+  baseStore.update((dbMap) =>
+    dbMap.with(
+      databaseId,
+      mutator(dbMap.get(databaseId) ?? blankDatabaseTablesEntry()),
+    ),
+  );
+}
+
+function setSchemaRequestStatus(
+  database: Database,
+  schemaOid: Schema['oid'],
+  status: RequestStatus,
+): void {
+  updateDatabase(database.id, (entry) => ({
+    ...entry,
+    statusBySchema: entry.statusBySchema.with(schemaOid, status),
+  }));
+}
 
 function sortTables(tables: Iterable<Table>): Table[] {
   const allTables = [...tables];
@@ -72,6 +112,39 @@ function sortTables(tables: Iterable<Table>): Table[] {
   const sort = (a: Table, b: Table) => a.name.localeCompare(b.name);
   return [...views.sort(sort), ...regularTables.sort(sort)];
 }
+
+export function tableByOid(
+  databaseId: Database['id'],
+  tableOid: Table['oid'],
+): Table | undefined {
+  return get(baseStore).get(databaseId)?.tablesByOid.get(tableOid);
+}
+
+export function tablesBySchema(
+  databaseId: Database['id'],
+  schemaOid: Schema['oid'],
+): { tablesMap: TablesMap; requestStatus: RequestStatus } {
+  const entry = get(baseStore).get(databaseId);
+  const inSchema = entry
+    ? [...entry.tablesByOid.values()].filter((t) => t.schema.oid === schemaOid)
+    : [];
+  return {
+    tablesMap: new Map(sortTables(inSchema).map((t) => [t.oid, t])),
+    requestStatus: entry?.statusBySchema.get(schemaOid) ?? { state: 'success' },
+  };
+}
+
+const tablesStore: Readable<TablesData> = derived(
+  [currentSchema, baseStore],
+  ([$currentSchema]) => {
+    if (!$currentSchema) return makeEmptyTablesData();
+    return {
+      databaseId: $currentSchema.database.id,
+      schemaOid: $currentSchema.oid,
+      ...tablesBySchema($currentSchema.database.id, $currentSchema.oid),
+    };
+  },
+);
 
 function setTablesStore(
   schema: Schema,
@@ -84,16 +157,12 @@ function setTablesStore(
         rawTableWithMetadata: t,
       }),
   );
-
-  const tablesMap: TablesMap = new Map();
-  sortTables(tables).forEach((t) => tablesMap.set(t.oid, t));
-
-  tablesStore.set({
-    databaseId: schema.database.id,
-    schemaOid: schema.oid,
-    tablesMap,
-    requestStatus: { state: 'success' },
-  });
+  updateDatabase(schema.database.id, (entry) => ({
+    tablesByOid: entry.tablesByOid
+      .filterValues((t) => t.schema.oid !== schema.oid)
+      .withEntries(tables.map((t) => [t.oid, t])),
+    statusBySchema: entry.statusBySchema.with(schema.oid, { state: 'success' }),
+  }));
 }
 
 let request: CancellablePromise<RawTableWithMetadata[]>;
@@ -102,63 +171,23 @@ export async function fetchTablesForCurrentSchema() {
   request?.cancel();
 
   const $currentSchema = get(currentSchema);
-  if (!$currentSchema) {
-    tablesStore.set(makeEmptyTablesData());
-    return;
-  }
+  if (!$currentSchema) return;
 
   try {
-    tablesStore.update(($tablesStore) => {
-      if (
-        $tablesStore.databaseId === $currentSchema.database.id &&
-        $tablesStore.schemaOid === $currentSchema.oid
-      ) {
-        return {
-          ...$tablesStore,
-          requestStatus: { state: 'processing' },
-        };
-      }
-      return {
-        databaseId: $currentSchema.database.id,
-        schemaOid: $currentSchema.oid,
-        tablesMap: new Map(),
-        requestStatus: { state: 'processing' },
-      };
+    setSchemaRequestStatus($currentSchema.database, $currentSchema.oid, {
+      state: 'processing',
     });
-
     request = api.tables
       .list_with_metadata({
         database_id: $currentSchema.database.id,
         schema_oid: $currentSchema.oid,
       })
       .run();
-
-    const tableEntries = await request;
-
-    setTablesStore($currentSchema, tableEntries);
+    setTablesStore($currentSchema, await request);
   } catch (err) {
-    tablesStore.update(($tablesStore) => {
-      if (
-        $tablesStore.databaseId === $currentSchema.database.id &&
-        $tablesStore.schemaOid === $currentSchema.oid
-      ) {
-        return {
-          ...$tablesStore,
-          requestStatus: {
-            state: 'failure',
-            errors: [getErrorMessage(err)],
-          },
-        };
-      }
-      return {
-        databaseId: $currentSchema.database.id,
-        schemaOid: $currentSchema.oid,
-        tablesMap: new Map(),
-        requestStatus: {
-          state: 'failure',
-          errors: [getErrorMessage(err)],
-        },
-      };
+    setSchemaRequestStatus($currentSchema.database, $currentSchema.oid, {
+      state: 'failure',
+      errors: [getErrorMessage(err)],
     });
   }
 }
@@ -177,19 +206,10 @@ export function deleteTable(
     (resolve, reject) => {
       void promise.then(() => {
         schema.setTableCount(get(schema.tableCount) - 1);
-        const $tablesStore = get(tablesStore);
-        if (
-          $tablesStore.databaseId === schema.database.id &&
-          $tablesStore.schemaOid === schema.oid
-        ) {
-          tablesStore.update((tableStoreData) => {
-            tableStoreData.tablesMap.delete(tableOid);
-            return {
-              ...tableStoreData,
-              tablesMap: new Map(tableStoreData.tablesMap),
-            };
-          });
-        }
+        updateDatabase(schema.database.id, (entry) => ({
+          ...entry,
+          tablesByOid: entry.tablesByOid.without(tableOid),
+        }));
         return resolve();
       }, reject);
     },
@@ -210,22 +230,14 @@ function putTableInStore({
     schema,
     rawTableWithMetadata,
   });
-  const $tablesStore = get(tablesStore);
-  if (
-    $tablesStore.databaseId === schema.database.id &&
-    $tablesStore.schemaOid === schema.oid
-  ) {
-    tablesStore.update((tablesData) => {
-      tablesData.tablesMap.set(fullTable.oid, fullTable);
-      const newTablesMap = new Map(
-        sortTables(tablesData.tablesMap.values()).map((t) => [t.oid, t]),
-      );
-      return {
-        ...tablesData,
-        tablesMap: newTablesMap,
-      };
-    });
-    schema.setTableCount(get(tablesStore).tablesMap.size);
+  updateDatabase(schema.database.id, (entry) => ({
+    ...entry,
+    tablesByOid: entry.tablesByOid.with(fullTable.oid, fullTable),
+  }));
+  if (get(baseStore).get(schema.database.id)?.statusBySchema.has(schema.oid)) {
+    schema.setTableCount(
+      tablesBySchema(schema.database.id, schema.oid).tablesMap.size,
+    );
   }
   return fullTable;
 }
@@ -367,47 +379,61 @@ export async function createTableFromDataFile(props: {
   };
 }
 
+async function resolveSchema(
+  database: Database,
+  schemaOid: Schema['oid'],
+): Promise<Schema> {
+  const find = () => {
+    const $schemas = get(schemasReadable);
+    return $schemas.databaseId === database.id
+      ? $schemas.data.get(schemaOid)
+      : undefined;
+  };
+  let schema = find();
+  if (!schema) {
+    await fetchSchemasForCurrentDatabase();
+    schema = find();
+  }
+  if (!schema) {
+    throw new Error(`Schema ${schemaOid} not found in database ${database.id}`);
+  }
+  return schema;
+}
+
 export function getTableFromStoreOrApi({
-  schema,
+  database,
   tableOid,
   clearCache = false,
 }: {
-  schema: Schema;
+  database: Database;
   tableOid: Table['oid'];
-  /** When true, the cached table in the store will be cleared */
   clearCache?: boolean;
 }): CancellablePromise<Table> {
-  const $tablesStore = get(tablesStore);
-
-  if (
-    $tablesStore.databaseId === schema.database.id &&
-    $tablesStore.schemaOid === schema.oid &&
-    !clearCache
-  ) {
-    const table = $tablesStore.tablesMap.get(tableOid);
-    if (table) {
-      return new CancellablePromise((resolve) => {
-        resolve(table);
-      });
+  if (!clearCache) {
+    const cached = tableByOid(database.id, tableOid);
+    if (cached) {
+      return new CancellablePromise((resolve) => resolve(cached));
     }
   }
 
   const promise = api.tables
     .get_with_metadata({
-      database_id: schema.database.id,
+      database_id: database.id,
       table_oid: tableOid,
     })
     .run();
 
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((rawTableWithMetadata) => {
-        const table = putTableInStore({
-          schema,
-          rawTableWithMetadata,
-        });
-        return resolve(table);
-      }, reject);
+      void promise
+        .then(async (rawTableWithMetadata) => {
+          const schema = await resolveSchema(
+            database,
+            rawTableWithMetadata.schema,
+          );
+          return resolve(putTableInStore({ schema, rawTableWithMetadata }));
+        })
+        .catch(reject);
     },
     () => {
       promise.cancel();
@@ -419,35 +445,30 @@ let preload = true;
 
 export const currentTablesData = collapse(
   derived(currentSchema, ($currentSchema) => {
-    const $tablesStore = get(tablesStore);
-    if (
-      $tablesStore.databaseId !== $currentSchema?.database.id ||
-      $tablesStore.schemaOid !== $currentSchema?.oid
-    ) {
+    if (!$currentSchema) return tablesStore;
+    const status = get(baseStore)
+      .get($currentSchema.database.id)
+      ?.statusBySchema.get($currentSchema.oid);
+    if (!status) {
       if (
         preload &&
         isInAuthenticatedContext &&
-        commonData.current_schema === $currentSchema?.oid &&
-        commonData.current_database === $currentSchema?.database.id
+        commonData.current_schema === $currentSchema.oid &&
+        commonData.current_database === $currentSchema.database.id
       ) {
         if (commonData.tables.state === 'success') {
           setTablesStore($currentSchema, commonData.tables.data);
         } else {
-          tablesStore.set({
-            databaseId: $currentSchema.database.id,
-            schemaOid: $currentSchema.oid,
-            tablesMap: new Map(),
-            requestStatus: {
-              state: 'failure',
-              errors: [getErrorMessage(commonData.tables.error)],
-            },
+          setSchemaRequestStatus($currentSchema.database, $currentSchema.oid, {
+            state: 'failure',
+            errors: [getErrorMessage(commonData.tables.error)],
           });
         }
       } else {
         void fetchTablesForCurrentSchema();
       }
       preload = false;
-    } else if ($tablesStore.requestStatus.state === 'failure') {
+    } else if (status.state === 'failure') {
       void fetchTablesForCurrentSchema();
     }
     return tablesStore;
@@ -494,17 +515,19 @@ export const currentTable = derived(
 export function factoryToGetTableNameValidationErrors(
   table: Table,
 ): Readable<(n: string) => string[]> {
-  const otherTableNames = derived(
-    tablesStore,
-    (d) =>
-      new Set(
-        execPipe(
-          d.tablesMap.values(),
-          filter((t) => t.oid !== table.oid),
-          map((t) => t.name),
-        ),
+  const otherTableNames = derived(tablesStore, () => {
+    const { tablesMap } = tablesBySchema(
+      table.schema.database.id,
+      table.schema.oid,
+    );
+    return new Set(
+      execPipe(
+        tablesMap.values(),
+        filter((t) => t.oid !== table.oid),
+        map((t) => t.name),
       ),
-  );
+    );
+  });
 
   return derived([otherTableNames, _], ([$otherTableNames, $_]) => {
     function getNameValidationErrors(name: string): string[] {

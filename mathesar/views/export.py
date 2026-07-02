@@ -34,7 +34,7 @@ def export_exploration_csv_in_chunks(
 ):
     with connect(database_id, user) as conn:
         csv_buffer = StringIO()
-        exploration_chunk_gen = exploration_chunker(conn, exploration_id, **kwargs)
+        exploration_chunk_gen = exploration_chunker(conn, database_id, exploration_id, **kwargs)
         columns = next(exploration_chunk_gen)
         csv_writer = csv.DictWriter(csv_buffer, fieldnames=columns)
 

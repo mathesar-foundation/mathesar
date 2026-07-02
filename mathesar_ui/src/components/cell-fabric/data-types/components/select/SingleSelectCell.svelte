@@ -129,7 +129,7 @@
         </CellValue>
       </div>
 
-      {#if isActive}
+      {#if isActive && !disabled}
         <div class="icon">
           <Icon {...iconExpandDown} />
         </div>

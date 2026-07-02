@@ -186,6 +186,7 @@ msar/
 ## yaml config files ##
 sso.yml
 file_storage.yml
+login_page.yml
 
 # UI
 node_modules/

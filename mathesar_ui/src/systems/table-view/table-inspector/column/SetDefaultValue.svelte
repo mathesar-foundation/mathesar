@@ -14,6 +14,11 @@
     Radio,
   } from '@mathesar-component-library';
 
+  import {
+    type DefaultValueMode,
+    getDefaultValueOptions,
+  } from './defaultValueOptions';
+
   export let column: ProcessedColumn;
 
   const tabularData = getTabularDataStoreFromContext();
@@ -21,17 +26,44 @@
   $: ({ linkedRecordSummaries } = recordsData);
   $: ({ currentRoleOwns } = table.currentAccess);
 
+  // Get type-specific default value options
+  $: options = getDefaultValueOptions(column);
+  $: initialDefaultMode = options.initialMode;
+
   $: initialValue = column.column.default?.value ?? column.initialInputValue;
-  $: value = initialValue;
-  $: isDefaultNull = column.column.default === null;
+
+  // Track column ID to reset when column changes
+  let previousColumnId = column.id;
+  let defaultMode: DefaultValueMode;
+  let value = initialValue;
+
+  // Initialize and reset when column changes
+  $: {
+    if (column.id !== previousColumnId || defaultMode === undefined) {
+      previousColumnId = column.id;
+      defaultMode = initialDefaultMode;
+      value = initialValue;
+    }
+  }
+
+  $: isDefaultNull = defaultMode === 'none';
+  $: isSetDefaultUser =
+    defaultMode === 'set_default_user' || defaultMode === 'custom';
+
   $: actionButtonsVisible = (() => {
-    if (isDefaultNull) {
-      return column.column.default !== null;
+    if (defaultMode !== initialDefaultMode) {
+      return true;
     }
-    if (typeof value === 'object') {
-      return JSON.stringify(value) !== JSON.stringify(initialValue);
+    if (isSetDefaultUser) {
+      if (initialDefaultMode === 'none') {
+        return true;
+      }
+      if (typeof value === 'object') {
+        return JSON.stringify(value) !== JSON.stringify(initialValue);
+      }
+      return String(value) !== String(initialValue);
     }
-    return String(value) !== String(initialValue);
+    return false;
   })();
 
   $: recordSummary = $linkedRecordSummaries
@@ -41,22 +73,29 @@
   let typeChangeState: RequestStatus;
 
   function resetValue() {
+    defaultMode = initialDefaultMode;
     value = initialValue;
   }
 
   async function save() {
     typeChangeState = { state: 'processing' };
-    const defaultRequest = isDefaultNull
-      ? null
-      : {
-          is_dynamic: !!column.column.default?.is_dynamic,
-          value: String(value),
-        };
     try {
+      const defaultRequest = isDefaultNull
+        ? null
+        : {
+            // For user type columns, the default is always static (a user ID)
+            // For other types, preserve existing is_dynamic setting
+            is_dynamic:
+              defaultMode === 'set_default_user'
+                ? false
+                : !!column.column.default?.is_dynamic,
+            value: String(value),
+          };
       await columnsDataStore.patch({
         id: column.column.id,
         default: defaultRequest,
       });
+
       typeChangeState = { state: 'success' };
     } catch (err) {
       const message =
@@ -73,8 +112,8 @@
     typeChangeState = { state: 'success' };
   }
 
-  function toggleNoDefault() {
-    isDefaultNull = !isDefaultNull;
+  function setDefaultMode(mode: DefaultValueMode) {
+    defaultMode = mode;
   }
 
   function setRecordSummary(recordId: string, _recordSummary: string) {
@@ -93,13 +132,32 @@
 <div class="default-value-container">
   <LabeledInput layout="inline-input-first">
     <span slot="label">{$_('no_default_value')}</span>
-    <Radio checked={isDefaultNull} on:change={toggleNoDefault} {disabled} />
+    <Radio
+      checked={isDefaultNull}
+      on:change={() => setDefaultMode('none')}
+      {disabled}
+    />
   </LabeledInput>
-  <LabeledInput layout="inline-input-first">
-    <span slot="label">{$_('custom_default')}</span>
-    <Radio checked={!isDefaultNull} on:change={toggleNoDefault} {disabled} />
-  </LabeledInput>
-  {#if !isDefaultNull}
+  {#if options.availableModes.includes('set_default_user')}
+    <LabeledInput layout="inline-input-first">
+      <span slot="label">{$_(options.customValueLabel)}</span>
+      <Radio
+        checked={isSetDefaultUser}
+        on:change={() => setDefaultMode('set_default_user')}
+        {disabled}
+      />
+    </LabeledInput>
+  {:else if options.availableModes.includes('custom')}
+    <LabeledInput layout="inline-input-first">
+      <span slot="label">{$_(options.customValueLabel)}</span>
+      <Radio
+        checked={isSetDefaultUser}
+        on:change={() => setDefaultMode('custom')}
+        {disabled}
+      />
+    </LabeledInput>
+  {/if}
+  {#if isSetDefaultUser}
     <DynamicInput
       componentAndProps={column.simpleInputComponentAndProps}
       bind:value

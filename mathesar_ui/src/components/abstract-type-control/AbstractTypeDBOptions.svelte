@@ -55,7 +55,7 @@
 
 {#if dbForm}
   <div class="type-options">
-    <DbTypeIndicator type={selectedDbType} />
+    <DbTypeIndicator type={selectedDbType} {typeOptions} />
     {#if dbForm}
       <div class="option-form db-opts">
         <div class="content">
@@ -65,7 +65,7 @@
     {/if}
   </div>
 {:else}
-  <DbTypeIndicator type={selectedDbType} />
+  <DbTypeIndicator type={selectedDbType} {typeOptions} />
 {/if}
 
 <style lang="scss">

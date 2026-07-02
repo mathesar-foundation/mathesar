@@ -2,12 +2,14 @@ import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-build
 
 import type { RawDatabase } from './databases';
 import type { RawConfiguredRole } from './roles';
+import type { User } from './users';
 
 export interface RawCollaborator {
   id: number;
   user_id: number;
   database_id: RawDatabase['id'];
   configured_role_id: RawConfiguredRole['id'];
+  user_info: User;
 }
 
 export const collaborators = {

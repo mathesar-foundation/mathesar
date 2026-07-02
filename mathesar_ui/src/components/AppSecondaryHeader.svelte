@@ -43,6 +43,14 @@
       --AppSecondaryHeader__background,
       var(--color-bg-supporting)
     );
+    /* Page headers can layer a thin accent rail above a page-blended fill. */
+    background-size: var(--AppSecondaryHeader__background-size, auto);
+    background-position: var(--AppSecondaryHeader__background-position, 0 0);
+    background-repeat: var(--AppSecondaryHeader__background-repeat, repeat);
+    box-shadow: var(
+      --AppSecondaryHeader__box-shadow,
+      inset 0 -1px color-mix(in srgb, var(--color-border-base), transparent 45%)
+    );
   }
   .content {
     padding: var(--lg4) var(--page-padding-x);

@@ -18,6 +18,7 @@ import Date from './type-configs/date';
 import DateTime from './type-configs/datetime';
 import Duration from './type-configs/duration';
 import Email from './type-configs/email';
+import Enum from './type-configs/enum';
 import Fallback from './type-configs/fallback';
 // eslint-disable-next-line import/no-cycle
 import File from './type-configs/file/file';
@@ -27,6 +28,7 @@ import Number from './type-configs/number';
 import Text from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
+import User from './type-configs/user/user';
 import Uuid from './type-configs/uuid';
 import { typeCastMap } from './typeCastMap';
 import type {
@@ -63,6 +65,8 @@ const simpleAbstractTypeCategories: AbstractTypeConfigurationPartialMap = {
   [abstractTypeCategory.Uuid]: Uuid,
   [abstractTypeCategory.Json]: Json,
   [abstractTypeCategory.File]: File,
+  [abstractTypeCategory.User]: User,
+  [abstractTypeCategory.Enum]: Enum,
 };
 
 export const arrayFactory: AbstractTypeConfigurationFactory = () => ({
@@ -201,6 +205,11 @@ const typesResponse: AbstractTypeResponse[] = [
     db_types: [DB_TYPES.MSAR__EMAIL],
   },
   {
+    identifier: 'enum',
+    name: 'Enum',
+    db_types: [DB_TYPES.ENUM],
+  },
+  {
     identifier: 'money',
     name: 'Money',
     db_types: [
@@ -271,6 +280,13 @@ const fileAbstractType: AbstractType = {
   ...File,
 };
 
+const userAbstractType: AbstractType = {
+  identifier: 'user',
+  name: 'User',
+  dbTypes: new Set([DB_TYPES.INTEGER]),
+  ...User,
+};
+
 const abstractTypesMap = constructAbstractTypeMapFromResponse(typesResponse);
 
 export const defaultAbstractType = (() => {
@@ -293,12 +309,19 @@ function isFileAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
   );
 }
 
+function isUserAbstractType(dbType: DbType, metadata: ColumnMetadata | null) {
+  return metadata?.user_display_field != null && dbType === DB_TYPES.INTEGER;
+}
+
 function identifyAbstractTypeForDbType(
   dbType: DbType,
   metadata: ColumnMetadata | null,
 ): AbstractType | undefined {
   if (isFileAbstractType(dbType, metadata)) {
     return fileAbstractType;
+  }
+  if (isUserAbstractType(dbType, metadata)) {
+    return userAbstractType;
   }
   let abstractTypeOfDbType;
   for (const [, abstractType] of abstractTypesMap) {
@@ -316,6 +339,9 @@ function identifyAllPossibleAbstractTypesForDbType(
   const allPossibleAbstractTypes: Set<AbstractType> = new Set();
   if (dbType === DB_TYPES.JSONB) {
     allPossibleAbstractTypes.add(fileAbstractType);
+  }
+  if (dbType === DB_TYPES.INTEGER) {
+    allPossibleAbstractTypes.add(userAbstractType);
   }
   for (const [, abstractType] of abstractTypesMap) {
     if (abstractType.dbTypes.has(dbType)) {
@@ -385,6 +411,11 @@ export function abstractTypeToColumnSaveSpec(abstractType: AbstractType): {
         file_backend: getDefaultFileStorageBackend()?.backend,
       };
     }
+    if (abstractType.identifier === 'user') {
+      return {
+        user_display_field: 'username',
+      };
+    }
     return null;
   })();
 
@@ -401,24 +432,49 @@ export function mergeMetadataOnTypeChange(
   newAbstractType: AbstractType,
   metadata: ColumnMetadata | null,
 ) {
+  let result = metadata ?? {};
+
+  // Handle file type metadata
   if (newAbstractType.identifier === 'file') {
-    return {
-      ...(metadata ?? {}),
+    result = {
+      ...result,
       file_backend: getDefaultFileStorageBackend()?.backend,
     };
-  }
-  if (metadata && metadata.file_backend) {
-    return {
-      ...metadata,
+  } else if (metadata && metadata.file_backend) {
+    result = {
+      ...result,
       file_backend: null,
     };
   }
-  return metadata;
+
+  // Handle user type metadata
+  if (newAbstractType.identifier === 'user') {
+    // Set user-specific metadata when changing to user type
+    result = {
+      ...result,
+      user_display_field: result.user_display_field ?? 'username',
+    };
+  } else if (metadata?.user_display_field != null) {
+    // Clear user-specific metadata when changing away from user type
+    const { user_display_field: userDisplayField, ...rest } = result;
+    void userDisplayField;
+    result = {
+      ...rest,
+      user_display_field: null,
+    };
+  }
+
+  return result;
 }
 
 export function getAllowedAbstractTypesForNewColumn() {
-  return [...abstractTypesMap.values(), fileAbstractType]
-    .filter((type) => !comboAbstractTypeCategories[type.identifier])
+  const typesDisallowedForNewColumnCreation = new Set<string>([
+    ...Object.keys(comboAbstractTypeCategories),
+    abstractTypeCategory.Enum,
+  ]);
+
+  return [...abstractTypesMap.values(), fileAbstractType, userAbstractType]
+    .filter((type) => !typesDisallowedForNewColumnCreation.has(type.identifier))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -427,6 +483,9 @@ export function getDbTypesForAbstractType(
 ): Set<DbType> {
   if (abstractTypeIdentifier === 'file') {
     return fileAbstractType.dbTypes;
+  }
+  if (abstractTypeIdentifier === 'user') {
+    return userAbstractType.dbTypes;
   }
   return abstractTypesMap.get(abstractTypeIdentifier)?.dbTypes ?? new Set();
 }

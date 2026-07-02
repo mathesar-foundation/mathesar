@@ -3,6 +3,7 @@ import boolean from './boolean';
 import date from './date';
 import datetime from './datetime';
 import duration from './duration';
+import enumFactory from './enum';
 import file from './file';
 import money from './money';
 import number from './number';
@@ -15,6 +16,7 @@ import type {
   SimpleCellDataTypes,
 } from './typeDefinitions';
 import uri from './uri';
+import user from './user';
 
 const simpleDataTypeComponentFactories: Record<
   SimpleCellDataTypes,
@@ -30,6 +32,8 @@ const simpleDataTypeComponentFactories: Record<
   time,
   datetime,
   file,
+  user,
+  enum: enumFactory,
 };
 
 const compoundDataTypeComponentFactories: Record<

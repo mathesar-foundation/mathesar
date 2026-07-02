@@ -1,26 +1,39 @@
-# This config file allows you to configure OpenID Connect(OIDC)
-# based Single Sign-On(SSO) for logging into Mathesar with your preferred
-# Identity Provider(IdP).
-version: 1
-oidc_providers:
+# This config file lets you configure Single Sign-On (SSO) for logging into
+# Mathesar with your preferred Identity Provider (IdP).
+#
+# Two schema versions are supported:
+#
+#   - version: 1  - OIDC providers only (the original schema). Still fully
+#                   supported; existing installations continue to work.
+#
+#   - version: 2  - Adds support for GitHub Oauth2 alongside OIDC. Uses an
+#                   explicit `type:` field per provider.
+#
+# If `version:` is omitted, the schema defaults to version 1.
+#
+# Pick one of the examples below.
+
+# -----------------------------------------------------------------------------
+# version: 2 example (recommended for new setups)
+# -----------------------------------------------------------------------------
+version: 2
+providers:
   provider1:
-    # (REQUIRED)
-    # These values are mandatory to enable SSO via OIDC.
-    # Sample OIDC config using Google as an IdP:
+    # (REQUIRED) For OIDC providers (Okta, Google, Microsoft, etc.).
+    type: oidc
     provider_name: google
     client_id: # your_client_id
     secret: # your_secret_key
     server_url: https://accounts.google.com
 
     # (OPTIONAL)
-    # These are optional configuration that can be added for you OIDC config.
-
     # Restrict logins to the specified email domains.
-    # Default(Allow all domains): []
+    # Default (allow all domains): []
     # Example: ['xyz.org', 'example.com']
     allowed_email_domains: []
 
-    # Specifies the default postgres roles to be provisioned to users on their first login.
+    # (OPTIONAL)
+    # Default postgres roles provisioned to users on their first login.
     default_pg_role:
       db1:
         name: # your_db_name
@@ -29,5 +42,36 @@ oidc_providers:
         role: # your_db_role
       db2:
         # Use the same config as db1 to provision default roles to users on additional databases.
+
   provider2:
-      # Use the same config as provider1 to configure additional OIDC providers.
+    # (REQUIRED) For github.com
+    type: github
+    client_id: # your_github_client_id
+    secret: # your_github_client_secret
+
+    # (OPTIONAL) Same semantics as the OIDC provider above.
+    allowed_email_domains: []
+    default_pg_role:
+      db1:
+        name: # your_db_name
+        host: # your_db_host
+        port: # your_db_port
+        role: # your_db_role
+
+# -----------------------------------------------------------------------------
+# version: 1 example (legacy, OIDC only)
+# -----------------------------------------------------------------------------
+# version: 1
+# oidc_providers:
+#   provider1:
+#     provider_name: google
+#     client_id: # your_client_id
+#     secret: # your_secret_key
+#     server_url: https://accounts.google.com
+#     allowed_email_domains: []
+#     default_pg_role:
+#       db1:
+#         name: # your_db_name
+#         host: # your_db_host
+#         port: # your_db_port
+#         role: # your_db_role

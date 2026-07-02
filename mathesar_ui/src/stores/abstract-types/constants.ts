@@ -4,6 +4,7 @@ export const abstractTypeCategory = {
   Time: 'time',
   DateTime: 'datetime',
   Duration: 'duration',
+  Enum: 'enum',
   Email: 'email',
   Money: 'money',
   Number: 'number',
@@ -15,5 +16,6 @@ export const abstractTypeCategory = {
   JsonObject: 'map',
   Array: 'array',
   File: 'file',
+  User: 'user',
   Other: 'other',
 } as const;

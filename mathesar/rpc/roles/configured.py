@@ -27,17 +27,18 @@ class ConfiguredRoleInfo(TypedDict):
 
 
 @mathesar_rpc_method(name="roles.configured.list", auth="login")
-def list_(*, server_id: int, **kwargs) -> list[ConfiguredRoleInfo]:
+def list_(*, database_id: int, server_id: int, **kwargs) -> list[ConfiguredRoleInfo]:
     """
     List information about roles configured in Mathesar. Exposed as `list`.
 
     Args:
+        database_id: The Django id of the Database within the Server.
         server_id: The Django id of the Server containing the configured roles.
 
     Returns:
         A list of configured roles.
     """
-    configured_role_qs = ConfiguredRole.objects.filter(server__id=server_id)
+    configured_role_qs = ConfiguredRole.objects.filter(server__id=server_id, server__databases=database_id)
 
     return [ConfiguredRoleInfo.from_model(db_model) for db_model in configured_role_qs]
 

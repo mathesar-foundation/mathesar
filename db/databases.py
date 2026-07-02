@@ -20,10 +20,11 @@ def drop_database(database_oid, conn):
     conn.autocommit = False
 
 
-def create_database(database_name, conn):
+def create_database(database_name, conn, owner=None):
     """Use the given connection to create a database."""
     conn.autocommit = True
-    conn.execute(
-        sql.SQL('CREATE DATABASE {}').format(sql.Identifier(database_name))
-    )
+    stmt = sql.SQL('CREATE DATABASE {}').format(sql.Identifier(database_name))
+    if owner is not None:
+        stmt += sql.SQL(' OWNER {}').format(sql.Identifier(owner))
+    conn.execute(stmt)
     conn.autocommit = False

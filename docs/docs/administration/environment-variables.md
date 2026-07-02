@@ -23,6 +23,13 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Format**: An integer.
 - **Default value**: `3`
 
+### `MATHESAR_DJANGO_ADMIN_ENABLED` {: #mathesar_django_admin_enabled}
+
+- **Description**: Enables Django's built-in admin interface at `/admin/`. This is disabled by default and does not affect Mathesar's own administration pages under `/administration/`.
+- **Format**: `true` or `false`
+- **Default value**: `false`
+- **Additional information**: If you enable this after installing Mathesar directly on Linux, macOS, or WSL, start Mathesar once with `mathesar run --setup-django` so Django can apply any required admin migrations and collect admin static files.
+
 
 ## Internal database configuration {: #db}
 
@@ -102,20 +109,37 @@ The database specified in this section is used to store Mathesar's internal data
 !!! info "**OPTIONAL**"
     Only used if [using SSO](./single-sign-on.md) in installations where the local filesystem is inaccessible.
 
-### `OIDC_CONFIG_DICT` (optional)
+### `SSO_CONFIG_DICT` (optional)
 
 - **Description**: The configuration for enabling SSO and configuring providers in Mathesar.
-- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example).
+- **Format**: A stringified JSON representation of the config in the [`sso.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/sso.yml.example). Both schema version 1 (OIDC only) and version 2 (OIDC + GitHub) are accepted.
 
-    !!! example
+    !!! example "Version 2 (OIDC + GitHub)"
         ```env
-         OIDC_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
+         SSO_CONFIG_DICT="{\"version\": 2,\"providers\": {\"provider1\": {\"type\": \"oidc\",\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"},\"provider2\": {\"type\": \"github\",\"client_id\": \"github-client-id\",\"secret\": \"github-client-secret\"}}}"
+        ```
+
+    !!! example "Version 1 (OIDC only, legacy)"
+        ```env
+         SSO_CONFIG_DICT="{\"version\": 1,\"oidc_providers\": {\"provider1\": {\"provider_name\": \"okta\",\"client_id\": \"client-id\",\"secret\": \"client-secret\",\"server_url\": \"https://trial-2872264-admin.okta.com\"}}}"
         ```
 
 
 - **Additional information**: The following tools might help you convert the YAML syntax from `sso.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+
+### `OIDC_CONFIG_DICT` (optional, alias)
+
+- **Description**: A backwards-compatible alias for `SSO_CONFIG_DICT`. Existing installations can continue to use this name with no changes. If both are set, `SSO_CONFIG_DICT` takes precedence.
+
+### `REQUIRE_SSO_LOGIN` (optional) {: #require_sso_login}
+
+- **Description**: When enabled, Mathesar disables password-based login and only allows users to sign in via a configured SSO provider. Users will not be able to update passwords or email addresses. Administrators can still reset another user's password and edit other users' emails as a break-glass mechanism.
+- **Format**: `true` or `false`
+- **Default value**: `false`
+- **Additional information**:
+    - This setting only takes effect when at least one SSO provider is configured. If `REQUIRE_SSO_LOGIN=true` but no provider is configured in `sso.yml`/`SSO_CONFIG_DICT`, Mathesar logs a warning and continues to allow password login (so administrators can never accidentally lock everyone out).
 
 ## File backend configuration
 
@@ -124,14 +148,108 @@ The database specified in this section is used to store Mathesar's internal data
 
 ### `FILE_STORAGE_DICT` (optional)
 
-- **Description**: The configuration to connect Mathesar to an S3-compatible [file storage backend](../administration/file-backend-config.md).
+- **Description**: The configuration to connect Mathesar to an S3-compatible or Azure Blob Storage [file storage backend](../administration/file-backend-config.md).
 - **Format**: A stringified JSON representation of the config in the [`file_storage.yml` file](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/file_storage.yml.example).
 
-    !!! example
+    !!! example "S3-compatible"
         ```env
          FILE_STORAGE_DICT="{\"default\":{\"protocol\":\"s3\",\"nickname\":\"Example\",\"prefix\":\"mathesar-storage\",\"kwargs\":{\"client_kwargs\":{\"endpoint_url\":\"https:\/\/storage-example.mathesar.org\",\"region_name\":\"auto\",\"aws_access_key_id\":\"XXX\",\"aws_secret_access_key\":\"XXX\"}}}}"
+        ```
+
+    !!! example "Azure Blob Storage (managed identity)"
+        ```env
+         FILE_STORAGE_DICT="{\"default\":{\"protocol\":\"az\",\"nickname\":\"Example\",\"prefix\":\"mathesar-file-attachments\",\"kwargs\":{\"account_name\":\"my-storage-account\"}}}"
         ```
 
 - **Additional information**: The following tools might help you convert the YAML syntax from `file_storage.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+
+## Datafiles storage configuration {: #datafiles-storage}
+
+!!! info "**OPTIONAL**"
+    Only needed if you want to store uploaded datafiles (used for CSV/TSV imports) in Azure Blob Storage instead of on the local filesystem.
+
+### `DATA_FILES_STORAGE_BACKEND` (optional)
+
+- **Description**: Selects the backend used to store uploaded datafiles. Set to `azure` to store them in Azure Blob Storage; otherwise they are stored on the local filesystem. Static files are always served by whitenoise regardless of this setting.
+- **Format**: One of `local` or `azure`
+- **Default value**: `local`
+
+### `DATA_FILES_AZURE_ACCOUNT_NAME` (optional)
+
+- **Description**: The Azure Storage account name used to store datafiles. Required when `DATA_FILES_STORAGE_BACKEND` is `azure`. Authentication uses [`DefaultAzureCredential`](https://learn.microsoft.com/python/api/azure-identity/azure.identity.defaultazurecredential), which resolves credentials from the environment (managed identity, workload identity, `az login`, etc.,).
+- **Format**: An Azure Storage account name
+
+### `DATA_FILES_AZURE_CONTAINER` (optional)
+
+- **Description**: The Azure Blob Storage container in which datafiles are stored. Required when `DATA_FILES_STORAGE_BACKEND` is `azure`.
+- **Format**: An Azure Blob Storage container name
+- **Default value**: `mathesar-datafiles`
+
+## Public entry and login page configuration {: #public-entry}
+
+!!! info "**OPTIONAL**"
+    Only needed if you want to customize the public-facing login experience or
+    redirect anonymous visitors from Mathesar's home page.
+
+### `MATHESAR_LANDING_PAGE_URL` (optional)
+
+- **Description**: URL to redirect anonymous visitors who open Mathesar's home page (`/`). If unset, anonymous visitors are sent to the login page.
+- **Format**: A URL
+- **Default value**: (none — anonymous visitors are sent to the login page)
+
+### `MATHESAR_INSTANCE_NAME` (optional)
+
+- **Description**: Name for this Mathesar instance. Currently used as accessible text for the logo on login/auth pages.
+- **Format**: Plain text
+- **Default value**: `Mathesar`
+
+### `MATHESAR_AUTH_LOGO_URL` (optional)
+
+- **Description**: URL for a custom logo shown on login/auth pages. If unset, Mathesar's default auth logo is shown.
+- **Format**: An `http://` or `https://` URL, a root-relative Mathesar path such as `/static/...`, or a small `data:image/...;base64,...` URL.
+- **Default value**: (none — Mathesar's default logo is shown)
+
+### `MATHESAR_LOGIN_PAGE_TEXT_DICT` (optional)
+
+- **Description**: Localized plain text copy shown on the login page. If unset, Mathesar uses the translated default heading (`Log in to Mathesar`) and no orientation copy.
+- **Format**: A stringified JSON representation of the config in a `login_page.yml` file. HTML and Markdown are not rendered.
+- **Default value**: `{}` (no custom login page copy)
+- **Example**:
+
+    ```env
+    MATHESAR_LOGIN_PAGE_TEXT_DICT="{\"heading\":\"Welcome to your Mathesar workspace\",\"body\":\"Log in to continue working with your data.\",\"translations\":{\"es\":{\"heading\":\"Bienvenido a tu espacio de trabajo de Mathesar\",\"body\":\"Inicia sesión para seguir trabajando con tus datos.\"}}}"
+    ```
+
+- **Additional information**: For Docker Compose, direct installations, and Kubernetes deployments that can mount files, prefer a `login_page.yml` file at Mathesar's installation root. The file uses the same shape:
+
+    ```yaml
+    heading: Welcome to your Mathesar workspace
+    body: Log in to continue working with your data.
+    translations:
+      es:
+        heading: Bienvenido a tu espacio de trabajo de Mathesar
+        body: Inicia sesión para seguir trabajando con tus datos.
+    ```
+
+    `MATHESAR_LOGIN_PAGE_TEXT_DICT` takes precedence over `login_page.yml`. If custom copy is provided without translations, that custom copy is shown for all selected languages.
+
+### `MATHESAR_LOGIN_PAGE_BACKGROUND` (optional)
+
+- **Description**: CSS `background` value for the login page. This is intended for trusted administrators and can be a solid color, image URL, or layered gradient.
+- **Format**: CSS background value
+- **Default value**: (none — Mathesar's default login page background is shown)
+- **Additional information**: If you set this in a dotenv-style file and the value contains `#` characters, wrap the value in quotes so the colors are not parsed as comments.
+
+### `MATHESAR_TERMS_OF_SERVICE_URL` (optional)
+
+- **Description**: URL for a "Terms of Service" link used in the login page legal notice.
+- **Format**: A URL
+- **Default value**: (none — no link is shown)
+
+### `MATHESAR_PRIVACY_POLICY_URL` (optional)
+
+- **Description**: URL for a "Privacy Policy" link used in the login page legal notice.
+- **Format**: A URL
+- **Default value**: (none — no link is shown)

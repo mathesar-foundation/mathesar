@@ -3,7 +3,7 @@
 
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
   import {
     type RecordRow,
     type TabularData,
@@ -123,7 +123,7 @@
     if (!recordId) {
       return undefined;
     }
-    return $storeToGetRecordPageUrl({ tableId: table.oid, recordId });
+    return getRecordPageUrlByTable(table, recordId);
   }
 
   function submitIndex(index: number) {

@@ -1,6 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
+
 from typing import Any, Literal, Optional, TypedDict, Union
 
 from modernrpc.core import REQUEST_KEY
@@ -16,9 +17,13 @@ from db.records import (
 )
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
-from mathesar.utils.columns import get_download_link_columns
-from mathesar.utils.tables import get_table_record_summary_templates
+from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.tables import get_table_meta_data, get_table_record_summary_templates
 from mathesar.utils.download_links import get_download_links
+from mathesar.utils.user_display import (
+    apply_track_editing_user,
+    get_user_linked_record_summaries,
+)
 
 
 class OrderBy(TypedDict):
@@ -29,6 +34,7 @@ class OrderBy(TypedDict):
         attnum: The attnum of the column to order by.
         direction: The direction to order by.
     """
+
     attnum: int
     direction: Literal["asc", "desc"]
 
@@ -41,6 +47,7 @@ class FilterAttnum(TypedDict):
         type: Must be `"attnum"`
         value: The attnum of the column to filter by
     """
+
     type: Literal["attnum"]
     value: int
 
@@ -53,6 +60,7 @@ class FilterLiteral(TypedDict):
       type: must be `"literal"`.
       value: The value of the literal.
     """
+
     type: Literal["literal"]
     value: Any
 
@@ -68,8 +76,9 @@ class Filter(TypedDict):
       type: a function or operator to be used in filtering.
       args: The ordered arguments for the function or operator.
     """
+
     type: str
-    args: list[Union['Filter', FilterAttnum, FilterLiteral]]
+    args: list[Union["Filter", FilterAttnum, FilterLiteral]]
 
 
 class SearchParam(TypedDict):
@@ -80,6 +89,7 @@ class SearchParam(TypedDict):
         attnum: The attnum of the column in the table.
         literal: The literal to search for in the column.
     """
+
     attnum: int
     literal: Any
 
@@ -94,6 +104,7 @@ class Grouping(TypedDict):
         columns: The columns to be grouped by.
         preproc: The preprocessing functions to apply (if any).
     """
+
     columns: list[int]
     preproc: list[str]
 
@@ -114,6 +125,7 @@ class Group(TypedDict):
         result_indices: The 0-indexed positions of group members in the
             results array.
     """
+
     id: int
     count: int
     results_eq: list[dict]
@@ -129,6 +141,7 @@ class GroupingResponse(TypedDict):
         preproc: The preprocessing functions to apply (if any).
         groups: The groups applicable to the records being returned.
     """
+
     columns: list[int]
     preproc: list[str]
     groups: list[Group]
@@ -183,6 +196,7 @@ class RecordList(TypedDict):
         download_links: Information for viewing or downloading file
             attachments.
     """
+
     count: int
     results: list[dict]
     grouping: GroupingResponse
@@ -200,7 +214,7 @@ class RecordList(TypedDict):
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
             joined_record_summaries=d.get("joined_record_summaries"),
-            download_links=d.get("download_links") or None
+            download_links=d.get("download_links") or None,
         )
 
 
@@ -219,6 +233,7 @@ class RecordAdded(TypedDict):
             values, provides a map of foreign key to a text summary.
         record_summaries: Information for previewing an added record.
     """
+
     results: list[dict]
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
@@ -240,6 +255,7 @@ class SummarizedRecordReference(TypedDict):
         key: A unique identifier for the record.
         summary: The record summary
     """
+
     key: Any
     summary: str
 
@@ -268,6 +284,7 @@ class RecordSummaryList(TypedDict):
         count: The total number of records matching the criteria.
         results: A list of summarized record references, each containing a key and a summary.
     """
+
     count: int
     results: list[SummarizedRecordReference]
     mapping: RecordSummaryMapping
@@ -316,6 +333,7 @@ def list_(
         The requested records, along with some metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
+    columns_meta_data = list(get_columns_meta_data(table_oid, database_id))
     with connect(database_id, user) as conn:
         record_info = list_records_from_table(
             conn,
@@ -327,14 +345,23 @@ def list_(
             group=grouping,
             joined_columns=joined_columns,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
-    download_link_columns = get_download_link_columns(table_oid, database_id)
+
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns,
+        columns_meta_data,
     ) or None
+
+    user_summaries = get_user_linked_record_summaries(
+        columns_meta_data, record_info.get("results", [])
+    )
+    if user_summaries is not None:
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
 
     return RecordList.from_dict(record_info)
 
@@ -371,8 +398,8 @@ def get(
     Returns:
         The requested record, along with some metadata.
     """
-
     user = kwargs.get(REQUEST_KEY).user
+    columns_meta_data = list(get_columns_meta_data(table_oid, database_id))
     with connect(database_id, user) as conn:
         record_info = get_record_from_table(
             conn,
@@ -385,12 +412,20 @@ def get(
                 **(table_record_summary_templates or {}),
             },
         )
-    download_link_columns = get_download_link_columns(table_oid, database_id)
+
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns,
+        columns_meta_data,
     ) or None
+
+    user_summaries = get_user_linked_record_summaries(
+        columns_meta_data, record_info.get("results", [])
+    )
+    if user_summaries is not None:
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
+
     return RecordList.from_dict(record_info)
 
 
@@ -424,14 +459,28 @@ def add(
         The created record, along with some metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
+    columns_meta_data = list(get_columns_meta_data(table_oid, database_id))
+    table_meta_data = get_table_meta_data(table_oid, database_id)
+    record_def = apply_track_editing_user(record_def, table_meta_data, user.id)
+
     with connect(database_id, user) as conn:
         record_info = add_record_to_table(
             conn,
             record_def,
             table_oid,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
+
+    user_summaries = get_user_linked_record_summaries(
+        columns_meta_data, record_info.get("results", [])
+    )
+    if user_summaries is not None:
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
+
     return RecordAdded.from_dict(record_info)
 
 
@@ -466,6 +515,10 @@ def patch(
         The modified record, along with some metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
+    columns_meta_data = list(get_columns_meta_data(table_oid, database_id))
+    table_meta_data = get_table_meta_data(table_oid, database_id)
+    record_def = apply_track_editing_user(record_def, table_meta_data, user.id)
+
     with connect(database_id, user) as conn:
         record_info = patch_record_in_table(
             conn,
@@ -473,18 +526,24 @@ def patch(
             record_id,
             table_oid,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
+
+    user_summaries = get_user_linked_record_summaries(
+        columns_meta_data, record_info.get("results", [])
+    )
+    if user_summaries is not None:
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
+
     return RecordAdded.from_dict(record_info)
 
 
 @mathesar_rpc_method(name="records.delete", auth="login")
 def delete(
-        *,
-        record_ids: list[Any],
-        table_oid: int,
-        database_id: int,
-        **kwargs
+        *, record_ids: list[Any], table_oid: int, database_id: int, **kwargs
 ) -> list[Any]:
     """
     Delete records from a table by primary key.
@@ -542,6 +601,7 @@ def search(
         The requested records, along with some metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
+    columns_meta_data = list(get_columns_meta_data(table_oid, database_id))
     with connect(database_id, user) as conn:
         record_info = search_records_from_table(
             conn,
@@ -550,14 +610,24 @@ def search(
             limit=limit,
             offset=offset,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
         )
-    download_link_columns = get_download_link_columns(table_oid, database_id)
+
     record_info["download_links"] = get_download_links(
         kwargs.get(REQUEST_KEY),
         record_info["results"],
-        download_link_columns,
+        columns_meta_data,
     ) or None
+
+    user_summaries = get_user_linked_record_summaries(
+        columns_meta_data, record_info.get("results", [])
+    )
+    if user_summaries is not None:
+        existing = record_info.get("linked_record_summaries") or {}
+        record_info["linked_record_summaries"] = {**existing, **user_summaries}
+
     return RecordList.from_dict(record_info)
 
 
@@ -595,7 +665,9 @@ def list_summaries(
             limit=limit,
             offset=offset,
             search=search,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates=get_table_record_summary_templates(
+                database_id
+            ),
             linked_record_path=linked_record_path,
         )
     return RecordSummaryList.from_dict(record_info)
