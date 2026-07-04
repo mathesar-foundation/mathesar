@@ -1,3 +1,6 @@
+import re
+from datetime import timedelta
+
 from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import cast, Column, MetaData, select, Table, text
@@ -184,6 +187,42 @@ datetime_defaults = [
 ]
 
 
+def _iso_duration_to_timedelta(iso_str):
+    """
+    Convert a simple ISO 8601 duration (without weeks) to a timedelta.
+
+    PostgreSQL converts 1 year -> 365 days and 1 month -> 30 days when
+    storing in its internal microseconds representation, so we mirror
+    that conversion here.
+    """
+    pattern = (
+        r'^P'
+        r'(?:(?P<years>-?\d+)Y)?'
+        r'(?:(?P<months>-?\d+)M)?'
+        r'(?:(?P<days>-?\d+)D)?'
+        r'(?:T'
+        r'(?:(?P<hours>-?\d+)H)?'
+        r'(?:(?P<minutes>-?\d+)M)?'
+        r'(?:(?P<seconds>-?\d+(?:\.\d+)?)S)?'
+        r')?$'
+    )
+    match = re.match(pattern, iso_str)
+    if not match:
+        return None
+    years = int(match.group('years') or 0)
+    months = int(match.group('months') or 0)
+    days = int(match.group('days') or 0)
+    hours = int(match.group('hours') or 0)
+    minutes = int(match.group('minutes') or 0)
+    seconds = float(match.group('seconds') or 0)
+    return timedelta(
+        days=years * 365 + months * 30 + days,
+        hours=hours,
+        minutes=minutes,
+        seconds=seconds,
+    )
+
+
 @pytest.mark.parametrize('type_,val', datetime_defaults)
 def test_datetime_type_column_default(engine_with_schema, type_, val):
     engine, app_schema = engine_with_schema
@@ -210,7 +249,13 @@ def test_datetime_type_column_default(engine_with_schema, type_, val):
     default_selectable = select(cast(text(default_sql_txt), test_col.type))
     with engine.begin() as conn:
         actual_default = conn.execute(default_selectable).scalar()
-    assert actual_default == default_str
+    if isinstance(actual_default, timedelta):
+        # SA 2.0 returns timedelta from cast() for interval types (column_expression
+        # is not applied to Cast expressions).  Parse the ISO default to a timedelta
+        # and compare semantically.
+        assert actual_default == _iso_duration_to_timedelta(default_str)
+    else:
+        assert actual_default == default_str
 
 
 def test_interval_type_column_args(engine_with_schema):
