@@ -34,9 +34,7 @@ def create_future_engine(
         port=port,
         query=query,
     )
-    kwargs.update(future=True)
     return create_engine(conn_url, *args, **kwargs)
-
 
 # NOTE: used in testing, hence public
 def create_engine(conn_url, *args, **kwargs):
@@ -69,7 +67,7 @@ def get_dummy_engine():
     In some cases we only need an engine to access the Postgres dialect. E.g. when examining the
     ischema_names dict. In those cases, following is enough:
     """
-    engine = create_engine("postgresql://", future=True)
+    engine = create_engine("postgresql://")
     add_custom_types_to_ischema_names(engine)
     return engine
 
