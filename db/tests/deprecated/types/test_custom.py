@@ -16,28 +16,28 @@ def test_char_type_column_creation(engine_with_schema):
     engine, schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={schema}"))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             "test_table",
             metadata,
             Column("char_col", custom.CHAR),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
 
 def test_char_type_column_reflection(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             "test_table",
             metadata,
             Column("char_col", custom.CHAR),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
     expect_cls = custom.CHAR
     actual_cls = reflect_table.columns["char_col"].type.__class__
@@ -143,13 +143,13 @@ def test_datetime_type_column_creation(engine_with_schema, test_type):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f'SET search_path={app_schema}'))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             'test_table',
             metadata,
             Column('time_type', test_type),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
 
 @pytest.mark.parametrize(
@@ -161,16 +161,16 @@ def test_datetime_type_column_reflection(engine_with_schema, test_type, sa_type)
     col_name = 'time_type'
     table_name = 'test_table'
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             table_name,
             metadata,
             Column(col_name, sa_type),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table(table_name, metadata, autoload_with=conn)
     expect_cls = test_type
     actual_cls = reflect_table.columns[col_name].type.__class__
@@ -192,7 +192,7 @@ def test_datetime_type_column_default(engine_with_schema, type_, val):
     table_name = 'test_table'
     with engine.begin() as conn:
         conn.execute(text(f'SET search_path={app_schema}'))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             table_name,
             metadata,
@@ -200,10 +200,10 @@ def test_datetime_type_column_default(engine_with_schema, type_, val):
                 column_name, type_, server_default=default_str,
             ),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table(table_name, metadata, autoload_with=conn)
     test_col = reflect_table.columns[column_name]
     default_sql_txt = str(test_col.server_default.arg)
@@ -216,7 +216,7 @@ def test_datetime_type_column_default(engine_with_schema, type_, val):
 def test_interval_type_column_args(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             'test_table',
             metadata,
@@ -225,10 +225,10 @@ def test_interval_type_column_args(engine_with_schema):
                 custom.Interval(precision=5, fields='SECOND')
             )
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table('test_table', metadata, autoload_with=conn)
     expect_cls = custom.Interval
     actual_cls = reflect_table.columns['time_intervals'].type.__class__
@@ -283,13 +283,13 @@ def test_interval_insert_select(engine_with_schema, type_, out_in_map):
     insert_dicts = [{column_name: tup[0]} for tup in fixed_type_exploded]
     output_values = [tup[1] for tup in fixed_type_exploded]
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             'test_table',
             metadata,
             Column(column_name, type_),
         )
-        test_table.create()
+        test_table.create(bind=conn)
         conn.execute(test_table.insert().values(insert_dicts))
         res = conn.execute(select(test_table)).fetchall()
     assert len(res) == len(output_values)
@@ -353,27 +353,27 @@ def test_email_type_column_creation(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             "test_table",
             metadata,
             Column("email_addresses", custom.Email),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
 
 def test_email_type_column_reflection(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             "test_table",
             metadata,
             Column("email_addresses", custom.Email),
         )
-        test_table.create()
+        test_table.create(bind=conn)
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
     expect_cls = custom.Email
     actual_cls = reflect_table.columns["email_addresses"].type.__class__
@@ -554,13 +554,13 @@ def test_uri_type_column_creation(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             "test_table",
             metadata,
             Column("uris", custom.URI),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
 
 test_data = ('https://centerofci.org', None)
@@ -571,29 +571,29 @@ def test_uri_type_set_data(engine_with_schema, data):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             "test_table",
             metadata,
             Column("uris", custom.URI),
         )
-        test_table.create()
+        test_table.create(bind=conn)
         conn.execute(test_table.insert(values=(data,)))
 
 
 def test_uri_type_column_reflection(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             "test_table",
             metadata,
             Column("uris", custom.URI),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
     expect_cls = custom.URI
     actual_cls = reflect_table.columns["uris"].type.__class__
@@ -636,28 +636,28 @@ def test_money_type_column_creation(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             "test_table",
             metadata,
             Column("money_col", custom.MathesarMoney),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
 
 def test_money_type_column_reflection(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             "test_table",
             metadata,
             Column("money_col", custom.MathesarMoney),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
     expect_cls = custom.MathesarMoney
     actual_cls = reflect_table.columns["money_col"].type.__class__
@@ -668,28 +668,28 @@ def test_multicurrency_type_column_creation(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
-        metadata = MetaData(bind=conn)
+        metadata = MetaData()
         test_table = Table(
             "test_table",
             metadata,
             Column("multicurrency_col", custom.MulticurrencyMoney),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
 
 def test_multicurrency_type_column_reflection(engine_with_schema):
     engine, app_schema = engine_with_schema
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         test_table = Table(
             "test_table",
             metadata,
             Column("sales_amounts", custom.MulticurrencyMoney),
         )
-        test_table.create()
+        test_table.create(bind=conn)
 
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn, schema=app_schema)
+        metadata = MetaData(schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
     expect_cls = custom.MulticurrencyMoney
     actual_cls = reflect_table.columns["sales_amounts"].type.__class__
@@ -708,13 +708,13 @@ def test_multicurrency_type_raw_selecting(engine_with_schema):
 
 def test_multicurrency_type_insert_from_dict(engine_with_schema):
     engine, app_schema = engine_with_schema
-    metadata = MetaData(bind=engine, schema=app_schema)
+    metadata = MetaData(schema=app_schema)
     test_table = Table(
         "test_table",
         metadata,
         Column("sales_amounts", custom.MulticurrencyMoney),
     )
-    test_table.create()
+    test_table.create(bind=engine)
     ins = test_table.insert().values(
         sales_amounts={'value': 1234.12, 'currency': 'EUR'}
     )
@@ -733,13 +733,13 @@ def test_multicurrency_type_insert_from_dict(engine_with_schema):
 
 def test_multicurrency_type_select_to_dict(engine_with_schema):
     engine, app_schema = engine_with_schema
-    metadata = MetaData(bind=engine, schema=app_schema)
+    metadata = MetaData(schema=app_schema)
     test_table = Table(
         "test_table",
         metadata,
         Column("sales_amounts", custom.MulticurrencyMoney),
     )
-    test_table.create()
+    test_table.create(bind=engine)
     with engine.begin() as conn:
         conn.execute(
             text(f"INSERT INTO {app_schema}.{test_table.name} VALUES ('(11.11,HKD)');")

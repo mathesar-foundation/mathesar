@@ -272,7 +272,7 @@ def academics_db_tables(engine_with_academics):
             autoload_with=engine,
         )
     engine, schema = engine_with_academics
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
     table_names = {
         'academics',
         'articles',
@@ -307,7 +307,7 @@ def library_db_tables(engine_with_library):
             autoload_with=engine,
         )
     engine, schema = engine_with_library
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
     table_names = {
         "Authors",
         "Checkouts",
