@@ -140,7 +140,7 @@ class DBQuery:
             table=self.transformed_relation,
             columns_to_select=[count(1).label(col_name)],
         )
-        return execute_pg_query(self.engine, relation)[0][col_name]
+        return execute_pg_query(self.engine, relation)[0]._mapping[col_name]
 
     # NOTE if too expensive, can be rewritten to parse DBQuery spec, instead of leveraging sqlalchemy
     @property

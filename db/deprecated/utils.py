@@ -29,6 +29,9 @@ def execute_statement(engine, statement, connection_to_use=None):
 
 
 def stringify_json_cols(query):
+    # SA 2.0 compat: SelectBase.c is deprecated, explicitly create subquery
+    if isinstance(query, sqlalchemy.sql.expression.SelectBase):
+        query = query.subquery()
     col_list = []
     for col in query.c:
         if isinstance(col.type, (JSONB, JSON)):

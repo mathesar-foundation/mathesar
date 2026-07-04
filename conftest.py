@@ -198,13 +198,13 @@ def create_db_schema(engine_cache):
 def _get_schema_name_from_oid(oid, engine, metadata=None):
     schema_info = _reflect_schema(engine, oid=oid, metadata=metadata)
     if schema_info:
-        return schema_info["name"]
+        return schema_info._mapping["name"]
 
 
 def _get_schema_oid_from_name(name, engine):
     schema_info = _reflect_schema(engine, name=name)
     if schema_info:
-        return schema_info["oid"]
+        return schema_info._mapping["oid"]
 
 
 def _reflect_schema(engine, name=None, oid=None, metadata=None):
