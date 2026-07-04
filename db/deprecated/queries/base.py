@@ -255,7 +255,7 @@ class DBQuery:
             for initial_col
             in self.initial_columns
         ]
-        stmt = select(processed_initial_columns).select_from(from_clause)
+        stmt = select(*processed_initial_columns).select_from(from_clause)
         return stmt.cte()
 
     def get_input_alias_for_output_alias(self, output_alias):

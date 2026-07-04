@@ -47,7 +47,7 @@ def execute_pg_query(engine, query, connection_to_use=None):
     # Before executing the query we check if there are any JSON like columns within the exploration and
     # stringify them so that they are rendered by the frontend properly.
     col_list = stringify_json_cols(query)
-    executable = sqlalchemy.select(col_list)
+    executable = sqlalchemy.select(*col_list)
     return execute_statement(engine, executable, connection_to_use=connection_to_use).fetchall()
 
 
