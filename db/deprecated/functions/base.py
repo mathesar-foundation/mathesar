@@ -50,6 +50,7 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
             (GenericFunction,),
             {
                 "type": return_type.get_sa_class(engine),
+                "inherit_cache": True,
                 "name": quoted_name(function_name, False),
                 "identifier": function_name,
             }
