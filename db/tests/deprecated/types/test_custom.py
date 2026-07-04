@@ -578,7 +578,7 @@ def test_uri_type_set_data(engine_with_schema, data):
             Column("uris", custom.URI),
         )
         test_table.create(bind=conn)
-        conn.execute(test_table.insert(values=(data,)))
+        conn.execute(test_table.insert().values(uris=data))
 
 
 def test_uri_type_column_reflection(engine_with_schema):
