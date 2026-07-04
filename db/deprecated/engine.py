@@ -1,9 +1,38 @@
 import copy
 
 from sqlalchemy import create_engine as sa_create_engine
+from sqlalchemy.dialects.postgresql import INTERVAL, DOMAIN
+from sqlalchemy.dialects.postgresql.base import PGDialect
 from sqlalchemy.engine import URL
 
 from db.deprecated.types.custom import CUSTOM_DB_TYPE_TO_SA_CLASS
+
+_CUSTOM_TYPE_BY_NAME = {}
+for db_type, sa_class in CUSTOM_DB_TYPE_TO_SA_CLASS.items():
+    _CUSTOM_TYPE_BY_NAME[db_type.id] = sa_class
+    if '.' in db_type.id:
+        _CUSTOM_TYPE_BY_NAME[db_type.id.split('.', 1)[1]] = sa_class
+
+
+_original_reflect_type = PGDialect._reflect_type
+
+
+def _patched_reflect_type(self, *args, **kwargs):
+    coltype = _original_reflect_type(self, *args, **kwargs)
+
+    if isinstance(coltype, INTERVAL):
+        interval_cls = _CUSTOM_TYPE_BY_NAME.get('interval')
+        if interval_cls is not None:
+            coltype = interval_cls(precision=coltype.precision, fields=coltype.fields)
+    elif isinstance(coltype, DOMAIN):
+        custom_cls = _CUSTOM_TYPE_BY_NAME.get(coltype.name)
+        if custom_cls is not None:
+            coltype = custom_cls()
+
+    return coltype
+
+
+PGDialect._reflect_type = _patched_reflect_type
 
 
 def create_future_engine_with_custom_types(
