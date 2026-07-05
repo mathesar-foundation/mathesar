@@ -91,7 +91,7 @@ The `code` is a negative integer. Some codes are produced according to the [JSON
 Other error codes are grouped according to the library that produced the Exception:
 
 - `builtins`: -31xxx
-- `psycopg` or `psycopg2`: -30xxx
+- `psycopg`: -30xxx
 - `django`: -29xxx
 - `mathesar` (our code): -28xxx
 - `db` (our code): -27xxx
