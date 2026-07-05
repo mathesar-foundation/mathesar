@@ -1,7 +1,7 @@
 import re
 from datetime import timedelta
 
-from psycopg2.errors import CheckViolation
+from psycopg.errors import CheckViolation
 import pytest
 from sqlalchemy import cast, Column, MetaData, select, Table, text
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE

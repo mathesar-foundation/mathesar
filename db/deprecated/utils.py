@@ -1,7 +1,7 @@
 import inspect
 import warnings
 
-from psycopg2 import errors as p_errors
+from psycopg.errors import UndefinedFunction as PsycopgUndefinedFunction
 import sqlalchemy
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.dialects.postgresql import JSON, JSONB, ARRAY, TEXT
@@ -21,7 +21,7 @@ def execute_statement(engine, statement, connection_to_use=None):
             with engine.begin() as conn:
                 return conn.execute(statement)
     except ProgrammingError as e:
-        if isinstance(e.orig, p_errors.UndefinedFunction):
+        if isinstance(e.orig, PsycopgUndefinedFunction):
             message = e.orig.args[0].split('\n')[0]
             raise UndefinedFunction(message)
         else:

@@ -1,5 +1,5 @@
 from enum import Enum
-from psycopg2.extras import Json
+from psycopg.types.json import Json
 from sqlalchemy import case, func, and_, cast
 from sqlalchemy.dialects.postgresql import (
     ENUM as SA_ENUM,

@@ -1,6 +1,7 @@
 import copy
 
-from sqlalchemy import create_engine as sa_create_engine
+from psycopg import ClientCursor
+from sqlalchemy import BindTyping, create_engine as sa_create_engine
 from sqlalchemy.dialects.postgresql import INTERVAL, DOMAIN
 from sqlalchemy.dialects.postgresql.base import PGDialect
 from sqlalchemy.engine import URL
@@ -55,7 +56,7 @@ def create_future_engine(
         query = {"host": hostname}
         hostname = None
     conn_url = URL.create(
-        "postgresql",
+        "postgresql+psycopg",
         username=username,
         password=password,
         host=hostname,
@@ -73,10 +74,14 @@ def create_engine(conn_url, *args, **kwargs):
     randomly corrupted.
     """
     kwargs.update(
-        connect_args={"application_name": "Mathesar db.deprecated.engine.create_future_engine"},
+        connect_args={
+            "application_name": "Mathesar db.deprecated.engine.create_future_engine",
+            "cursor_factory": ClientCursor,
+        },
         pool_size=2,
     )
     engine = sa_create_engine(conn_url, *args, **kwargs)
+    engine.dialect.bind_typing = BindTyping.NONE
     _make_ischema_names_unique(engine)
     return engine
 
@@ -96,7 +101,7 @@ def get_dummy_engine():
     In some cases we only need an engine to access the Postgres dialect. E.g. when examining the
     ischema_names dict. In those cases, following is enough:
     """
-    engine = create_engine("postgresql://")
+    engine = create_engine("postgresql+psycopg://")
     add_custom_types_to_ischema_names(engine)
     return engine
 
