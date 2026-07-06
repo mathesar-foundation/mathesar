@@ -23,9 +23,9 @@ def execute_statement(engine, statement, connection_to_use=None):
     except ProgrammingError as e:
         if isinstance(e.orig, PsycopgUndefinedFunction):
             message = e.orig.args[0].split('\n')[0]
-            raise UndefinedFunction(message)
+            raise UndefinedFunction(message) from e
         else:
-            raise e
+            raise
 
 
 def stringify_json_cols(query):
