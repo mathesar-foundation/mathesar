@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from psycopg.errors import CheckViolation
 import pytest
-from sqlalchemy import cast, Column, MetaData, select, Table, text
+from sqlalchemy import BindTyping, cast, Column, MetaData, select, Table, text
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE
 from sqlalchemy.dialects.postgresql import INTERVAL as SA_INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
@@ -849,3 +849,31 @@ def test_domain_type_reflection_from_raw_sql(engine_with_schema):
     assert isinstance(reflected.c['c_uri'].type, custom.URI)
     assert isinstance(reflected.c['c_json_arr'].type, custom.MathesarJsonArray)
     assert isinstance(reflected.c['c_json_obj'].type, custom.MathesarJsonObject)
+
+
+def test_reflection_idempotency(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = 'test_reflect_twice'
+    with engine.begin() as conn:
+        conn.execute(text(f'SET search_path={schema}'))
+        conn.execute(text(f'''
+            CREATE TABLE {table_name} (
+                c_email {custom.EMAIL_DB_TYPE},
+                c_interval interval,
+                c_money {custom.MONEY_DB_TYPE}
+            )
+        '''))
+    with engine.begin() as conn:
+        m1 = MetaData(schema=schema)
+        r1 = Table(table_name, m1, autoload_with=conn)
+    with engine.begin() as conn:
+        m2 = MetaData(schema=schema)
+        r2 = Table(table_name, m2, autoload_with=conn)
+    for reflected in [r1, r2]:
+        assert isinstance(reflected.c['c_email'].type, custom.Email)
+        assert isinstance(reflected.c['c_interval'].type, custom.Interval)
+        assert isinstance(reflected.c['c_money'].type, custom.MathesarMoney)
+
+
+def test_engine_config(engine):
+    assert engine.dialect.bind_typing is BindTyping.NONE
