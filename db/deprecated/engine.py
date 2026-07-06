@@ -69,6 +69,7 @@ def create_future_engine(
     )
     return create_engine(conn_url, *args, **kwargs)
 
+
 # NOTE: used in testing, hence public
 def create_engine(conn_url, *args, **kwargs):
     """
