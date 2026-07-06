@@ -55,6 +55,9 @@ def create_future_engine(
     if hostname.startswith("/"):
         query = {"host": hostname}
         hostname = None
+    # SA 2.0 URL.create rejects empty string for port
+    if port == '':
+        port = None
     conn_url = URL.create(
         "postgresql+psycopg",
         username=username,
