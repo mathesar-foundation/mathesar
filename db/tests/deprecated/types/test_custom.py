@@ -283,6 +283,36 @@ def test_interval_type_column_args(engine_with_schema):
     assert actual_interval.fields.upper() == 'SECOND'
 
 
+@pytest.mark.parametrize("precision,fields", [
+    (None, "YEAR"),
+    (None, "MONTH"),
+    (None, "DAY TO HOUR"),
+    (None, "YEAR TO MONTH"),
+    (None, "DAY TO SECOND"),
+    (6, "SECOND"),
+    (None, None),
+])
+def test_interval_type_column_args_variations(engine_with_schema, precision, fields):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn:
+        metadata = MetaData(schema=schema)
+        t = Table(
+            'test_interval_variations',
+            metadata,
+            Column('c', custom.Interval(precision=precision, fields=fields)),
+        )
+        t.create(bind=conn)
+    with engine.begin() as conn:
+        metadata = MetaData(schema=schema)
+        reflected = Table('test_interval_variations', metadata, autoload_with=conn)
+    assert isinstance(reflected.c['c'].type, custom.Interval)
+    assert reflected.c['c'].type.impl.precision == precision
+    if fields is not None:
+        assert reflected.c['c'].type.impl.fields.upper() == fields.upper()
+    else:
+        assert reflected.c['c'].type.impl.fields is None
+
+
 invalid_args_list = [(None, 'SECONDS'), (1.34, None), (5, 'HOURS')]
 
 
@@ -795,3 +825,27 @@ def test_multicurrency_type_select_to_dict(engine_with_schema):
         actual_val = res.fetchone()[0]
         expect_val = {'value': 11.11, 'currency': 'HKD'}
         assert actual_val == expect_val
+
+
+def test_domain_type_reflection_from_raw_sql(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = 'test_domain_reflect'
+    with engine.begin() as conn:
+        conn.execute(text(f'SET search_path={schema}'))
+        conn.execute(text(f'''
+            CREATE TABLE {table_name} (
+                c_email {custom.EMAIL_DB_TYPE},
+                c_money {custom.MONEY_DB_TYPE},
+                c_uri {custom.URI_DB_TYPE},
+                c_json_arr {custom.JSON_ARR_DB_TYPE},
+                c_json_obj {custom.JSON_OBJ_DB_TYPE}
+            )
+        '''))
+    with engine.begin() as conn:
+        metadata = MetaData(schema=schema)
+        reflected = Table(table_name, metadata, autoload_with=conn)
+    assert isinstance(reflected.c['c_email'].type, custom.Email)
+    assert isinstance(reflected.c['c_money'].type, custom.MathesarMoney)
+    assert isinstance(reflected.c['c_uri'].type, custom.URI)
+    assert isinstance(reflected.c['c_json_arr'].type, custom.MathesarJsonArray)
+    assert isinstance(reflected.c['c_json_obj'].type, custom.MathesarJsonObject)
