@@ -16,7 +16,6 @@ INSTALL_STEPS = [
     _install_sql_file("00_msar_all_objects_table.sql"),
     _install_sql_file("01_msar_types.sql"),
     _install_sql_file("02_msar_remove.sql"),
-    _install_sql_file("50_msar_permissions.sql"),
 ]
 
 
@@ -28,7 +27,7 @@ def install(conn):
 
 def uninstall(
         conn,
-        schemas_to_remove=['msar', '__msar', 'mathesar_types'],
+        schemas_to_remove=['msar', 'mathesar_types'],
         strict=True
 ):
     """Remove msar and __msar schemas safely."""

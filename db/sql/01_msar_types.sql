@@ -74,3 +74,20 @@ BEGIN
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
+
+GRANT USAGE ON SCHEMA mathesar_types TO PUBLIC;
+
+DO $$
+BEGIN
+  EXECUTE (
+    SELECT string_agg(
+      format('GRANT USAGE ON TYPE %I.%I TO PUBLIC', nspname, typname),
+      E';\n'
+    ) || E';\n'
+    FROM pg_catalog.pg_type t
+    JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+    WHERE n.nspname = 'mathesar_types'
+    AND (t.typtype = 'c' OR t.typtype = 'd')
+    AND t.typcategory != 'A'
+  );
+END $$;
