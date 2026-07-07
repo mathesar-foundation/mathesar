@@ -6,11 +6,12 @@ import os
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
 
-from sqlalchemy import MetaData, text, Table, select, or_
+from sqlalchemy import MetaData, text, Table, select, or_, event
 from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from db.deprecated.engine import add_custom_types_to_ischema_names, create_future_engine as sa_create_engine
+from db.sql.install import get_jit_functions_sql
 from db.sql import install as sql_install
 from db.deprecated.utils import get_pg_catalog_table, engine_to_psycopg_conn
 from db.deprecated.metadata import get_empty_metadata
@@ -68,9 +69,10 @@ def create_db(request, engine_cache):
         logger.debug(f'creating {db_name}')
         create_database(engine.url)
         created_dbs.add(db_name)
-        # Our default testing database has our types and functions preinstalled.
+        # Our default testing database has our types preinstalled.
+        # Functions are installed per-connection (JIT) via the engine event listener.
         with engine_to_psycopg_conn(engine) as conn:
-            sql_install.install(conn)
+            sql_install.install_mathesar_types(conn)
         engine.dispose()
         return db_name
     yield __create_db
@@ -239,6 +241,12 @@ def _create_engine(db_name):
         # Setting a fixed timezone makes the timezone aware test cases predictable.
         connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
     )
+
+    @event.listens_for(engine, "connect")
+    def _install_msar_functions(dbapi_connection, connection_record):
+        cursor = dbapi_connection.execute(get_jit_functions_sql())
+        cursor.close()
+
     return engine
 
 
