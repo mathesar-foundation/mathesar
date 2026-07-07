@@ -314,7 +314,7 @@ class PeakTime(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         column_expr = cast(column_expr, TIME)
-        return sa_call_sql_function('msar.peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
+        return sa_call_sql_function('pg_temp.peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
 
 
 class PeakMonth(DBFunction):
@@ -324,7 +324,7 @@ class PeakMonth(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         column_expr = cast(column_expr, DATE)
-        return sa_call_sql_function('msar.peak_month', column_expr, return_type=PostgresType.TEXT)
+        return sa_call_sql_function('pg_temp.peak_month', column_expr, return_type=PostgresType.TEXT)
 
 
 class Min(DBFunction):
