@@ -85,7 +85,7 @@ def json_table_name():
 @pytest.fixture
 def times_table_obj(engine_with_times):
     engine, schema = engine_with_times
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
     table = Table("times", metadata, schema=schema, autoload_with=engine)
     return table, engine
 
@@ -93,7 +93,7 @@ def times_table_obj(engine_with_times):
 @pytest.fixture
 def boolean_table_obj(engine_with_booleans):
     engine, schema = engine_with_booleans
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
     table = Table("boolean", metadata, schema=schema, autoload_with=engine)
     return table, engine
 
@@ -101,7 +101,7 @@ def boolean_table_obj(engine_with_booleans):
 @pytest.fixture
 def roster_table_obj(engine_with_roster, roster_table_name):
     engine, schema = engine_with_roster
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
     table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
 
@@ -109,7 +109,7 @@ def roster_table_obj(engine_with_roster, roster_table_name):
 @pytest.fixture
 def array_table_obj(engine_with_array, array_table_name):
     engine, schema = engine_with_array
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
     table = Table(array_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
 
@@ -117,6 +117,6 @@ def array_table_obj(engine_with_array, array_table_name):
 @pytest.fixture
 def json_table_obj(engine_with_json, json_table_name):
     engine, schema = engine_with_json
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
     table = Table(json_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine

@@ -1,5 +1,5 @@
 from enum import Enum
-from psycopg2.extras import Json
+from psycopg.types.json import Json
 from sqlalchemy import case, func, and_, cast
 from sqlalchemy.dialects.postgresql import (
     ENUM as SA_ENUM,
@@ -67,6 +67,7 @@ class DATE(TypeDecorator):
 
 class Email(UserDefinedType, HasUnderlyingType):
     underlying_type = SA_TEXT
+    cache_ok = True
 
     def get_col_spec(self, **_):
         # This results in the type name being upper case when viewed.
@@ -194,12 +195,14 @@ def _compile_mathesarjsonobject(element, compiler, **kw):
 
 class MathesarMoney(UserDefinedType, HasUnderlyingType):
     underlying_type = SA_NUMERIC
+    cache_ok = True
 
     def get_col_spec(self, **_):
         return MONEY_DB_TYPE.upper()
 
 
 class MulticurrencyMoney(UserDefinedType):
+    cache_ok = True
 
     def get_col_spec(self, **_):
         return MULTICURRENCY_DB_TYPE.upper()
@@ -393,6 +396,7 @@ class URIFunction(Enum):
 
 class URI(UserDefinedType, HasUnderlyingType):
     underlying_type = SA_TEXT
+    cache_ok = True
 
     def get_col_spec(self, **_):
         # This results in the type name being upper case when viewed.

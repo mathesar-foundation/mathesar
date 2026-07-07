@@ -50,6 +50,7 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
             (GenericFunction,),
             {
                 "type": return_type.get_sa_class(engine),
+                "inherit_cache": True,
                 "name": quoted_name(function_name, False),
                 "identifier": function_name,
             }
@@ -116,7 +117,7 @@ class Literal(DBFunction):
 class Noop(DBFunction):
     """This Noop function is an unwrapped version of Literal().
     The Literal DB function produces a literal SQLAlchemy wrapper
-    which doesn't play nicely with the type conversion between python classes and db types in psycopg2."""
+    which doesn't play nicely with the type conversion between python classes and db types in psycopg."""
     id = 'noop'
     name = 'no wrapping'
 

@@ -1,5 +1,7 @@
 import re
+
 import pytest
+from sqlalchemy import select
 
 from db.deprecated.utils import execute_pg_query
 
@@ -108,7 +110,7 @@ def test_filter_with_db_functions(
     else:
         db_function = db_function_lambda(column_name)
 
-    relation = table.select()
+    relation = select(table)
 
     query = apply_db_function_as_filter(relation, db_function)
 
@@ -149,7 +151,7 @@ def test_filter_boolean_ops(
         for column_name, value in column_name_and_val_pairs
     ])
 
-    relation = table.select()
+    relation = select(table)
 
     query = apply_db_function_as_filter(relation, db_function)
 
@@ -179,7 +181,7 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
         ]),
     ])
 
-    relation = table.select()
+    relation = select(table)
 
     query = apply_db_function_as_filter(relation, db_function)
 
@@ -225,7 +227,7 @@ def test_case_insensitive_filtering(roster_table_obj, column_name, main_db_funct
 
 def _filters_as_expected(table_engine, column_name, main_db_function, literal_param, expected_count):
     table, engine = table_engine
-    selectable = table.select()
+    selectable = select(table)
     db_function = main_db_function([
         ColumnName([column_name]),
         Literal([literal_param]),

@@ -1,7 +1,7 @@
 import inspect
 import warnings
 
-from psycopg2 import errors as p_errors
+from psycopg.errors import UndefinedFunction as PsycopgUndefinedFunction
 import sqlalchemy
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.dialects.postgresql import JSON, JSONB, ARRAY, TEXT
@@ -21,14 +21,17 @@ def execute_statement(engine, statement, connection_to_use=None):
             with engine.begin() as conn:
                 return conn.execute(statement)
     except ProgrammingError as e:
-        if isinstance(e.orig, p_errors.UndefinedFunction):
+        if isinstance(e.orig, PsycopgUndefinedFunction):
             message = e.orig.args[0].split('\n')[0]
-            raise UndefinedFunction(message)
+            raise UndefinedFunction(message) from e
         else:
-            raise e
+            raise
 
 
 def stringify_json_cols(query):
+    # SA 2.0 compat: SelectBase.c is deprecated, explicitly create subquery
+    if isinstance(query, sqlalchemy.sql.expression.SelectBase):
+        query = query.subquery()
     col_list = []
     for col in query.c:
         if isinstance(col.type, (JSONB, JSON)):
@@ -44,7 +47,7 @@ def execute_pg_query(engine, query, connection_to_use=None):
     # Before executing the query we check if there are any JSON like columns within the exploration and
     # stringify them so that they are rendered by the frontend properly.
     col_list = stringify_json_cols(query)
-    executable = sqlalchemy.select(col_list)
+    executable = sqlalchemy.select(*col_list)
     return execute_statement(engine, executable, connection_to_use=connection_to_use).fetchall()
 
 

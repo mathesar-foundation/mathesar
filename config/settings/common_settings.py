@@ -192,7 +192,7 @@ if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
     }
 
 for db_key, db_dict in DATABASES.items():
-    # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s)
+    # Engine should be '.postgresql' or '.postgresql_psycopg' for all db(s)
     if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
         raise ValueError(
             f"{db_key} is not a PostgreSQL database. "
