@@ -243,7 +243,7 @@ def _create_engine(db_name):
     )
 
     @event.listens_for(engine, "connect")
-    def _install_msar_functions(dbapi_connection, connection_record):
+    def _install_msar_functions(dbapi_connection, _):
         cursor = dbapi_connection.execute(get_jit_functions_sql())
         cursor.close()
 
