@@ -255,8 +255,8 @@ services:
     expose:
       - "8000"
     # Uncomment the following if not using caddy
-    ports:
-      - ${HOST_PORT:-8000}:8000
+    # ports:
+    #   - ${HOST_PORT:-8000}:8000
 
   #-----------------------------------------------------------------------------
   # PostgreSQL Database
@@ -279,30 +279,6 @@ services:
       - "5432"
     volumes:
       - ./msar/pgdata:/var/lib/postgresql/data
-
-  #-----------------------------------------------------------------------------
-  # Sample PostgreSQL Database (Custom Port)
-  #
-  # This service provides a separate Postgres database instance on a custom port
-  # (54432) with pre-initialized tables and sample data for testing purposes.
-  #
-  sample_db:
-    image: postgres:17-bookworm
-    container_name: sample_postgres_db
-    environment:
-      POSTGRES_DB: sample_db
-      POSTGRES_USER: sampleuser
-      POSTGRES_PASSWORD: samplepass
-    ports:
-      - "54432:5432"
-    volumes:
-      - ./msar/sample_pgdata:/var/lib/postgresql/data
-      - ./sample_db_init.sql:/docker-entrypoint-initdb.d/01_init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=samplepass pg_isready -U sampleuser -d sample_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   #-----------------------------------------------------------------------------
   # Caddy
