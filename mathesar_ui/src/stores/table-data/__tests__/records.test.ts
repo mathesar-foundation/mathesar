@@ -35,27 +35,22 @@ describe('getRecordIdentifier', () => {
   });
 
   test('returns a scalar value for a single-column primary key', () => {
-    expect(getRecordIdentifier({ 1: 3, 2: 'pending' }, [column(1)])).toBe(
-      3,
-    );
+    expect(getRecordIdentifier({ 1: 3, 2: 'pending' }, [column(1)])).toBe(3);
   });
 
   test('returns an attnum-keyed object for a composite primary key', () => {
     expect(
-      getRecordIdentifier(
-        { 1: 3, 2: 103, 3: '2024-01-17', 4: 'pending' },
-        [column(1), column(2), column(3)],
-      ),
+      getRecordIdentifier({ 1: 3, 2: 103, 3: '2024-01-17', 4: 'pending' }, [
+        column(1),
+        column(2),
+        column(3),
+      ]),
     ).toEqual({ 1: 3, 2: 103, 3: '2024-01-17' });
   });
 
   test('returns undefined when any composite primary key value is missing', () => {
     expect(
-      getRecordIdentifier({ 1: 3, 2: 103 }, [
-        column(1),
-        column(2),
-        column(3),
-      ]),
+      getRecordIdentifier({ 1: 3, 2: 103 }, [column(1), column(2), column(3)]),
     ).toBeUndefined();
   });
 });
