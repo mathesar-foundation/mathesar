@@ -7,6 +7,7 @@
     "check-format": "prettier --check .",
     "lint": "eslint .",
     "lint-fix": "eslint --fix .",
+    "lint-i18n": "python3 scripts/i18n/check_invalid_calls.py && python3 scripts/i18n/check_missing_strings.py && python3 scripts/i18n/check_icu_format.py && python3 scripts/i18n/check_translation_variables.py && python3 scripts/i18n/check_unused_strings.py",
     "typecheck": "svelte-check --tsconfig tsconfig.json --threshold warning .",
     "build": "vite build",
     "test": "vitest",
