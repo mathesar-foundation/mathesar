@@ -391,6 +391,7 @@
   "inspector": "Inspector",
   "integer": "Integer",
   "internal_schema_help": "These schemas are necessary for Mathesar to function and will automatically be installed on the database after connecting.",
+  "mathesar_types_schema_help": "Optional custom types (email, uri, money, etc.) that can be used in your database columns.",
   "join": "Extend",
   "join_chat": "Join Community",
   "join_mailing_list_help": "Join our mailing list to keep on top of what's going on at the Mathesar Foundation.",

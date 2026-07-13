@@ -59,11 +59,9 @@ export const databases = {
     },
     RawUnderlyingDatabase
   >(),
-  upgrade_sql: rpcMethodTypeContainer<
+  install_types: rpcMethodTypeContainer<
     {
       database_id: RawDatabase['id'];
-      username?: string;
-      password?: string;
     },
     void
   >(),
@@ -104,6 +102,7 @@ export const databases = {
         database: RawDatabase['name'];
         sample_data?: SampleDataSchemaIdentifier[];
         nickname: RawDatabase['nickname'];
+        install_types?: boolean;
       },
       DatabaseConnectionResult
     >(),
@@ -117,6 +116,7 @@ export const databases = {
         sample_data?: SampleDataSchemaIdentifier[];
         nickname: RawDatabase['nickname'];
         sslmode?: SslMode;
+        install_types?: boolean;
       },
       DatabaseConnectionResult
     >(),
