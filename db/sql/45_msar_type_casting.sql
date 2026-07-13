@@ -198,7 +198,7 @@ RETURNS text AS $$
     SELECT split_part($1, '@', 2);
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 DO $jit$
@@ -208,7 +208,7 @@ RETURNS text AS $$
     SELECT split_part($1, '@', 1);
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 -- mathesar_types.uri
@@ -380,7 +380,7 @@ BEGIN
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_email(text) RETURNS mathesar_types.email AS $$
   SELECT $1::mathesar_types.email;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 
@@ -819,6 +819,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DO $jit$
+BEGIN
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_money(real)
 RETURNS mathesar_types.mathesar_money AS $$
   SELECT $1::numeric::mathesar_types.mathesar_money;
@@ -896,6 +898,8 @@ RETURNS mathesar_types.mathesar_money AS $$
     replace(replace(replace(replace(num, curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::mathesar_types.mathesar_money
   END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
 -- pg_temp.cast_to_money
@@ -971,7 +975,7 @@ CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(money)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 
@@ -998,7 +1002,7 @@ CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(mathesar_types.mult
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(time with time zone)
@@ -1170,7 +1174,7 @@ CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(mathesar_types.multicurrenc
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(time with time zone)
@@ -1342,7 +1346,7 @@ CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(math
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(time with time zone)
@@ -1514,7 +1518,7 @@ CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(mathesar_types.multicurrency_mon
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(time with time zone)
@@ -1686,7 +1690,7 @@ CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(mathesar_types.multicurrency_mon
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-EXCEPTION WHEN undefined_object THEN NULL;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
 END $jit$;
 
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(time with time zone)
@@ -1837,6 +1841,8 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- pg_temp.cast_to_uri
 
+DO $jit$
+BEGIN
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_uri(text)
 RETURNS mathesar_types.uri AS $$
 DECLARE
@@ -1854,6 +1860,8 @@ BEGIN
   RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
 -- pg_temp.cast_to_numeric
@@ -1971,6 +1979,8 @@ $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- pg_temp.cast_to_mathesar_json_array
 
+DO $jit$
+BEGIN
 CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_array(json)
 RETURNS mathesar_types.mathesar_json_array AS $$
   SELECT $1::mathesar_types.mathesar_json_array;
@@ -2003,6 +2013,8 @@ CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_object(text)
 RETURNS mathesar_types.mathesar_json_object AS $$
   SELECT $1::mathesar_types.mathesar_json_object;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
 -- pg_temp.cast_to_json
