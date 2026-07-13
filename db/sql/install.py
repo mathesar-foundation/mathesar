@@ -12,19 +12,6 @@ def _install_sql_file(file_name):
     return _install
 
 
-INSTALL_STEPS = [
-    _install_sql_file("00_msar_all_objects_table.sql"),
-    _install_sql_file("01_msar_types.sql"),
-    _install_sql_file("02_msar_remove.sql"),
-]
-
-
-def install(conn):
-    """Install SQL pieces using the given conn."""
-    for step in INSTALL_STEPS:
-        step(conn)
-
-
 def uninstall(
         conn,
         schemas_to_remove=['msar', 'mathesar_types'],

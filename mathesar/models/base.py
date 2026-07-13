@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.sessions.models import Session
 from encrypted_fields.fields import EncryptedCharField, EncryptedJSONField
 
-from db.sql.install import uninstall, install
+from db.sql.install import uninstall
 from db.analytics import get_object_counts
 from db.connection import mathesar_connection
 from mathesar import __version__
@@ -91,17 +91,6 @@ class Database(BaseModel):
     @property
     def needs_upgrade_attention(self):
         return self.last_confirmed_sql_version != __version__
-
-    def install_sql(self, username=None, password=None):
-        if username is not None:
-            with self.connect_manually(username, password) as conn:
-                install(conn)
-        else:
-            with self.connect_admin() as conn:
-                install(conn)
-
-        self.last_confirmed_sql_version = __version__
-        self.save()
 
     def uninstall_sql(
             self,
