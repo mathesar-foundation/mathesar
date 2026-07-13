@@ -39,7 +39,7 @@ The database configured using these environment variables is used to store Mathe
 
 Additionally, If the postgres role configured here has the permissions to create new databases,  Mathesar admins are allowed to create new databases within the same database server via the Mathesar UI using **"Connect Database" → "Create a New Database"**.
 
-See also: [Connecting a database](../../user-guide/databases/#connection).
+See also: [Connecting a database](../user-guide/databases.md#connection).
 
 
 ### `POSTGRES_DB`
