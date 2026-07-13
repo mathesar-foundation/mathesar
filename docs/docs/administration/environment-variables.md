@@ -37,7 +37,7 @@ This page contains all available environment variables supported by Mathesar. Se
 
 The database configured using these environment variables is used to store Mathesar's internal metadata.
 
-Additionally, If the postgres role configured here has the permissions to create new databases,  Mathesar admins are allowed to create new databases within the same database server via the Mathesar UI using **"Connect Database" → "Create a New Database"**.
+Additionally, if the [`POSTGRES_USER`](#postgres_user) configured here has the permissions to create new databases,  Mathesar admins are allowed to create new databases within the same database server via the Mathesar UI using **"Connect Database" → "Create a New Database"**.
 
 See also: [Connecting a database](../user-guide/databases.md#connection).
 
