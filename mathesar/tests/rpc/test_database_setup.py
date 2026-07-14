@@ -23,7 +23,7 @@ def test_create_new(monkeypatch, rf):
     db_model = Database(id=3, name=test_database, nickname=test_nickname, server=server_model)
     role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
 
-    def mock_set_up_new_for_user(database, nickname, user, sample_data=[]):
+    def mock_set_up_new_for_user(database, nickname, user, sample_data=[], install_types=True):
         if not (
                 database == test_database
                 and nickname == test_nickname
@@ -67,7 +67,7 @@ def test_connect_existing(monkeypatch, rf):
     role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
 
     def mock_set_up_preexisting_database_for_user(
-            host, port, database_name, nickname, role_name, password, user, sample_data=[], sslmode="prefer"
+            host, port, database_name, nickname, role_name, password, user, sample_data=[], sslmode="prefer", install_types=True
     ):
         if not (
                 host == test_host
