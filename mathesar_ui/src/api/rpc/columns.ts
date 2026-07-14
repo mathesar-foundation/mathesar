@@ -51,7 +51,7 @@ export const allColumnPrivileges = [
 export type ColumnPrivilege = (typeof allColumnPrivileges)[number];
 
 /** The raw column data, from the user database only */
-interface RawColumn {
+export interface RawColumn {
   /** The PostgreSQL attnum of the column */
   id: number;
   name: string;
