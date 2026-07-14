@@ -16,7 +16,7 @@
   export let dataType: DataTypeBasedInputType;
   export let enumValues: unknown[] | undefined = undefined;
   export let options: DataTypeBasedInputSelectElement['options'] = undefined;
-  export let triggerAppearance: Appearance = 'default';
+  export let triggerAppearance: Appearance = 'input';
   export let value = getInitialValue(dataType, enumValues);
 
   $: selectOptions = generateSelectOptions(dataType, enumValues, options);

@@ -167,7 +167,7 @@
         </Tooltip>
 
         <Tooltip enabled={!showButtonLabels}>
-          <a slot="trigger" class="btn btn-default" href={downloadUrl}>
+          <a slot="trigger" class="btn btn-control" href={downloadUrl}>
             <Icon {...iconDownload} />
             <span class="button-label">{$_('download')}</span>
           </a>
