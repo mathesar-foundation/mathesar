@@ -24,4 +24,5 @@ class AnalyticsReport(BaseModel):
     exploration_count = models.PositiveIntegerField(null=True, blank=True)
     form_count = models.PositiveIntegerField(null=True, blank=True)
     public_form_count = models.PositiveIntegerField(null=True, blank=True)
+    is_dockerized = models.BooleanField(null=True, blank=True)
     uploaded = models.BooleanField(default=False)
