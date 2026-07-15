@@ -4,6 +4,7 @@ from modernrpc.core import REQUEST_KEY
 
 from db.databases import get_database, drop_database
 from db.sql.install import install_mathesar_types
+from mathesar import __version__
 from mathesar.models.base import Database
 from mathesar.rpc.utils import connect
 from mathesar.rpc.decorators import mathesar_rpc_method
@@ -84,3 +85,45 @@ def install_types(*, database_id: int, **kwargs) -> None:
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         install_mathesar_types(conn)
+
+
+@mathesar_rpc_method(name="databases.remove_mathesar_schemas", auth="login")
+def remove_mathesar_schemas(
+        *,
+        database_id: int,
+        schemas_to_remove: list[str] = ['msar', '__msar'],
+        remove_types: bool = False,
+        role_name: str = None,
+        password: str = None,
+        **kwargs
+) -> None:
+    """
+    Remove permanently-installed Mathesar schemas from a database.
+
+    This is a cleanup operation for databases that were connected before
+    the JIT approach. It removes the msar and __msar schemas (and optionally
+    mathesar_types) using the all_mathesar_objects tracking table.
+
+    The operation is optional - the old schemas don't affect functionality.
+
+    Args:
+        database_id: The Django id of the database.
+        schemas_to_remove: Schemas to remove. Default: ['msar', '__msar']
+        remove_types: If True, also remove mathesar_types schema.
+        role_name: The username of the role used for SQL removal.
+        password: The password of the role used for SQL removal.
+    """
+    database = Database.objects.get(id=database_id)
+
+    if remove_types:
+        schemas_to_remove = list(schemas_to_remove) + ['mathesar_types']
+
+    database.uninstall_sql(
+        schemas_to_remove=schemas_to_remove,
+        strict=False,
+        role_name=role_name,
+        password=password,
+    )
+
+    database.last_confirmed_sql_version = __version__
+    database.save()
