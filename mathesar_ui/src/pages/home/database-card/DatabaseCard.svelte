@@ -57,13 +57,8 @@
 <DisconnectDatabaseModal
   controller={disconnectModalController}
   disconnect={async (opts) => {
-    const result = await databasesStore.disconnectDatabase(opts);
-    if (result.sql_cleaned) {
-      toast.success($_('database_disconnected_successfully'));
-    } else {
-      toast.success($_('database_disconnected_without_sql_cleanup'));
-    }
-    return result;
+    await databasesStore.disconnectDatabase(opts);
+    toast.success($_('database_disconnected_successfully'));
   }}
 />
 

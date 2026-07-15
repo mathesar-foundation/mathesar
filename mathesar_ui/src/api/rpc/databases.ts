@@ -65,6 +65,16 @@ export const databases = {
     },
     void
   >(),
+  remove_mathesar_schemas: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      schemas_to_remove?: SystemSchema[];
+      remove_types?: boolean;
+      role_name?: string;
+      password?: string;
+    },
+    void
+  >(),
   configured: {
     list: rpcMethodTypeContainer<
       {
@@ -85,15 +95,9 @@ export const databases = {
     disconnect: rpcMethodTypeContainer<
       {
         database_id: RawDatabase['id'];
-        schemas_to_remove?: SystemSchema[];
-        strict?: boolean;
-        role_name?: string;
-        password?: string;
         disconnect_db_server?: boolean;
       },
-      {
-        sql_cleaned: boolean;
-      }
+      void
     >(),
   },
   setup: {
