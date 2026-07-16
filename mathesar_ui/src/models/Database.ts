@@ -24,12 +24,22 @@ export class Database {
 
   readonly needsUpgradeAttention: boolean;
 
+  readonly postgresqlVersion: number | null;
+
   constructor(props: { server: Server; rawDatabase: RawDatabase }) {
     this.id = props.rawDatabase.id;
     this.name = props.rawDatabase.name;
     this.nickname = props.rawDatabase.nickname;
     this.server = props.server;
     this.needsUpgradeAttention = props.rawDatabase.needs_upgrade_attention;
+    this.postgresqlVersion = props.rawDatabase.postgresql_version;
+  }
+
+  get isPostgresDeprecated() {
+    if (this.postgresqlVersion === null) return false;
+
+    // Mathesar 0.8.0 drops support for PostgreSQL versions 13 and below
+    return this.postgresqlVersion < 140000;
   }
 
   get displayName() {

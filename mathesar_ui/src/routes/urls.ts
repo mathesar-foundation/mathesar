@@ -185,6 +185,7 @@ const docsPages = {
   userAdmin: '/user-guide/users/#admin',
   userGuide: '/user-guide/',
   sslMode: '/user-guide/databases/#ssl',
+  versionSupport: '/administration/version-support/',
 };
 
 export type DocsPage = keyof typeof docsPages;
