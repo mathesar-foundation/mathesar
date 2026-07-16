@@ -40,7 +40,7 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/com
 1. **Begin making your changes.**
 
     - Refer to our **[Developer Guide](./DEVELOPER_GUIDE.md)** for questions about the code.
-    - Make sure to follow our [front end code standards](./mathesar_ui/STANDARDS.md) and [API standards](./mathesar/api/STANDARDS.md) where applicable.
+    - Make sure to follow our [front end code standards](./mathesar_ui/STANDARDS.md) where applicable.
     - If you are not familiar with GitHub or pull requests, please follow [GitHub's "Hello World" guide](https://guides.github.com/activities/hello-world/) first. Make sure to commit your changes on a new git branch named after the ticket you claimed. Base that new branch on our `develop` branch.
     - Commit early, commit often. Write [good commit messages](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53). Try to keep pull requests small if possible, since it makes review easier.
     - If you expect your work to last longer than 1 week, open a draft pull request for your in-progress work.

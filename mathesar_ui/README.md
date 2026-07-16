@@ -107,10 +107,6 @@ ESLint can fix some errors automatically. In particular, we rely on ESLint to au
 
 ## Testing
 
-### Integration tests
-
-See [Integration tests](../mathesar/tests/integration/README.md).
-
 ### Unit tests
 
 We use [Vitest](https://vitest.dev/) to run our unit tests, and we use [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro/) to test our Svelte components.
