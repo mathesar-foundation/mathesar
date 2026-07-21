@@ -14,7 +14,7 @@ def _install_sql_file(file_name):
 
 def uninstall(
         conn,
-        schemas_to_remove=['msar', 'mathesar_types'],
+        schemas_to_remove=['msar', '__msar', 'mathesar_types'],
         strict=True
 ):
     """Remove msar and __msar schemas safely."""
