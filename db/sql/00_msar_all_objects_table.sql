@@ -607,6 +607,8 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.build_joined_columns_summaries_expr(jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.build_linked_record_summaries_ctes(oid,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.build_order_by_expr(oid,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.build_pk_filter_expr(oid,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.build_pk_json_returning_expr(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.build_record_list_query_components_with_ctes(oid,integer,integer,jsonb,jsonb,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.build_record_list_query_components_with_ctes(oid,integer,integer,jsonb,jsonb,jsonb,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.build_record_summary_query_for_table(oid,smallint,jsonb)', 'FUNCTION', NULL),
@@ -1124,11 +1126,13 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.get_other_column_ids(regclass,smallint[])', 'FUNCTION', NULL),
   ('msar', 'msar.get_pk_column(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_pk_column(text,text)', 'FUNCTION', NULL),
+  ('msar', 'msar.get_pk_columns(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_pkey_order(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_preview(oid,jsonb,integer)', 'FUNCTION', NULL),
   ('msar', 'msar.get_record_from_table(oid,anycompatible,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.get_record_from_table(oid,anycompatible,boolean,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.get_record_from_table(oid,anycompatible,jsonb,boolean,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.get_record_from_table_by_pk(oid,jsonb,jsonb,boolean,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.get_relation_name(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_relation_namespace_oid(oid)', 'FUNCTION', NULL),
   ('msar', 'msar.get_relation_oid(text,text)', 'FUNCTION', NULL),
@@ -1182,6 +1186,7 @@ INSERT INTO msar.all_mathesar_objects VALUES
   ('msar', 'msar.obj_description(oid,text)', 'FUNCTION', NULL),
   ('msar', 'msar.patch_record_in_table(oid,anycompatible,jsonb,boolean)', 'FUNCTION', NULL),
   ('msar', 'msar.patch_record_in_table(oid,anycompatible,jsonb,boolean,jsonb)', 'FUNCTION', NULL),
+  ('msar', 'msar.patch_record_in_table_by_pk(oid,jsonb,jsonb,boolean,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.patch_schema(oid,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.patch_schema(text,jsonb)', 'FUNCTION', NULL),
   ('msar', 'msar.peak_month(date)', 'AGGREGATE', NULL),
@@ -1250,4 +1255,3 @@ ALTER TABLE ONLY msar.all_mathesar_objects
 --
 -- PostgreSQL database dump complete
 --
-

@@ -35,6 +35,8 @@ export class ColumnsDataStore extends EventHandler<{
 
   private fetchedColumns = writable<RawColumnWithMetadata[]>([]);
 
+  allColumns: Readable<RawColumnWithMetadata[]>;
+
   fetchStatus = writable<RequestStatus | undefined>(undefined);
 
   hiddenColumns: WritableSet<number>;
@@ -43,6 +45,8 @@ export class ColumnsDataStore extends EventHandler<{
   columns: Readable<RawColumnWithMetadata[]>;
 
   pkColumn: Readable<RawColumnWithMetadata | undefined>;
+
+  pkColumns: Readable<RawColumnWithMetadata[]>;
 
   constructor({
     database,
@@ -57,12 +61,16 @@ export class ColumnsDataStore extends EventHandler<{
     super();
     this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.hiddenColumns = new WritableSet(hiddenColumns);
+    this.allColumns = this.fetchedColumns;
     this.columns = derived(
       [this.fetchedColumns, this.hiddenColumns],
       ([fetched, hidden]) => fetched.filter((column) => !hidden.has(column.id)),
     );
     this.pkColumn = derived(this.fetchedColumns, (fetched) =>
       fetched.find((c) => c.primary_key),
+    );
+    this.pkColumns = derived(this.fetchedColumns, (fetched) =>
+      fetched.filter((c) => c.primary_key),
     );
     void this.fetch();
   }
