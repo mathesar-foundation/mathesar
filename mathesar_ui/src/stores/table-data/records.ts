@@ -131,7 +131,7 @@ export function isRecordReadyToCreate(
   columns: RawColumnWithMetadata[],
 ): boolean {
   return columns.every((column) => {
-    if (column.nullable || column.default?.is_dynamic) {
+    if (column.nullable || column.default) {
       return true;
     }
     const value = record[String(column.id)];

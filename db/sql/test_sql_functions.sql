@@ -6092,6 +6092,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_by_pk_null_rec_id() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_composite_pk_records_table();
+
+  RETURN NEXT throws_ok(
+    $q$SELECT msar.patch_record_in_table_by_pk(
+      'composite_orders'::regclass,
+      NULL::jsonb,
+      '{"5": "fulfilled"}'
+    )$q$,
+    'Record identifier must be a JSON object keyed by primary-key attnums'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __setup_add_records_table_only_pk() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE atable (

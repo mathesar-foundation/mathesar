@@ -91,4 +91,19 @@ describe('isRecordReadyToCreate', () => {
       ]),
     ).toBe(true);
   });
+
+  test('does not require static default values', () => {
+    expect(
+      isRecordReadyToCreate({ 1: 3 }, [
+        column(1),
+        column(2, {
+          primary_key: false,
+          default: {
+            value: "'pending'::text",
+            is_dynamic: false,
+          },
+        }),
+      ]),
+    ).toBe(true);
+  });
 });
