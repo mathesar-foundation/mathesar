@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/mathesar-foundation/mathesar,457,317
+/mathesar-foundation/mathesar/issues,49,25
+/mathesar-foundation/mathesar/pulls,45,15
+/mathesar-foundation/mathesar/commits/develop,35,6
+/mathesar-foundation/mathesar/tree/master/mathesar/tests/integration,16,16
+/mathesar-foundation/mathesar/discussions,15,9
+/mathesar-foundation/mathesar/releases,14,8
+/mathesar-foundation/mathesar/releases/tag/0.12.0,10,9
+/mathesar-foundation/mathesar/commits/develop/mathesar_ui/src,10,1
+/mathesar-foundation/mathesar/blob/develop/api_tests/test_happy_db_setups.py,7,1
