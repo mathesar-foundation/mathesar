@@ -27,7 +27,9 @@
 
   const databaseName = requiredField('');
   const nickname = optionalField<string | undefined>(undefined);
-  const installationSchemas = optionalField<InstallationSchema[]>(['mathesar_types']);
+  const installationSchemas = optionalField<InstallationSchema[]>([
+    'mathesar_types',
+  ]);
   const form = makeForm({
     databaseName,
     nickname,

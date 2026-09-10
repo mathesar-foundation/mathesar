@@ -3,7 +3,12 @@
   import { _ } from 'svelte-i18n';
 
   import DocsLink from '@mathesar/components/DocsLink.svelte';
-  import { FieldLayout, FormSubmit, makeForm, requiredField } from '@mathesar/components/form';
+  import {
+    FieldLayout,
+    FormSubmit,
+    makeForm,
+    requiredField,
+  } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';
   import {

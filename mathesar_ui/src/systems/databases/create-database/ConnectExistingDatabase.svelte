@@ -42,7 +42,9 @@
   const role = requiredField('');
   const password = optionalField('');
   const sslmode = requiredField<SslMode>('prefer');
-  const installationSchemas = optionalField<InstallationSchema[]>(['mathesar_types']);
+  const installationSchemas = optionalField<InstallationSchema[]>([
+    'mathesar_types',
+  ]);
   const form = makeForm({
     databaseName,
     nickname,
