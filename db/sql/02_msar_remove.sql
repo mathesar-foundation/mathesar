@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION
-msar.drop_all_msar_objects(
+pg_temp.drop_all_msar_objects(
   schemas_to_remove text[],
   remove_custom_types boolean DEFAULT true,
   strict boolean DEFAULT true
@@ -16,7 +16,7 @@ DECLARE
   message text;
   failed boolean := false;
 BEGIN
-  INSERT INTO msar.all_mathesar_objects
+  INSERT INTO pg_temp.all_mathesar_objects
     SELECT oid::regclass::text AS obj_name, 'TABLE' AS obj_kind, null AS custom_type
     FROM pg_catalog.pg_class
     WHERE
@@ -25,17 +25,11 @@ BEGIN
       AND relname LIKE 'mathesar_temp_table%'
     ON CONFLICT DO NOTHING;
 
-  INSERT INTO msar.all_mathesar_objects
-    SELECT oid::regprocedure::text AS obj_name, 'FUNCTION' AS obj_kind, null AS custom_type
-    FROM pg_catalog.pg_proc
-    WHERE pronamespace::regnamespace::text='msar' AND proname='drop_all_msar_objects'
-    ON CONFLICT DO NOTHING;
-
   SET client_min_messages = WARNING;
   FOR i in 1..10 LOOP
     FOR obj IN
       SELECT obj_schema, obj_name, obj_kind, custom_type
-      FROM msar.all_mathesar_objects
+      FROM pg_temp.all_mathesar_objects
       WHERE
         obj_schema=ANY(schemas_to_remove)
         AND (remove_custom_types OR custom_type IS NOT true)

@@ -17,8 +17,20 @@ if [[ $EXIT_CODE -eq 0 ]]; then
     for i in {1..50}; do
         pg_isready -U mathesar -d mathesar_testing && break || sleep 0.5
     done
-    pg_prove --runtests -U mathesar -d mathesar_testing -v "$@"
+    pg_prove -U mathesar -d mathesar_testing -v "$sql"/run_jit_tests.sql
     EXIT_CODE=$?
+fi
+
+if [[ $EXIT_CODE -eq 0 ]]; then
+    psql -q -U mathesar -d postgres -v "ON_ERROR_STOP=1" \
+        -c "CREATE DATABASE mathesar_remove_testing;"
+    psql -q -U mathesar -d mathesar_remove_testing -v "ON_ERROR_STOP=1" \
+        -c "CREATE EXTENSION IF NOT EXISTS pgtap;"
+    pg_prove -U mathesar -d mathesar_remove_testing -v "$sql"/test_msar_remove.sql
+    REMOVE_EXIT_CODE=$?
+    psql -q -U mathesar -d postgres -v "ON_ERROR_STOP=1" \
+        -c "DROP DATABASE IF EXISTS mathesar_remove_testing WITH (FORCE);"
+    EXIT_CODE=$(( EXIT_CODE > REMOVE_EXIT_CODE ? EXIT_CODE : REMOVE_EXIT_CODE ))
 fi
 psql -q -U mathesar -d postgres -v "ON_ERROR_STOP=1" -f "$sql"/test_shutdown.sql
 EXIT_CODE=$(( EXIT_CODE > $? ? EXIT_CODE : $? ))  # Collect max exit code

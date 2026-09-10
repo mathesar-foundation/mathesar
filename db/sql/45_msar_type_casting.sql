@@ -1,10 +1,10 @@
 /*
 This file has msar-namespaced functions related to type casting.
 
-Depends on 05_msar.sql
+Depends on 05_pg_temp.sql
 */
-CREATE TABLE msar.top_level_domains (tld text PRIMARY KEY);
-INSERT INTO msar.top_level_domains VALUES
+CREATE TABLE pg_temp.top_level_domains (tld text PRIMARY KEY);
+INSERT INTO pg_temp.top_level_domains VALUES
 ('aaa'), ('aarp'), ('abarth'), ('abb'), ('abbott'), ('abbvie'), ('abc'), ('able'), ('abogado'),
 ('abudhabi'), ('ac'), ('academy'), ('accenture'), ('accountant'), ('accountants'), ('aco'),
 ('actor'), ('ad'), ('adac'), ('ads'), ('adult'), ('ae'), ('aeg'), ('aero'), ('aetna'), ('af'),
@@ -191,52 +191,60 @@ INSERT INTO msar.top_level_domains VALUES
 ('zara'), ('zero'), ('zip'), ('zm'), ('zone'), ('zuerich'), ('zw');
 
 
-CREATE OR REPLACE FUNCTION msar.email_domain_name(mathesar_types.email)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.email_domain_name(mathesar_types.email)
 RETURNS text AS $$
     SELECT split_part($1, '@', 2);
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
-CREATE OR REPLACE FUNCTION msar.email_local_part(mathesar_types.email)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.email_local_part(mathesar_types.email)
 RETURNS text AS $$
     SELECT split_part($1, '@', 1);
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 -- mathesar_types.uri
-CREATE OR REPLACE FUNCTION msar.uri_parts(text)
+CREATE OR REPLACE FUNCTION pg_temp.uri_parts(text)
 RETURNS text[] AS $$
     SELECT regexp_match($1, '^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?');
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.uri_scheme(text)
+CREATE OR REPLACE FUNCTION pg_temp.uri_scheme(text)
 RETURNS text AS $$
-    SELECT (msar.uri_parts($1))[2];
+    SELECT (pg_temp.uri_parts($1))[2];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.uri_authority(text)
+CREATE OR REPLACE FUNCTION pg_temp.uri_authority(text)
 RETURNS text AS $$
-    SELECT (msar.uri_parts($1))[4];
+    SELECT (pg_temp.uri_parts($1))[4];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.uri_path(text)
+CREATE OR REPLACE FUNCTION pg_temp.uri_path(text)
 RETURNS text AS $$
-    SELECT (msar.uri_parts($1))[5];
+    SELECT (pg_temp.uri_parts($1))[5];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.uri_query(text)
+CREATE OR REPLACE FUNCTION pg_temp.uri_query(text)
 RETURNS text AS $$
-    SELECT (msar.uri_parts($1))[7];
+    SELECT (pg_temp.uri_parts($1))[7];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.uri_fragment(text)
+CREATE OR REPLACE FUNCTION pg_temp.uri_fragment(text)
 RETURNS text AS $$
-    SELECT (msar.uri_parts($1))[9];
+    SELECT (pg_temp.uri_parts($1))[9];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
@@ -247,12 +255,12 @@ CASTING FUNCTIONS
 ------------------------------------------------------------------------
 */
 
--- msar.cast_to_boolean
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(boolean) RETURNS boolean AS $$
+-- pg_temp.cast_to_boolean
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_boolean(boolean) RETURNS boolean AS $$
   SELECT $1::boolean;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(real) RETURNS boolean AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_boolean(real) RETURNS boolean AS $$
 BEGIN
   IF $1<>0 AND $1<>1 THEN
     RAISE EXCEPTION '% is not a boolean', $1; END IF;
@@ -260,7 +268,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(bigint) RETURNS boolean AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_boolean(bigint) RETURNS boolean AS $$
 BEGIN
   IF $1<>0 AND $1<>1 THEN
     RAISE EXCEPTION '% is not a boolean', $1; END IF;
@@ -268,7 +276,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(double precision) RETURNS boolean AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_boolean(double precision) RETURNS boolean AS $$
 BEGIN
   IF $1<>0 AND $1<>1 THEN
     RAISE EXCEPTION '% is not a boolean', $1; END IF;
@@ -276,7 +284,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(numeric) RETURNS boolean AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_boolean(numeric) RETURNS boolean AS $$
 BEGIN
   IF $1<>0 AND $1<>1 THEN
     RAISE EXCEPTION '% is not a boolean', $1; END IF;
@@ -284,7 +292,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_boolean(text) RETURNS boolean AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_boolean(text) RETURNS boolean AS $$
 DECLARE
   istrue boolean;
 BEGIN
@@ -305,86 +313,90 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_real
+-- pg_temp.cast_to_real
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(bigint) RETURNS real AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_real(bigint) RETURNS real AS $$
   SELECT $1::real;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(double precision) RETURNS real AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_real(double precision) RETURNS real AS $$
   SELECT $1::real;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(real) RETURNS real AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_real(real) RETURNS real AS $$
   SELECT $1::real;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(numeric) RETURNS real AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_real(numeric) RETURNS real AS $$
   SELECT $1::real;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(text) RETURNS real AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_real(text) RETURNS real AS $$
   SELECT $1::real;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_real(boolean) RETURNS real AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_real(boolean) RETURNS real AS $$
   SELECT CASE WHEN $1 THEN 1::real ELSE 0::real END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_double_precision
+-- pg_temp.cast_to_double_precision
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_double_precision(bigint)
 RETURNS double precision AS $$
   SELECT $1::double precision;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_double_precision(double precision)
 RETURNS double precision AS $$
   SELECT $1::double precision;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_double_precision(real)
 RETURNS double precision AS $$
   SELECT $1::double precision;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_double_precision(numeric)
 RETURNS double precision AS $$
   SELECT $1::double precision;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_double_precision(text)
 RETURNS double precision AS $$
   SELECT $1::double precision;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_double_precision(boolean)
 RETURNS double precision AS $$
   SELECT CASE WHEN $1 THEN 1::double precision ELSE 0::double precision END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_email
+-- pg_temp.cast_to_email
 
-CREATE OR REPLACE FUNCTION msar.cast_to_email(text) RETURNS mathesar_types.email AS $$
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_email(text) RETURNS mathesar_types.email AS $$
   SELECT $1::mathesar_types.email;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
--- msar.cast_to_smallint
+-- pg_temp.cast_to_smallint
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_smallint(bigint)
 RETURNS smallint AS $$
   SELECT $1::smallint;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_smallint(text)
 RETURNS smallint AS $$
   SELECT $1::smallint;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_smallint(real)
 RETURNS smallint AS $$
   DECLARE integer_res smallint;
   BEGIN
@@ -396,7 +408,7 @@ RETURNS smallint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_smallint(double precision)
 RETURNS smallint AS $$
   DECLARE integer_res smallint;
   BEGIN
@@ -408,7 +420,7 @@ RETURNS smallint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_smallint(numeric)
 RETURNS smallint AS $$
   DECLARE integer_res smallint;
   BEGIN
@@ -420,7 +432,7 @@ RETURNS smallint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_smallint(money)
 RETURNS smallint AS $$
   DECLARE integer_res smallint;
   BEGIN
@@ -432,25 +444,25 @@ RETURNS smallint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_smallint(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_smallint(boolean)
 RETURNS smallint AS $$
   SELECT CASE WHEN $1 THEN 1::smallint ELSE 0::smallint END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_bigint
+-- pg_temp.cast_to_bigint
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_bigint(bigint)
 RETURNS bigint AS $$
   SELECT $1::bigint;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_bigint(text)
 RETURNS bigint AS $$
   SELECT $1::bigint;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_bigint(real)
 RETURNS bigint AS $$
   DECLARE integer_res bigint;
   BEGIN
@@ -462,7 +474,7 @@ RETURNS bigint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_bigint(double precision)
 RETURNS bigint AS $$
   DECLARE integer_res bigint;
   BEGIN
@@ -474,7 +486,7 @@ RETURNS bigint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_bigint(numeric)
 RETURNS bigint AS $$
   DECLARE integer_res bigint;
   BEGIN
@@ -486,7 +498,7 @@ RETURNS bigint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_bigint(money)
 RETURNS bigint AS $$
   DECLARE integer_res bigint;
   BEGIN
@@ -498,25 +510,25 @@ RETURNS bigint AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_bigint(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_bigint(boolean)
 RETURNS bigint AS $$
   SELECT CASE WHEN $1 THEN 1::bigint ELSE 0::bigint END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_integer
+-- pg_temp.cast_to_integer
 
-CREATE OR REPLACE FUNCTION msar.cast_to_integer(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_integer(bigint)
 RETURNS integer AS $$
   SELECT $1::integer;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_integer(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_integer(text)
 RETURNS integer AS $$
   SELECT $1::integer;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_integer(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_integer(real)
 RETURNS integer AS $$
   DECLARE integer_res integer;
   BEGIN
@@ -528,7 +540,7 @@ RETURNS integer AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_integer(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_integer(double precision)
 RETURNS integer AS $$
   DECLARE integer_res integer;
   BEGIN
@@ -540,7 +552,7 @@ RETURNS integer AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_integer(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_integer(numeric)
 RETURNS integer AS $$
   DECLARE integer_res integer;
   BEGIN
@@ -552,7 +564,7 @@ RETURNS integer AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_integer(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_integer(money)
 RETURNS integer AS $$
   DECLARE integer_res integer;
   BEGIN
@@ -564,20 +576,20 @@ RETURNS integer AS $$
   END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_integer(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_integer(boolean)
 RETURNS integer AS $$
   SELECT CASE WHEN $1 THEN 1::integer ELSE 0::integer END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_interval
+-- pg_temp.cast_to_interval
 
-CREATE OR REPLACE FUNCTION msar.cast_to_interval(interval)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_interval(interval)
 RETURNS interval AS $$
   SELECT $1;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_interval(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_interval(text)
 RETURNS interval AS $$
 BEGIN
   PERFORM $1::numeric;
@@ -589,53 +601,53 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_time_without_time_zone
+-- pg_temp.cast_to_time_without_time_zone
 
-CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_time_without_time_zone(text)
 RETURNS time without time zone AS $$
   SELECT $1::time without time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(time with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_time_without_time_zone(time with time zone)
 RETURNS time without time zone AS $$
   SELECT $1::time without time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_time_with_time_zone
+-- pg_temp.cast_to_time_with_time_zone
 
-CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_time_with_time_zone(text)
 RETURNS time with time zone AS $$
   SELECT $1::time with time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(time with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_time_with_time_zone(time with time zone)
 RETURNS time with time zone AS $$
   SELECT $1::time with time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_timestamp_with_time_zone
+-- pg_temp.cast_to_timestamp_with_time_zone
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_timestamp_with_time_zone(timestamp with time zone)
 RETURNS timestamp with time zone AS $$
   SELECT $1::timestamp with time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_timestamp_with_time_zone(text)
 RETURNS timestamp with time zone AS $$
   SELECT $1::timestamp with time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_timestamp_without_time_zone
+-- pg_temp.cast_to_timestamp_without_time_zone
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(timestamp without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_timestamp_without_time_zone(timestamp without time zone)
 RETURNS timestamp without time zone AS $$
   SELECT $1::timestamp without time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_timestamp_without_time_zone(text)
 RETURNS timestamp without time zone AS $$
 DECLARE
   timestamp_value_with_tz NUMERIC;
@@ -653,7 +665,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(date)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_timestamp_without_time_zone(date)
 RETURNS timestamp without time zone AS $$
 DECLARE
   timestamp_value_with_tz NUMERIC;
@@ -671,7 +683,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_timestamp_without_time_zone(timestamp with time zone)
 RETURNS timestamp without time zone AS $$
 DECLARE
   timestamp_value_with_tz NUMERIC;
@@ -690,14 +702,14 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_date
+-- pg_temp.cast_to_date
 
-CREATE OR REPLACE FUNCTION msar.cast_to_date(date)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_date(date)
 RETURNS date AS $$
   SELECT $1::timestamp with time zone;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_date(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_date(text)
 RETURNS date AS $$
 DECLARE
   timestamp_value_with_tz NUMERIC;
@@ -715,7 +727,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_date(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_date(timestamp with time zone)
 RETURNS date AS $$
 DECLARE
   timestamp_value_with_tz NUMERIC;
@@ -734,9 +746,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_mathesar_money
+-- pg_temp.cast_to_mathesar_money
 
-CREATE OR REPLACE FUNCTION msar.get_mathesar_money_array(text) RETURNS text[] AS $$
+CREATE OR REPLACE FUNCTION pg_temp.get_mathesar_money_array(text) RETURNS text[] AS $$
 DECLARE
   raw_arr text[];
   actual_number_arr text[];
@@ -807,27 +819,29 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(real)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_money(real)
 RETURNS mathesar_types.mathesar_money AS $$
   SELECT $1::numeric::mathesar_types.mathesar_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_money(bigint)
 RETURNS mathesar_types.mathesar_money AS $$
   SELECT $1::numeric::mathesar_types.mathesar_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_money(double precision)
 RETURNS mathesar_types.mathesar_money AS $$
   SELECT $1::numeric::mathesar_types.mathesar_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_money(numeric)
 RETURNS mathesar_types.mathesar_money AS $$
   SELECT $1::numeric::mathesar_types.mathesar_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_money(text)
 RETURNS mathesar_types.mathesar_money AS $$
 DECLARE
   decimal_point text;
@@ -835,7 +849,7 @@ DECLARE
   money_arr text[];
   money_num text;
 BEGIN
-  SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
+  SELECT pg_temp.get_mathesar_money_array($1::text) INTO money_arr;
   IF money_arr IS NULL THEN
     RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
   END IF;
@@ -851,7 +865,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_money(money)
 RETURNS mathesar_types.mathesar_money AS $$
 DECLARE
   decimal_point text;
@@ -859,7 +873,7 @@ DECLARE
   money_arr text[];
   money_num text;
 BEGIN
-  SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
+  SELECT pg_temp.get_mathesar_money_array($1::text) INTO money_arr;
   IF money_arr IS NULL THEN
     RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
   END IF;
@@ -876,7 +890,7 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
-msar.cast_to_mathesar_money(num text, group_sep "char", decimal_p "char", curr_pref text, curr_suff text)
+pg_temp.cast_to_mathesar_money(num text, group_sep "char", decimal_p "char", curr_pref text, curr_suff text)
 RETURNS mathesar_types.mathesar_money AS $$
   SELECT CASE WHEN num ~ '^.*(-|\(.+\)).*$' THEN -- Handle negative values
     ('-' || replace(replace(replace(replace(replace(replace(replace(num, '-', ''), '(', ''), ')', ''), curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' ')))::mathesar_types.mathesar_money
@@ -884,31 +898,33 @@ RETURNS mathesar_types.mathesar_money AS $$
     replace(replace(replace(replace(num, curr_pref, ''), curr_suff, ''), group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' '))::mathesar_types.mathesar_money
   END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
--- msar.cast_to_money
+-- pg_temp.cast_to_money
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(money) RETURNS money AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_money(money) RETURNS money AS $$
   SELECT $1::money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(real) RETURNS money AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_money(real) RETURNS money AS $$
   SELECT $1::numeric::money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(bigint) RETURNS money AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_money(bigint) RETURNS money AS $$
   SELECT $1::numeric::money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(double precision) RETURNS money AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_money(double precision) RETURNS money AS $$
   SELECT $1::numeric::money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(numeric) RETURNS money AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_money(numeric) RETURNS money AS $$
   SELECT $1::numeric::money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_money(text) RETURNS money AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_money(text) RETURNS money AS $$
 DECLARE
   currency text;
 BEGIN
@@ -921,887 +937,913 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_multicurrency_money
+DO $jit$
+BEGIN
+-- pg_temp.cast_to_multicurrency_money
 
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.multicurrency_money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(mathesar_types.multicurrency_money)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT $1::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(real)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(bigint)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(double precision)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(numeric)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(text)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_multicurrency_money(money)
 RETURNS mathesar_types.multicurrency_money AS $$
   SELECT ROW($1, 'USD')::mathesar_types.multicurrency_money;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
--- msar.cast_to_character_varying
+-- pg_temp.cast_to_character_varying
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(time without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(time without time zone)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(bigint)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(double precision)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.multicurrency_money)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(mathesar_types.multicurrency_money)
+RETURNS character varying AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
+
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(time with time zone)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(time with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(real)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(tsvector)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(tsvector)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(jsonb)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(interval)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(interval)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(macaddr)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(macaddr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(timestamp with time zone)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(inet)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(inet)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(boolean)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(int4range)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(int4range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(tstzrange)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(tstzrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(regclass)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(regclass)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(tsrange)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(tsrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(numrange)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(numrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(cidr)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(cidr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(numeric)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(bit)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(bit)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(money)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(int8range)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(int8range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(integer)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(integer)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(smallint)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(smallint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(oid)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(oid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(json)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(daterange)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(daterange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(timestamp without time zone)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(timestamp without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(bytea)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(bytea)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(date)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(date)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(text)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(text)
-RETURNS character varying AS $$
-  SELECT $1::text;
-$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(uuid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character_varying(uuid)
 RETURNS character varying AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_character
+-- pg_temp.cast_to_character
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(time without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(time without time zone)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(bigint)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(double precision)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(mathesar_types.multicurrency_money)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(mathesar_types.multicurrency_money)
+RETURNS character AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
+
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(time with time zone)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(time with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(real)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(tsvector)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(tsvector)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(jsonb)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(interval)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(interval)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(macaddr)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(macaddr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(timestamp with time zone)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(inet)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(inet)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(boolean)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(int4range)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(int4range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(tstzrange)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(tstzrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(regclass)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(regclass)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(tsrange)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(tsrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(numrange)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(numrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(cidr)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(cidr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(numeric)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(bit)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(bit)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(money)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(int8range)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(int8range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(integer)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(integer)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(smallint)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(smallint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(oid)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(oid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(json)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(daterange)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(daterange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(timestamp without time zone)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(timestamp without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(bytea)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(bytea)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(date)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(date)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(text)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_character(text)
-RETURNS character AS $$
-  SELECT $1::text;
-$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_character(uuid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_character(uuid)
 RETURNS character AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to__double_quote_char_double_quote_
+-- pg_temp.cast_to__double_quote_char_double_quote_
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(time without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(time without time zone)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(bigint)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(double precision)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.multicurrency_money)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(mathesar_types.multicurrency_money)
+RETURNS "char" AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
+
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(time with time zone)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(time with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(real)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(tsvector)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tsvector)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(jsonb)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(interval)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(interval)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(macaddr)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(macaddr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(timestamp with time zone)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(inet)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(inet)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(boolean)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(int4range)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(int4range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(tstzrange)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tstzrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(regclass)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(regclass)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(tsrange)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tsrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(numrange)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(numrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(cidr)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(cidr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(numeric)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(bit)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bit)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(money)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(int8range)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(int8range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(integer)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(integer)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(smallint)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(smallint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(oid)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(oid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(json)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(daterange)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(daterange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(timestamp without time zone)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(timestamp without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(bytea)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bytea)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(date)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(date)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(text)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(text)
-RETURNS "char" AS $$
-  SELECT $1::text;
-$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(uuid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to__double_quote_char_double_quote_(uuid)
 RETURNS "char" AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_text
+-- pg_temp.cast_to_text
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(time without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(time without time zone)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(bigint)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(double precision)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.multicurrency_money)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(mathesar_types.multicurrency_money)
+RETURNS text AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
+
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(time with time zone)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(time with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(real)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(tsvector)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(tsvector)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(jsonb)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(interval)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(interval)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(macaddr)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(macaddr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(timestamp with time zone)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(inet)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(inet)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(boolean)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(int4range)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(int4range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(tstzrange)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(tstzrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(regclass)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(regclass)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(tsrange)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(tsrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(numrange)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(numrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(cidr)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(cidr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(numeric)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(bit)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(bit)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(money)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(int8range)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(int8range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(integer)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(integer)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(smallint)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(smallint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(oid)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(oid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(json)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(daterange)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(daterange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(timestamp without time zone)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(timestamp without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(bytea)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(bytea)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(date)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(date)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(text)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_text(text)
-RETURNS text AS $$
-  SELECT $1::text;
-$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_text(uuid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_text(uuid)
 RETURNS text AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_name
+-- pg_temp.cast_to_name
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(time without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(time without time zone)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(bigint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(bigint)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(double precision)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(double precision)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(mathesar_types.multicurrency_money)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(mathesar_types.multicurrency_money)
+RETURNS name AS $$
+  SELECT $1::text;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
+
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(time with time zone)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(time with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(real)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(real)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(tsvector)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(tsvector)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(jsonb)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(interval)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(interval)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(macaddr)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(macaddr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(timestamp with time zone)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(timestamp with time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(inet)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(inet)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(boolean)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(boolean)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(int4range)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(int4range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(tstzrange)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(tstzrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(regclass)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(regclass)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(tsrange)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(tsrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(numrange)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(numrange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(cidr)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(cidr)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(numeric)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(numeric)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(bit)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(bit)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(money)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(money)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(int8range)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(int8range)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(integer)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(integer)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(smallint)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(smallint)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(oid)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(oid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(json)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(daterange)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(daterange)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(timestamp without time zone)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(timestamp without time zone)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(bytea)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(bytea)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(date)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(date)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(text)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_name(text)
-RETURNS name AS $$
-  SELECT $1::text;
-$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION msar.cast_to_name(uuid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_name(uuid)
 RETURNS name AS $$
   SELECT $1::text;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_uri
+-- pg_temp.cast_to_uri
 
-CREATE OR REPLACE FUNCTION msar.cast_to_uri(text)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_uri(text)
 RETURNS mathesar_types.uri AS $$
 DECLARE
   uri_res mathesar_types.uri := 'https://mathesar.org';
@@ -1810,19 +1852,21 @@ BEGIN
   RETURN $1::mathesar_types.uri;
   EXCEPTION WHEN SQLSTATE '23514' THEN
     SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-    SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
+    SELECT (regexp_match(pg_temp.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
       INTO uri_tld;
-    IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
+    IF EXISTS(SELECT 1 FROM pg_temp.top_level_domains WHERE tld = uri_tld) THEN
       RETURN uri_res;
     END IF;
   RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
--- msar.cast_to_numeric
+-- pg_temp.cast_to_numeric
 
-CREATE OR REPLACE FUNCTION msar.get_numeric_array(text) RETURNS text[] AS $$
+CREATE OR REPLACE FUNCTION pg_temp.get_numeric_array(text) RETURNS text[] AS $$
   DECLARE
     raw_arr text[];
     actual_number_arr text[];
@@ -1846,34 +1890,34 @@ CREATE OR REPLACE FUNCTION msar.get_numeric_array(text) RETURNS text[] AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(real) RETURNS numeric AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_numeric(real) RETURNS numeric AS $$
   SELECT $1::numeric;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(bigint) RETURNS numeric AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_numeric(bigint) RETURNS numeric AS $$
   SELECT $1::numeric;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(double precision) RETURNS numeric AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_numeric(double precision) RETURNS numeric AS $$
   SELECT $1::numeric;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(numeric) RETURNS numeric AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_numeric(numeric) RETURNS numeric AS $$
   SELECT $1::numeric;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(money) RETURNS numeric AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_numeric(money) RETURNS numeric AS $$
   SELECT $1::numeric;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text) RETURNS numeric AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_numeric(text) RETURNS numeric AS $$
 DECLARE
   decimal_point text;
   is_negative boolean;
   numeric_arr text[];
   numeric text;
 BEGIN
-  SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
+  SELECT pg_temp.get_numeric_array($1::text) INTO numeric_arr;
   IF numeric_arr IS NULL THEN
     RAISE EXCEPTION '% cannot be cast to numeric', $1;
   END IF;
@@ -1895,7 +1939,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.cast_to_numeric(num text, group_sep "char", decimal_p "char") RETURNS numeric AS $$/*
+pg_temp.cast_to_numeric(num text, group_sep "char", decimal_p "char") RETURNS numeric AS $$/*
 Cast to numeric with prechosen group and decimal separators.
 
 For performance, this function does not check for correctness of the given number format. It simply
@@ -1910,90 +1954,94 @@ SELECT replace(replace(num, group_sep, ''), decimal_p, ltrim(to_char(1, 'D'), ' 
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.cast_to_numeric(boolean) RETURNS numeric AS $$
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_numeric(boolean) RETURNS numeric AS $$
   SELECT CASE WHEN $1 THEN 1::numeric ELSE 0::numeric END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_jsonb
+-- pg_temp.cast_to_jsonb
 
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_jsonb(json)
 RETURNS jsonb AS $$
   SELECT $1::jsonb;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_jsonb(jsonb)
 RETURNS jsonb AS $$
   SELECT $1::jsonb;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_jsonb(text)
 RETURNS jsonb AS $$
   SELECT $1::jsonb;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_mathesar_json_array
+-- pg_temp.cast_to_mathesar_json_array
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(json)
+DO $jit$
+BEGIN
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_array(json)
 RETURNS mathesar_types.mathesar_json_array AS $$
   SELECT $1::mathesar_types.mathesar_json_array;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_array(jsonb)
 RETURNS mathesar_types.mathesar_json_array AS $$
   SELECT $1::mathesar_types.mathesar_json_array;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_array(text)
 RETURNS mathesar_types.mathesar_json_array AS $$
   SELECT $1::mathesar_types.mathesar_json_array;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
--- msar.cast_to_mathesar_json_object
+-- pg_temp.cast_to_mathesar_json_object
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_object(json)
 RETURNS mathesar_types.mathesar_json_object AS $$
   SELECT $1::mathesar_types.mathesar_json_object;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_object(jsonb)
 RETURNS mathesar_types.mathesar_json_object AS $$
   SELECT $1::mathesar_types.mathesar_json_object;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_mathesar_json_object(text)
 RETURNS mathesar_types.mathesar_json_object AS $$
   SELECT $1::mathesar_types.mathesar_json_object;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+EXCEPTION WHEN undefined_object OR invalid_schema_name THEN NULL;
+END $jit$;
 
 
--- msar.cast_to_json
+-- pg_temp.cast_to_json
 
-CREATE OR REPLACE FUNCTION msar.cast_to_json(json)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_json(json)
 RETURNS json AS $$
   SELECT $1::json;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_json(jsonb)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_json(jsonb)
 RETURNS json AS $$
   SELECT $1::json;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_json(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_json(text)
 RETURNS json AS $$
   SELECT $1::json;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
--- msar.cast_to_uuid
+-- pg_temp.cast_to_uuid
 
-CREATE OR REPLACE FUNCTION msar.cast_to_uuid(text)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_uuid(text)
 RETURNS uuid AS $$
   SELECT $1::uuid;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION msar.cast_to_uuid(uuid)
+CREATE OR REPLACE FUNCTION pg_temp.cast_to_uuid(uuid)
 RETURNS uuid AS $$
   SELECT $1::uuid;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;

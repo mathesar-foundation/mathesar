@@ -414,7 +414,7 @@ def test_local_part_func_wrapper(engine_with_schema):
     engine, _ = engine_with_schema
     sel = select(
         sa_call_sql_function(
-            'msar.email_local_part',
+            'pg_temp.email_local_part',
             text("'test@example.com'"),
             return_type=PostgresType.TEXT
         )

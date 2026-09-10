@@ -12,7 +12,6 @@
     iconEdit,
     iconMoreActions,
     iconPermissions,
-    iconReinstall,
   } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
@@ -26,7 +25,6 @@
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
-  import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
   import { canViewDbPermissionsAndSettings } from '@mathesar/utils/preloadData';
   import {
     Button,
@@ -54,7 +52,6 @@
 
   const permissionsModal = modal.spawnModalController();
   const disconnectModal = modal.spawnModalController<Database>();
-  const reinstallModal = modal.spawnModalController<Database>();
   const editModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -149,12 +146,6 @@
                 >
                   {$_('edit_connection')}
                 </ButtonMenuItem>
-                <ButtonMenuItem
-                  icon={iconReinstall}
-                  on:click={() => reinstallModal.open(database)}
-                >
-                  {$_('reinstall_mathesar_schemas')}
-                </ButtonMenuItem>
                 <!--
                 TODO: Allow dropping databases
                 https://github.com/mathesar-foundation/mathesar/issues/3862
@@ -207,18 +198,12 @@
 
 <EditDatabaseModal controller={editModal} {database} />
 <DatabasePermissionsModal controller={permissionsModal} />
-<UpgradeDatabaseModal controller={reinstallModal} isReinstall />
 <DisconnectDatabaseModal
   controller={disconnectModal}
   disconnect={async (opts) => {
-    const result = await databasesStore.disconnectDatabase(opts);
-    if (result.sql_cleaned) {
-      toast.success($_('database_disconnected_successfully'));
-    } else {
-      toast.success($_('database_disconnected_without_sql_cleanup'));
-    }
+    await databasesStore.disconnectDatabase(opts);
+    toast.success($_('database_disconnected_successfully'));
     router.goto('/');
-    return result;
   }}
 />
 

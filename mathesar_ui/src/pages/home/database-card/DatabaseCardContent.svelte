@@ -6,13 +6,10 @@
     iconDeleteMajor,
     iconEdit,
     iconMoreActions,
-    iconReinstall,
-    iconRequiresUpgrade,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
-    Button,
     ButtonMenuItem,
     DropdownMenu,
     Icon,
@@ -22,10 +19,6 @@
   export let href: string;
   export let openDisconnect: () => void;
   export let openEdit: () => void;
-  export let openReinstall: () => void;
-  export let upgradeRequired = false;
-  export let onTriggerUpgrade: ((database: Database) => void) | undefined =
-    undefined;
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
@@ -37,12 +30,7 @@
   let isFocused = false;
 </script>
 
-<div
-  class="db-card-content"
-  class:hover={isHovered}
-  class:focus={isFocused}
-  class:upgrade-required={upgradeRequired}
->
+<div class="db-card-content" class:hover={isHovered} class:focus={isFocused}>
   <div class="content">
     <div class="content-header">
       <div class="icon-container">
@@ -59,17 +47,6 @@
           <span>{server}</span>
         </div>
       </div>
-      {#if upgradeRequired && onTriggerUpgrade}
-        <div class="upgrade-actions">
-          <div class="indicator">
-            <Icon {...iconRequiresUpgrade} />
-            {$_('upgrade_required')}
-          </div>
-          <Button on:click={() => onTriggerUpgrade?.(database)}>
-            {$_('upgrade')}
-          </Button>
-        </div>
-      {/if}
       {#if isMathesarAdmin}
         <div class="menu-trigger">
           <DropdownMenu
@@ -81,9 +58,6 @@
             <ButtonMenuItem icon={iconEdit} on:click={openEdit}>
               {$_('edit_connection')}
             </ButtonMenuItem>
-            <ButtonMenuItem icon={iconReinstall} on:click={openReinstall}>
-              {$_('reinstall_mathesar_schemas')}
-            </ButtonMenuItem>
             <ButtonMenuItem icon={iconDeleteMajor} on:click={openDisconnect}>
               {$_('disconnect_database')}
             </ButtonMenuItem>
@@ -93,26 +67,24 @@
     </div>
   </div>
 
-  {#if !upgradeRequired}
-    <!-- svelte-ignore a11y-missing-content -->
-    <a
-      {href}
-      class="hyperlink-overlay"
-      aria-label={`Open database ${database.displayName}`}
-      on:mouseenter={() => {
-        isHovered = true;
-      }}
-      on:mouseleave={() => {
-        isHovered = false;
-      }}
-      on:focusin={() => {
-        isFocused = true;
-      }}
-      on:focusout={() => {
-        isFocused = false;
-      }}
-    />
-  {/if}
+  <!-- svelte-ignore a11y-missing-content -->
+  <a
+    {href}
+    class="hyperlink-overlay"
+    aria-label={`Open database ${database.displayName}`}
+    on:mouseenter={() => {
+      isHovered = true;
+    }}
+    on:mouseleave={() => {
+      isHovered = false;
+    }}
+    on:focusin={() => {
+      isFocused = true;
+    }}
+    on:focusout={() => {
+      isFocused = false;
+    }}
+  />
 </div>
 
 <style lang="scss">
@@ -132,24 +104,20 @@
     outline-offset: 1px;
   }
 
-  .db-card-content.upgrade-required {
-    background: var(--color-navigation-20-hover);
-  }
-
-  .db-card-content.hover:not(.upgrade-required) {
+  .db-card-content.hover {
     border: 1px solid var(--color-database-40);
     background: var(--color-database-5-active);
     box-shadow: var(--card-hover-box-shadow);
   }
 
-  .db-card-content:active:not(.upgrade-required),
-  .db-card-content.focus:not(.upgrade-required) {
+  .db-card-content:active,
+  .db-card-content.focus {
     outline: 2px solid var(--color-database-15);
     border: 1px solid var(--color-database-40);
     box-shadow: var(--card-focus-box-shadow);
   }
 
-  .db-card-content:active:not(.upgrade-required) {
+  .db-card-content:active {
     background: var(--color-database-10-active);
   }
 
@@ -200,21 +168,6 @@
   .detail {
     font-size: 1rem;
     color: var(--color-fg-subtle-1);
-  }
-
-  .upgrade-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    z-index: var(--z-index-menu-trigger);
-  }
-
-  .indicator {
-    color: var(--color-fg-warning);
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 1rem;
   }
 
   .menu-trigger {

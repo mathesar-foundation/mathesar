@@ -3,6 +3,8 @@ from typing import Literal, TypedDict
 from modernrpc.core import REQUEST_KEY
 
 from db.databases import get_database, drop_database
+from db.sql.install import install_mathesar_types
+from mathesar import __version__
 from mathesar.models.base import Database
 from mathesar.rpc.utils import connect
 from mathesar.rpc.decorators import mathesar_rpc_method
@@ -67,21 +69,61 @@ def delete(*, database_oid: int, database_id: int, **kwargs) -> None:
         drop_database(database_oid, conn)
 
 
-@mathesar_rpc_method(name="databases.upgrade_sql")
-def upgrade_sql(
-        *, database_id: int, username: str = None, password: str = None
-) -> None:
+@mathesar_rpc_method(name="databases.install_types", auth="login")
+def install_types(*, database_id: int, **kwargs) -> None:
     """
-    Install, Upgrade, or Reinstall the Mathesar SQL on a database.
+    Install Mathesar custom types (email, uri, money, etc.) on a database.
 
-    If no `username` and `password` are submitted, we will determine the
-    role which owns the `msar` schema on the database, then use that role
-    for the upgrade.
+    This creates the mathesar_types schema with custom type definitions.
+    Types are optional and can be installed after connecting a database.
+
+    The user's role must have permission to create schemas for this to work.
 
     Args:
         database_id: The Django id of the database.
-        username: The username of the role used for upgrading.
-        password: The password of the role used for upgrading.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        install_mathesar_types(conn)
+
+
+@mathesar_rpc_method(name="databases.remove_mathesar_schemas", auth="login")
+def remove_mathesar_schemas(
+        *,
+        database_id: int,
+        schemas_to_remove: list[str] = ['msar', '__msar'],
+        remove_types: bool = False,
+        role_name: str = None,
+        password: str = None,
+        **kwargs
+) -> None:
+    """
+    Remove permanently-installed Mathesar schemas from a database.
+
+    This is a cleanup operation for databases that were connected before
+    the JIT approach. It removes the msar and __msar schemas (and optionally
+    mathesar_types) using the all_mathesar_objects tracking table.
+
+    The operation is optional - the old schemas don't affect functionality.
+
+    Args:
+        database_id: The Django id of the database.
+        schemas_to_remove: Schemas to remove. Default: ['msar', '__msar']
+        remove_types: If True, also remove mathesar_types schema.
+        role_name: The username of the role used for SQL removal.
+        password: The password of the role used for SQL removal.
     """
     database = Database.objects.get(id=database_id)
-    database.install_sql(username=username, password=password)
+
+    if remove_types:
+        schemas_to_remove = list(schemas_to_remove) + ['mathesar_types']
+
+    database.uninstall_sql(
+        schemas_to_remove=schemas_to_remove,
+        strict=False,
+        role_name=role_name,
+        password=password,
+    )
+
+    database.last_confirmed_sql_version = __version__
+    database.save()
