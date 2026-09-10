@@ -1,11 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import {
-    type SampleDataSchemaIdentifier,
-    sampleDataOptions,
-  } from '@mathesar/api/rpc/databases';
-  import type { RequiredField } from '@mathesar/components/form/field';
+  import { sampleDataOptions } from '@mathesar/api/rpc/databases';
+  import type { OptionalField } from '@mathesar/components/form/field';
   import { CheckboxGroup } from '@mathesar-component-library';
 
   import type { InstallationSchema } from './createDatabaseUtils';
@@ -37,7 +34,7 @@
     nonprofit_grants: $_('sample_data_nonprofit_grants_help'),
   };
 
-  export let installationSchemas: RequiredField<InstallationSchema[]>;
+  export let installationSchemas: OptionalField<InstallationSchema[]>;
 </script>
 
 <div>
