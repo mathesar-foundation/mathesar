@@ -7,21 +7,17 @@
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
-  import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
 
   import DisconnectDatabaseModal from '../../database/disconnect/DisconnectDatabaseModal.svelte';
 
   import DatabaseCardContent from './DatabaseCardContent.svelte';
 
   export let database: Database;
-  export let onTriggerUpgrade: (database: Database) => void;
 
-  $: needsUpgrade = database.needsUpgradeAttention;
   $: href = getDatabasePageUrl(database.id);
 
   const disconnectModalController = modal.spawnModalController<Database>();
   const editModalController = modal.spawnModalController();
-  const reinstallModalController = modal.spawnModalController<Database>();
 
   function openDisconnect() {
     disconnectModalController.open(database);
@@ -30,30 +26,13 @@
   function openEdit() {
     editModalController.open();
   }
-
-  function openReinstall() {
-    reinstallModalController.open(database);
-  }
 </script>
 
-<div class="db-card" class:hoverable={!needsUpgrade}>
-  <DatabaseCardContent
-    {database}
-    {href}
-    {openDisconnect}
-    {openEdit}
-    {openReinstall}
-    upgradeRequired={needsUpgrade}
-    onTriggerUpgrade={needsUpgrade ? onTriggerUpgrade : undefined}
-  />
+<div class="db-card">
+  <DatabaseCardContent {database} {href} {openDisconnect} {openEdit} />
 </div>
 
 <EditDatabaseModal controller={editModalController} {database} />
-<UpgradeDatabaseModal
-  controller={reinstallModalController}
-  isReinstall
-  refreshDatabaseList={() => databasesStore.refresh()}
-/>
 <DisconnectDatabaseModal
   controller={disconnectModalController}
   disconnect={async (opts) => {
@@ -63,7 +42,7 @@
 />
 
 <style lang="scss">
-  .db-card.hoverable {
+  .db-card {
     cursor: pointer;
   }
 </style>
