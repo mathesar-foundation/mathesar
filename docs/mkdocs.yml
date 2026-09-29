@@ -12,6 +12,7 @@ nav:
       - On Linux · macOS · WSL: administration/install-from-scratch.md
       - DigitalOcean: administration/install-digitalocean.md
       - Railway: administration/install-railway.md
+      - Easypanel: administration/install-easypanel.md
   - Administrator Guide:
       - Configuration:
         - Environment variables: administration/environment-variables.md
