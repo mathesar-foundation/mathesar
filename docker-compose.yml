@@ -94,6 +94,10 @@ x-config: &config
   MATHESAR_TERMS_OF_SERVICE_URL: ${MATHESAR_TERMS_OF_SERVICE_URL:-}
   MATHESAR_PRIVACY_POLICY_URL: ${MATHESAR_PRIVACY_POLICY_URL:-}
 
+  # Prototype AI table creation
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+  MATHESAR_AI_MODEL: ${MATHESAR_AI_MODEL:-stealth/space-bunny-alpha}
+
 #-------------------------------------------------------------------------------
 # ADDITIONAL INFO ABOUT CONFIG VARIABLES
 #

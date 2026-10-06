@@ -148,6 +148,33 @@ def test_tables_add(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[8] is None
 
 
+def test_tables_add_from_prompt(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    expected = {"oid": 1964474, "name": "contacts", "renamed_columns": None}
+
+    def mock_add_table_with_agent(**kwargs):
+        assert kwargs == {
+            "prompt": "A contacts table",
+            "database_id": 11,
+            "schema_oid": 2200,
+            "request": request,
+        }
+        return expected
+
+    monkeypatch.setattr(
+        "mathesar.ai.agent.add_table_with_agent", mock_add_table_with_agent
+    )
+    actual = tables.add_from_prompt(
+        prompt="A contacts table",
+        schema_oid=2200,
+        database_id=11,
+        request=request,
+    )
+
+    assert actual == expected
+
+
 def test_tables_patch(rf, monkeypatch, mocked_exec_msar_func):
     request = rf.post('/api/rpc/v0', data={})
     request.user = User(username='alice', password='pass1234')

@@ -12,6 +12,7 @@
   export let database: Database;
   export let schema: Schema;
   export let onCreateEmptyTable: () => void;
+  export let onCreateTableWithAi: () => void;
 
   $: ({ currentRolePrivileges } = schema.currentAccess);
 </script>
@@ -30,6 +31,8 @@
   <ButtonMenuItem on:click={onCreateEmptyTable}>
     {$_('from_scratch')}
   </ButtonMenuItem>
+  <ButtonMenuItem on:click={onCreateTableWithAi}>{$_('with_ai')}</ButtonMenuItem
+  >
   <LinkMenuItem href={getImportPageUrl(database.id, schema.oid)}>
     {$_('from_data_import')}
   </LinkMenuItem>

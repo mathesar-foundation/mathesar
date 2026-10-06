@@ -237,6 +237,18 @@ export const tables = {
     }
   >(),
 
+  add_from_prompt: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      schema_oid: number;
+      prompt: string;
+    },
+    {
+      oid: number;
+      name: string;
+    }
+  >(),
+
   /** Returns the oid of the table created */
   import: rpcMethodTypeContainer<
     {

@@ -36,6 +36,7 @@
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
   export let onCreateEmptyTable: () => void;
+  export let onCreateTableWithAi: () => void;
 
   $: ({ schema, dataFormsFetch } = $schemaRouteContext);
   $: void dataFormsFetch.runConservatively();
@@ -63,6 +64,7 @@
           database={schema.database}
           {schema}
           {onCreateEmptyTable}
+          {onCreateTableWithAi}
         />
       </div>
     </header>

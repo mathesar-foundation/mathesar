@@ -445,6 +445,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        tables.add_from_prompt,
+        "tables.add_from_prompt",
+        [user_is_authenticated]
+    ),
+    (
         tables.delete,
         "tables.delete",
         [user_is_authenticated]

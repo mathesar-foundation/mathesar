@@ -21,6 +21,7 @@
   const schemaRouteContext = SchemaRouteContext.get();
   const editSchemaModal = modal.spawnModalController();
   const createTableModal = modal.spawnModalController();
+  const createTableWithAiModal = modal.spawnModalController();
   const permissionsModal = modal.spawnModalController();
   const showPermissionsModal = canViewDbPermissionsAndSettings();
 
@@ -87,6 +88,7 @@
     {explorationsMap}
     {explorationsRequestStatus}
     onCreateEmptyTable={() => createTableModal.open()}
+    onCreateTableWithAi={() => createTableWithAiModal.open()}
   />
 </LayoutWithHeader>
 
@@ -99,6 +101,12 @@
   controller={createTableModal}
   {schema}
   existingTableNames={new Set(map((t) => t.name, tablesMap.values()))}
+/>
+<CreateTableModal
+  controller={createTableWithAiModal}
+  {schema}
+  existingTableNames={new Set(map((t) => t.name, tablesMap.values()))}
+  useAi
 />
 <SchemaPermissionsModal controller={permissionsModal} {schema} />
 

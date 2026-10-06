@@ -4,6 +4,8 @@ Classes and functions exposed to the RPC endpoint for managing tables in a datab
 from typing import Literal, Optional, TypedDict
 
 from modernrpc.core import REQUEST_KEY
+from langchain.tools import tool
+
 
 from db.tables import (
     alter_table_on_database,
@@ -213,6 +215,7 @@ def get(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
     return TableInfo(raw_table_info)
 
 
+@tool
 @mathesar_rpc_method(name="tables.add", auth="login")
 def add(
     *,
@@ -256,6 +259,23 @@ def add(
     )
 
     return AddedTableInfo.from_dict(created_table_info)
+
+
+@mathesar_rpc_method(name="tables.add_from_prompt", auth="login")
+def add_from_prompt(
+    *, prompt: str, schema_oid: int, database_id: int, **kwargs
+) -> AddedTableInfo:
+    """Use an AI agent to create a table in the selected schema."""
+    # Import lazily so installations that do not use this prototype do not load
+    # LangChain while Django starts.
+    from mathesar.ai.agent import add_table_with_agent
+
+    return add_table_with_agent(
+        prompt=prompt,
+        database_id=database_id,
+        schema_oid=schema_oid,
+        request=kwargs.get(REQUEST_KEY),
+    )
 
 
 @mathesar_rpc_method(name="tables.delete", auth="login")

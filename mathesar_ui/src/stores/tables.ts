@@ -343,6 +343,32 @@ export async function createTable({
   return putTableInStore({ schema, rawTableWithMetadata });
 }
 
+export async function createTableFromPrompt({
+  schema,
+  prompt,
+}: {
+  schema: Schema;
+  prompt: string;
+}): Promise<Table> {
+  const created = await api.tables
+    .add_from_prompt({
+      database_id: schema.database.id,
+      schema_oid: schema.oid,
+      prompt,
+    })
+    .run();
+
+  const rawTableWithMetadata = await api.tables
+    .get_with_metadata({
+      database_id: schema.database.id,
+      table_oid: created.oid,
+    })
+    .run();
+
+  schema.setTableCount(get(schema.tableCount) + 1);
+  return putTableInStore({ schema, rawTableWithMetadata });
+}
+
 export async function createTableFromDataFile(props: {
   schema: Schema;
   dataFile: Pick<DataFile, 'id'>;

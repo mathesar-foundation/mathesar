@@ -86,6 +86,8 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
       - PER_USER_DATABASES_ENABLED=${PER_USER_DATABASES_ENABLED-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY-}
+      - MATHESAR_AI_MODEL=${MATHESAR_AI_MODEL-stealth/space-bunny-alpha}
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
