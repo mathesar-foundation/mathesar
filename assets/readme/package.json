@@ -1,0 +1,15 @@
+{
+  "name": "mathesar-readme-screenshots",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "node capture-readme-screenshots.mjs",
+    "validate": "node capture-readme-screenshots.mjs --validate-only"
+  },
+  "dependencies": {
+    "@playwright/test": "1.61.0",
+    "pg": "8.13.1",
+    "sharp": "0.33.5"
+  }
+}

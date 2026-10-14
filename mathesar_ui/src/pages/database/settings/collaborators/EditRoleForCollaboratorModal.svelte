@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { User } from '@mathesar/api/rpc/users';
   import {
     FormSubmit,
     makeForm,
@@ -24,15 +23,14 @@
   export let controller: ModalController;
   export let collaborator: Collaborator;
   export let configuredRolesMap: ImmutableMap<number, ConfiguredRole>;
-  export let usersMap: ImmutableMap<number, User>;
   export let onUpdateRole: (collaborator: Collaborator) => void;
 
   $: savedConfiguredRoleId = collaborator.configuredRoleId;
   $: configuredRoleId = requiredField<number>($savedConfiguredRoleId);
   $: form = makeForm({ configuredRoleId });
 
-  $: userName =
-    usersMap.get(collaborator.userId)?.username ?? String(collaborator.userId);
+  $: user = collaborator.userInfo;
+  $: userName = user.full_name || user.username || String(user.id);
 
   async function updateRoleForCollaborator() {
     await collaborator.setConfiguredRole($configuredRoleId);

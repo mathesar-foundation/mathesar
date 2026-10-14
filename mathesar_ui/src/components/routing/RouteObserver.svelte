@@ -5,16 +5,21 @@
   export let meta: TinroRouteMeta;
   export let onLoad: (metaInfo: TinroRouteMeta) => void = () => {};
   export let onUnload: () => void = () => {};
+  export let onLoadAlways: () => void = () => {};
 
   onMount(() => {
-    const unsubsriber = meta.subscribe((metaInfo) => {
+    if (!meta.subscribe) {
+      onLoadAlways();
+    }
+    const unsubscriber = meta.subscribe?.((metaInfo) => {
+      onLoadAlways();
       if (metaInfo) {
         onLoad(metaInfo);
       }
     });
 
     return () => {
-      unsubsriber();
+      unsubscriber?.();
       onUnload();
     };
   });

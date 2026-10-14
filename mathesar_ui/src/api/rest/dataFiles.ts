@@ -12,8 +12,7 @@ import {
 const ENDPOINT = '/api/db/v0/data_files/';
 
 interface PostParams {
-  url?: string;
-  paste?: string;
+  paste: string;
 }
 
 function postToEndpoint(body: PostParams) {
@@ -36,7 +35,6 @@ function update(id: number, properties: { header: boolean }) {
 }
 
 export const dataFilesApi = {
-  addViaUrlToFile: (url: string) => postToEndpoint({ url }),
   addViaText: (paste: string) => postToEndpoint({ paste }),
   addViaUpload,
   get,

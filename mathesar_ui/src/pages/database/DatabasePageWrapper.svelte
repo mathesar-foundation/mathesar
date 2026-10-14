@@ -27,6 +27,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import EditDatabaseModal from '@mathesar/systems/databases/edit-database/EditDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
+  import { canViewDbPermissionsAndSettings } from '@mathesar/utils/preloadData';
   import {
     Button,
     ButtonMenuItem,
@@ -62,17 +63,23 @@
   type Section = 'schemas' | 'settings';
   let section: Section = 'schemas';
 
+  const showSettingsTab = canViewDbPermissionsAndSettings();
+
   $: tabs = [
     {
       id: 'schemas',
       label: $_('schemas'),
       href: getDatabasePageSchemasSectionUrl(database.id),
     },
-    {
-      id: 'settings',
-      label: $_('database_settings'),
-      href: getDatabasePageSettingsSectionUrl(database.id),
-    },
+    ...(showSettingsTab
+      ? [
+          {
+            id: 'settings' as const,
+            label: $_('database_settings'),
+            href: getDatabasePageSettingsSectionUrl(database.id),
+          },
+        ]
+      : []),
   ];
   $: activeTab = tabs.find((tab) => tab.id === section);
 
@@ -112,13 +119,15 @@
       </div>
       <div slot="action">
         <div class="actions-container">
-          <Button
-            appearance="secondary"
-            on:click={() => permissionsModal.open()}
-          >
-            <Icon {...iconPermissions} />
-            <span>{$_('database_permissions')}</span>
-          </Button>
+          {#if showSettingsTab}
+            <Button
+              appearance="secondary"
+              on:click={() => permissionsModal.open()}
+            >
+              <Icon {...iconPermissions} />
+              <span>{$_('database_permissions')}</span>
+            </Button>
+          {/if}
           {#if isMathesarAdmin}
             <div class="dropdown-container">
               <DropdownMenu
@@ -216,12 +225,23 @@
 <style>
   .database-page-header {
     --AppSecondaryHeader__background: linear-gradient(
-      135deg,
-      var(--color-bg-raised-1) 10%,
-      var(--color-bg-supporting) 30%,
-      var(--color-database-20) 50%,
-      var(--color-database-10) 100%
-    );
+        90deg,
+        color-mix(in srgb, var(--color-database), transparent 42%) 0%,
+        color-mix(in srgb, var(--color-database), transparent 62%) 42%,
+        color-mix(in srgb, var(--color-schema), transparent 78%) 72%,
+        transparent 100%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-bg-base), var(--color-database) 15%) 0%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-bg-supporting) 24%)
+          34%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-schema) 5%) 78%,
+        var(--color-bg-base) 100%
+      );
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
+    --AppSecondaryHeader__background-repeat: no-repeat;
     --entity-name-color: var(--color-database);
   }
 

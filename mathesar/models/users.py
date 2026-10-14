@@ -9,6 +9,7 @@ class User(AbstractUser):
     # Both are optional because we can always fall back on username
     first_name = None
     last_name = None
+    username = models.CharField(max_length=63, unique=True)
     full_name = models.CharField(max_length=255, blank=True, null=True)
     short_name = models.CharField(max_length=255, blank=True, null=True)
     password_change_needed = models.BooleanField(default=False)

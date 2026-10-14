@@ -1,3 +1,6 @@
+import io
+import itertools
+
 import clevercsv as csv
 
 from db.constants import COLUMN_NAME_TEMPLATE
@@ -19,7 +22,6 @@ def copy_datafile_to_table(
     header_to_validate=[]
 ):
     data_file = DataFile.objects.get(id=data_file_id, user=user)
-    file_path = data_file.file.path
     header = data_file.header
     dialect = csv.dialect.SimpleDialect(
         data_file.delimiter,
@@ -28,19 +30,22 @@ def copy_datafile_to_table(
     )
     table_name = table_name or data_file.base_name
 
-    with open(file_path, "r", newline="") as f:
+    with data_file.file.open("rb") as raw:
+        f = io.TextIOWrapper(raw, encoding=data_file.encoding, newline="")
         reader = csv.reader(f, dialect)
+        first_row = next(reader)
         if header:
-            raw_col_names = next(reader)
             if import_into_temp_table:
-                assert list(enumerate(raw_col_names)) == header_to_validate, "Parsing mismatch"
-            column_names = _process_column_names(raw_col_names)
+                assert list(enumerate(first_row)) == header_to_validate, "Parsing mismatch"
+            column_names = _process_column_names(first_row)
+            rows = reader
         else:
             column_names = [
-                f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(next(reader)))
+                f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(first_row))
             ]
-            f.seek(0)
-        processed_rows = ([None if val == '' else val for val in row] for row in reader)
+            # The first row is data, not a header: chain it back in
+            rows = itertools.chain([first_row], reader)
+        processed_rows = ([None if val == '' else val for val in row] for row in rows)
         import_info = create_and_import_from_rows(
             processed_rows,
             table_name,

@@ -2,7 +2,6 @@ import { type Readable, derived } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
 import type { User } from '@mathesar/api/rpc/users';
-import type { Collaborator } from '@mathesar/models/Collaborator';
 import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
 import type { Database } from '@mathesar/models/Database';
 import type { Role } from '@mathesar/models/Role';
@@ -45,8 +44,6 @@ export class DatabaseSettingsRouteContext {
   configuredRoles;
 
   combinedLoginRoles: Readable<CombinedLoginRole[]>;
-
-  collaborators;
 
   users: AsyncStore<void, ImmutableMap<User['id'], User>>;
 
@@ -92,7 +89,6 @@ export class DatabaseSettingsRouteContext {
         return [];
       },
     );
-    this.collaborators = this.database.constructCollaboratorsStore();
     this.users = new AsyncStore(getUsersPromise);
   }
 
@@ -122,26 +118,7 @@ export class DatabaseSettingsRouteContext {
      *
      * TODO: Discuss on whether we should cascade or throw error?
      */
-    this.collaborators.reset();
-  }
-
-  async addCollaborator(
-    userId: User['id'],
-    configuredRoleId: ConfiguredRole['id'],
-  ) {
-    const newCollaborator = await this.database.addCollaborator(
-      userId,
-      configuredRoleId,
-    );
-    this.collaborators.updateResolvedValue((collaborators) =>
-      collaborators.with(newCollaborator.id, newCollaborator),
-    );
-    return newCollaborator;
-  }
-
-  async deleteCollaborator(collaborator: Collaborator) {
-    await collaborator.delete();
-    this.collaborators.updateResolvedValue((c) => c.without(collaborator.id));
+    this.databaseRouteContext.collaborationFeaturesContext.collaborators.reset();
   }
 
   static construct(databaseRouteContext: DatabaseRouteContext) {

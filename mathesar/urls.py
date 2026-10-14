@@ -1,9 +1,9 @@
-from django.contrib.auth.views import LoginView
 from django.urls import include, path, re_path
 
 from mathesar import views
 from mathesar.views.installation.decorators import installation_complete, installation_incomplete
 from mathesar.views.installation.complete_installation import CompleteInstallationFormView
+from mathesar.views.users.login import MathesarLoginView
 from mathesar.views.users.password_reset import MathesarPasswordResetConfirmView
 
 urlpatterns = [
@@ -14,8 +14,8 @@ urlpatterns = [
     path('api/export/v0/tables/', views.export.export_table, name='export_table'),
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
     path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('auth/login/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
-    path('auth/3rdparty/<path:rest>/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='oidc'),  # hack to redirect '/login/cancelled', 'login/error/' 'signup/' and '' to login page
+    path('auth/login/', installation_complete(MathesarLoginView.as_view(redirect_authenticated_user=True)), name='login'),
+    path('auth/3rdparty/<path:rest>/', installation_complete(MathesarLoginView.as_view(redirect_authenticated_user=True)), name='oidc'),  # hack to redirect '/login/cancelled', 'login/error/' 'signup/' and '' to login page
     path('auth/', include('django.contrib.auth.urls')),  # default auth/
     path('auth/', include('allauth.urls')),  # catch any urls that are not available in default auth/
     path('bulk_insert/', views.bulk_insert.bulk_insert, name='bulk_insert'),

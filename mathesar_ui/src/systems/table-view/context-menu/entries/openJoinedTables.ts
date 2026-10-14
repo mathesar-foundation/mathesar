@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 
 import type { Table } from '@mathesar/models/Table';
-import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+import { getTablePageUrlByTable } from '@mathesar/routes/urls';
 import type { JoinedColumn } from '@mathesar/stores/table-data';
 import { currentTablesData } from '@mathesar/stores/tables';
 import {
@@ -17,8 +17,7 @@ function getTableDetail(
 ): { table: Table; href: string } | undefined {
   const table = get(currentTablesData).tablesMap.get(tableOid);
   if (!table) return undefined;
-  const getTablePageUrl = get(storeToGetTablePageUrl);
-  const href = getTablePageUrl({ tableId: table.oid });
+  const href = getTablePageUrlByTable(table);
   if (!href) return undefined;
   return {
     table,

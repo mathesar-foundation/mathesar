@@ -3,7 +3,7 @@
 
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconConstraint } from '@mathesar/icons';
-  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getTablePageUrlByTable } from '@mathesar/routes/urls';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { currentTablesData } from '@mathesar/stores/tables';
   import { Icon, iconExternalLink } from '@mathesar-component-library';
@@ -21,10 +21,7 @@
   {#if type === 'foreignKey' && linkedTable}
     <div class="fk-container">
       <span>{$_('linked_to')}</span>
-      <a
-        class="specifier-tag"
-        href={$storeToGetTablePageUrl({ tableId: linkedTableId })}
-      >
+      <a class="specifier-tag" href={getTablePageUrlByTable(linkedTable)}>
         <TableName table={linkedTable} />
         <Icon {...iconExternalLink} />
       </a>

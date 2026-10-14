@@ -126,3 +126,70 @@ def test_get_download_links(monkeypatch):
     for li in download_links:
         assert li.sessions.filter(session_key=first_session_key).count() == 1
         assert li.sessions.filter(session_key=second_session_key).count() == 1
+
+
+def test_get_download_links_azure(monkeypatch):
+    """The link/mash/uri flow is protocol-agnostic and must work for `az://`."""
+    session_key = 'azuresession',
+    request = MagicMock()
+    request.session = Session.objects.create(
+        session_key=session_key,
+        expire_date=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)
+    )
+
+    def mock_file_link(_, url_name, mash):
+        return f'http://a-link-here/?url_name={url_name}&mash={mash}'
+
+    monkeypatch.setattr(dl, "_build_file_link", mock_file_link)
+
+    BACKEND_KEY = "azure_backend"
+
+    def mock_backends():
+        return {
+            BACKEND_KEY: {
+                "protocol": "az",
+                "nickname": "for testing azure",
+                "kwargs": {"account_name": "mystorageacct"},
+            },
+        }
+
+    monkeypatch.setattr(dl, "get_backends", mock_backends)
+
+    uri_pic = "az://mathesar-file-attachments/admin/20250919-192215167015/pic.jpeg"
+    uri_pdf = "az://mathesar-file-attachments/admin/20250919-192215167016/document.pdf"
+
+    results = [
+        {"files": dl.create_json_for_uri(uri_pic, BACKEND_KEY)},
+        {"files": dl.create_json_for_uri(uri_pdf, BACKEND_KEY)},
+    ]
+
+    expect_pic_mash = dl.create_mash_for_uri(uri_pic, BACKEND_KEY)
+    expect_pdf_mash = dl.create_mash_for_uri(uri_pdf, BACKEND_KEY)
+
+    mock_col_meta = MagicMock()
+    mock_col_meta.attnum = "files"
+    mock_col_meta.file_backend = BACKEND_KEY
+    actual_output = dl.get_download_links(request, results, [mock_col_meta])
+    assert actual_output == {
+        "files": {
+            expect_pdf_mash: {
+                "attachment": mock_file_link(None, "files_download", expect_pdf_mash),
+                "direct": mock_file_link(None, "files_direct", expect_pdf_mash),
+                "mimetype": "application/pdf",
+                "name": "document.pdf",
+                "thumbnail": None,
+                "uri": uri_pdf,
+            },
+            expect_pic_mash: {
+                "attachment": mock_file_link(None, "files_download", expect_pic_mash),
+                "direct": mock_file_link(None, "files_direct", expect_pic_mash),
+                "mimetype": "image/jpeg",
+                "name": "pic.jpeg",
+                "thumbnail": mock_file_link(None, "files_thumbnail", expect_pic_mash),
+                "uri": uri_pic,
+            },
+        },
+    }
+
+    for li in DownloadLink.objects.all():
+        assert li.fsspec_kwargs == {"account_name": "mystorageacct"}

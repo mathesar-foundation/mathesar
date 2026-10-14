@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import select
 from db.deprecated.utils import execute_pg_query
 from db.deprecated.functions.base import ColumnName, Noop, ArrayContains
 from db.deprecated.functions.packed import (
@@ -25,7 +26,7 @@ from db.deprecated.functions.operations.apply import apply_db_function_as_filter
 ])
 def test_filter_functions_on_int_array(array_table_obj, main_db_function, literal_param, expected_count):
     table, engine = array_table_obj
-    selectable = table.select()
+    selectable = select(table)
     dimension = 1
     array_column_name = "int_array_col"
     if main_db_function is ArrayContains:
@@ -61,7 +62,7 @@ def test_filter_functions_on_int_array(array_table_obj, main_db_function, litera
 ])
 def test_filter_functions_on_text_array(array_table_obj, main_db_function, literal_param, expected_count):
     table, engine = array_table_obj
-    selectable = table.select()
+    selectable = select(table)
     dimension = 1
     array_column_name = "text_array_col"
     if main_db_function is ArrayContains:

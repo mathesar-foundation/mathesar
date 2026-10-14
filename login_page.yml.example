@@ -1,0 +1,14 @@
+# This config file lets you customize localized copy on Mathesar's login page.
+# Custom copy is plain text only; HTML and Markdown are not rendered.
+heading: Welcome to Mathesar
+body: Log in to continue working with your data.
+translations:
+  es:
+    heading: Bienvenido a Mathesar
+    body: Inicia sesión para seguir trabajando con tus datos.
+  fr:
+    heading: Bienvenue dans Mathesar
+    body: Connectez-vous pour continuer à travailler avec vos données.
+  ja:
+    heading: Mathesar へようこそ
+    body: ログインしてデータの操作を続けます。

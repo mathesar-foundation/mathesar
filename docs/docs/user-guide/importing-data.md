@@ -31,7 +31,7 @@ The JSON data must be structured in one of the following ways:
 
 - **An array of objects**
 
-    Each object produces one row in the table, and the object keys become column names. If a key is present is only one object, then the values for that column will be `NULL` in all other rows.
+    Each object produces one row in the table, and the object keys become column names. If a key is present in only one object, then the values for that column will be `NULL` in all other rows.
 
     ```json
     [

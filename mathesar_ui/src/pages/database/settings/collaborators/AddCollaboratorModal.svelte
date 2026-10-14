@@ -14,7 +14,7 @@
   import { toast } from '@mathesar/stores/toast';
   import {
     ControlledModal,
-    type ImmutableMap,
+    ImmutableMap,
     type ModalController,
     Select,
     portalToWindowFooter,
@@ -23,10 +23,12 @@
   import SelectConfiguredRoleField from './SelectConfiguredRoleField.svelte';
 
   const routeContext = DatabaseSettingsRouteContext.get();
+  $: ({ databaseRouteContext, users } = $routeContext);
+  $: ({ collaborationFeaturesContext } = databaseRouteContext);
+  $: void users.runConservatively();
 
   export let controller: ModalController;
   export let configuredRolesMap: ImmutableMap<number, ConfiguredRole>;
-  export let usersMap: ImmutableMap<number, User>;
   export let collaboratorsMap: ImmutableMap<number, Collaborator>;
   export let onAdd: (collaborator: Collaborator) => void;
 
@@ -36,13 +38,14 @@
 
   const SelectUser = Select<User['id']>;
 
+  $: usersMap = $users.resolvedValue ?? new ImmutableMap<User['id'], User>();
   $: addedUsers = new Set(
     [...collaboratorsMap.values()].map((cbr) => cbr.userId),
   );
 
   async function addCollaborator() {
     if ($userId && $configuredRoleId) {
-      const collaborator = await $routeContext.addCollaborator(
+      const collaborator = await collaborationFeaturesContext.addCollaborator(
         $userId,
         $configuredRoleId,
       );

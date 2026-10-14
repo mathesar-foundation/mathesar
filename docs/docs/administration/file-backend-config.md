@@ -5,7 +5,7 @@
 
 	[Talk to us for 20 min](https://cal.com/mathesar/users)! We'll give you a $25 gift card as a thank you.
 
-Mathesar's [**file data type**](../user-guide/files.md) requires you to configure an **S3-compatible object storage backend**. File storage allows users to upload, preview, and download files directly within Mathesar.
+Mathesar's [**file data type**](../user-guide/files.md) requires you to configure an object storage backend — either an **S3-compatible** service or **Azure Blob Storage**. File storage allows users to upload, preview, and download files directly within Mathesar.
 
 **Configuring file storage and using file columns is optional.** By default, Mathesar does not expose file column controls unless a storage backend is set up. If you do not set up a backend, users will not be able to work directly with files in Mathesar.
 
@@ -96,7 +96,7 @@ From your chosen storage backend, collect the following details:
 * **Access key ID**: generated credential for programmatic access.
 * **Secret access key**: generated credential paired with the access key ID.
 
-#### 3b. Basic setup
+#### 3b. Basic setup with S3 compatible object store
 
 Once you have those details, update `file_storage.yml` with your values:
 
@@ -113,10 +113,39 @@ default:
 +      region_name: us-east-2
 +      aws_access_key_id: YOUR_ACCESS_KEY
 +      aws_secret_access_key: YOUR_SECRET_KEY
-+ public_form_access:
++  public_form_access:
 +    enabled: true # Set to false to disable files upload via public form
 +    max_upload_size: 1073741824 # 1GB in bytes, adjust as-needed or remove for limitless uploads
 ```
+
+#### 3c. Azure Blob Storage setup
+
+To use Azure Blob Storage instead of an S3-compatible backend, set `protocol: az` and use a flat `kwargs` block (Azure does not use the nested `client_kwargs` that S3 does). Here, `prefix` is the **container name**, not a bucket.
+
+```diff
+default:
++  protocol: az
++  nickname: "Backend name"            # A friendly label for this backend
++  prefix: my-mathesar-container       # This should match your container name exactly
++  kwargs:
++    account_name: my-storage-account
++  public_form_access:
++    enabled: true # Set to false to disable files upload via public form
++    max_upload_size: 1073741824 # 1GB in bytes, adjust as-needed or remove for limitless uploads
+```
+
+Authentication is selected by which keys you place under `kwargs`:
+
+| Auth method | Add under `kwargs` |
+| --- | --- |
+| Managed identity / workload identity | _nothing extra_ — Mathesar uses [`DefaultAzureCredential`](https://learn.microsoft.com/python/api/azure-identity/azure.identity.defaultazurecredential) automatically, which resolves credentials from the environment (managed identity, workload identity, `az login`, etc.) |
+| Account key | `account_key: <key>` |
+| SAS token | `sas_token: <token>` |
+| Connection string | `connection_string: <connection-string>` (no `account_name` needed) |
+| Service principal | `tenant_id`, `client_id`, and `client_secret` |
+
+!!! note "Managed identity and private storage accounts"
+    Because Mathesar streams every file through its own backend (it never hands the browser a direct or pre-signed blob URL), a **private** storage account works as long as Mathesar can reach it over the network with its identity. Grant the identity the **Storage Blob Data Contributor** role on the account (or container). To use a public, anonymously-readable container instead, add `anon: true` under `kwargs`.
 
 ### 4. Activate file storage
 

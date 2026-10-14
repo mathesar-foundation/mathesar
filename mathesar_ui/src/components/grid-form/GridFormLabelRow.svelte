@@ -25,4 +25,7 @@
   .label-cell {
     padding-top: 0.5rem;
   }
+  .input-cell {
+    position: relative;
+  }
 </style>

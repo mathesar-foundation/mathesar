@@ -1,6 +1,6 @@
 default:
   protocol: s3
-  nickname: "Local object store"
+  nickname: "Object store supporting S3 protocol"
   prefix: mathesar-storages
   kwargs:
     client_kwargs:
@@ -11,3 +11,22 @@ default:
   public_form_access:
     enabled: false
     max_upload_size: 1073741824
+
+# Azure Blob Storage example (uses the `adlfs` backend).
+# Replace the `default` block above with this.
+#
+# default:
+#   protocol: az
+#   nickname: "Azure blobs"
+#   prefix: mathesar-file-attachments   # The Azure container name
+#   kwargs:
+#     account_name: my-storage-account
+#     # Managed identity / workload identity needs nothing more: adlfs uses
+#     # DefaultAzureCredential automatically. For other auth, add ONE of:
+#     #   account_key: <key>
+#     #   sas_token: <token>
+#     #   connection_string: <connection-string>
+#     #   tenant_id, client_id, client_secret   # service principal
+#   public_form_access:
+#     enabled: false
+#     max_upload_size: 1073741824

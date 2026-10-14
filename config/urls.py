@@ -13,15 +13,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+from django.conf import settings
 from django.urls import include, path
 
 from mathesar import urls as mathesar_urls
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', include(mathesar_urls)),
 ]
+
+if settings.MATHESAR_DJANGO_ADMIN_ENABLED:
+    from django.contrib import admin
+    urlpatterns.insert(0, path('admin/', admin.site.urls))
 
 handler404 = 'mathesar.views.page_not_found_view'

@@ -21,7 +21,7 @@ def get_error_code(err: Exception) -> int:
     section of code that could throw the exception:
 
     - builtins: -31xxx
-    - psycopg or psycopg2: -30xxx
+    - psycopg: -30xxx
     - django: -29xxx
     - mathesar (our code): -28xxx
     - db (our code): -27xxx

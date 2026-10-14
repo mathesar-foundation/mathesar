@@ -21,6 +21,7 @@
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { recordSelectorContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
+  import { canViewDbPermissionsAndSettings } from '@mathesar/utils/preloadData';
   import {
     getTableAccentColor,
     getTableIcon,
@@ -43,6 +44,8 @@
   export let openEditTableModal: (_table: Table) => void;
   export let openTablePermissionsModal: (_table: Table) => void;
   export let condensed = false;
+
+  const showPermissionsModal = canViewDbPermissionsAndSettings();
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
@@ -134,12 +137,14 @@
           {isView ? $_('rename_view') : $_('rename_table')}
         </ButtonMenuItem>
       {/if}
-      <ButtonMenuItem
-        on:click={() => openTablePermissionsModal(table)}
-        icon={iconPermissions}
-      >
-        {isView ? $_('view_permissions') : $_('table_permissions')}
-      </ButtonMenuItem>
+      {#if showPermissionsModal}
+        <ButtonMenuItem
+          on:click={() => openTablePermissionsModal(table)}
+          icon={iconPermissions}
+        >
+          {isView ? $_('view_permissions') : $_('table_permissions')}
+        </ButtonMenuItem>
+      {/if}
     {/if}
     {#if !isView}
       <!-- Hiding option till deleting view is supported on the backend -->

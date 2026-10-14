@@ -21,18 +21,19 @@
   export let onDelete: (collaborator: Collaborator) => void;
 
   const routeContext = DatabaseSettingsRouteContext.get();
-  $: ({ configuredRoles, users } = $routeContext);
+  $: ({ configuredRoles, databaseRouteContext } = $routeContext);
+  $: ({ collaborationFeaturesContext } = databaseRouteContext);
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
 
-  $: user = $users.resolvedValue?.get(collaborator.userId);
+  $: user = collaborator.userInfo;
   $: configuredRoleId = collaborator.configuredRoleId;
   $: configuredRole = $configuredRoles.resolvedValue?.get($configuredRoleId);
-  $: userName = user ? user.full_name || user.username : '';
+  $: userName = user.full_name || user.username || String(user.id);
 
   async function deleteCollaborator() {
-    await $routeContext.deleteCollaborator(collaborator);
+    await collaborationFeaturesContext.deleteCollaborator(collaborator);
     onDelete(collaborator);
     toast.success($_('collaborator_removed_successfully'));
   }
@@ -40,12 +41,8 @@
 
 <GridTableCell>
   <div>
-    {#if user}
-      <div>{userName}</div>
-      <div>{user.email ?? ''}</div>
-    {:else}
-      {collaborator.userId}
-    {/if}
+    <div>{userName}</div>
+    <div>{user.email ?? ''}</div>
   </div>
 </GridTableCell>
 <GridTableCell>

@@ -4,7 +4,8 @@ Mathesar's **user data type** allows you to store references to Mathesar users d
 
 - User columns store Mathesar user IDs (integer values).
 - Users are displayed using their username, display name, or email address (configurable).
-- You can select users from a searchable list when editing cells.
+- Only users who are collaborators on the database can be stored in a user column.
+- You can select users from a searchable list of the database's collaborators when editing cells.
 - User columns support default values.
 - A table can designate one user column to automatically record who last edited each record.
 
@@ -30,13 +31,15 @@ To select a user for a user cell, click on the cell and use the user selection d
 
 ![Selecting a user from the searchable list](../assets/images/user-type/selecting-user.png)
 /// caption
-Clicking on a user cell opens a searchable dropdown list of all Mathesar users.
+Clicking on a user cell opens a searchable dropdown list of the database's collaborators.
 ///
 
 1. Click on an empty user cell (or double-click a cell with an existing value).
-2. A searchable list of Mathesar users will appear.
+2. A searchable list of the database's collaborators will appear.
 3. Type to search for users by their username, display name, or email.
 4. Click on a user to select them.
+
+Only users who are collaborators on the database that contains the table appear in this list. To make another Mathesar user selectable, add them as a collaborator on the database first.
 
 You can also clear a user value by selecting the cell and removing the selection.
 
@@ -89,6 +92,8 @@ To enable tracking:
 1. Select a user column from the dropdown. Choose **None** to disable tracking.
 
 Once set, Mathesar updates the chosen column to the current user on every add or edit — including edits made through form submissions. The tracked column is not manually editable in the UI.
+
+The acting user must be a collaborator on the database for the tracked column to be populated.
 
 Only one user column per table can be designated for tracking at a time. Any user-type column in the table is eligible.
 

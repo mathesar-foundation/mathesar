@@ -202,13 +202,14 @@ def test_get_attnum_from_name(engine_with_schema):
     table_name = "table_with_columns"
     zero_name = "colzero"
     one_name = "colone"
+    metadata = MetaData(schema=schema)
     table = Table(
         table_name,
-        MetaData(bind=engine, schema=schema),
+        metadata,
         Column(zero_name, Integer),
         Column(one_name, String),
     )
-    table.create()
+    table.create(bind=engine)
     table_oid = _get_oid_from_table(table_name, schema, engine)
     metadata = get_empty_metadata()
     column_zero_attnum = get_column_attnum_from_name(table_oid, zero_name, engine, metadata=metadata)

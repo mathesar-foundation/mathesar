@@ -1,6 +1,7 @@
 import type { Database } from '@mathesar/models/Database';
 import type { Role } from '@mathesar/models/Role';
 
+import type { CollaborationFeaturesContext } from './CollaborationFeaturesContext';
 import { getRouteContext, setRouteContext } from './utils';
 
 const contextKey = Symbol('database route store');
@@ -14,8 +15,14 @@ export class DatabaseRouteContext {
 
   currentRole;
 
-  constructor(database: Database) {
+  collaborationFeaturesContext;
+
+  constructor(
+    database: Database,
+    collaborationFeaturesContext: CollaborationFeaturesContext,
+  ) {
     this.database = database;
+    this.collaborationFeaturesContext = collaborationFeaturesContext;
     this.roles = database.constructRolesStore();
     this.underlyingDatabase = database.constructUnderlyingDatabaseStore();
     this.currentRole = database.constructCurrentRoleStore();
@@ -51,8 +58,14 @@ export class DatabaseRouteContext {
     this.roles.updateResolvedValue((r) => r.without(role.oid));
   }
 
-  static construct(database: Database) {
-    return setRouteContext(contextKey, new DatabaseRouteContext(database));
+  static construct(
+    database: Database,
+    collaborationFeaturesContext: CollaborationFeaturesContext,
+  ) {
+    return setRouteContext(
+      contextKey,
+      new DatabaseRouteContext(database, collaborationFeaturesContext),
+    );
   }
 
   static get() {

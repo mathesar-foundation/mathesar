@@ -23,6 +23,7 @@
   import { setLanguage } from '@mathesar/i18n';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     BooleanCheckbox,
     PasswordInput,
@@ -34,12 +35,17 @@
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
+  const commonData = preloadCommonData();
   $: userProfile = $userProfileStore;
 
   export let user: User | undefined = undefined;
 
   $: isUserUpdatingThemselves = userProfile && userProfile.id === user?.id;
   $: isNewUser = user === undefined;
+  $: isEmailLocked =
+    !!isUserUpdatingThemselves &&
+    !isNewUser &&
+    commonData.is_sso_login_required;
   $: fullName = optionalField(user?.full_name ?? '');
   $: username = requiredField(user?.username ?? '', [
     maxLength(
@@ -144,7 +150,20 @@
   </GridFormLabelRow>
 
   <GridFormLabelRow label={$_('email')}>
-    <Field field={email} />
+    <Field
+      field={email}
+      input={{
+        component: TextInput,
+        props: { disabled: isEmailLocked },
+      }}
+    />
+    {#if isEmailLocked}
+      <span class="info">
+        <Help>
+          <p>{$_('email_managed_by_sso')}</p>
+        </Help>
+      </span>
+    {/if}
   </GridFormLabelRow>
 
   <GridFormLabelRow label={`${$_('username')} *`}>
@@ -214,6 +233,11 @@
     display: flex;
     align-items: flex-end;
     gap: 0.7rem;
+  }
+  .info {
+    position: absolute;
+    top: 0.4em;
+    right: 0.5em;
   }
   .submit-section {
     --form-submit-margin: var(--lg3) 0 0 0;

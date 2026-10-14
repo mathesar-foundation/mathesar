@@ -2,7 +2,7 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import { iconLinkToRecordPage, iconModalRecordView } from '@mathesar/icons';
-import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
 import type { TabularData } from '@mathesar/stores/table-data';
 import { currentTablesMap } from '@mathesar/stores/tables';
 import RecordStore from '@mathesar/systems/record-view/RecordStore';
@@ -39,11 +39,10 @@ export function* viewRowRecord(p: {
     },
   });
 
-  const getRecordPageUrl = get(storeToGetRecordPageUrl);
-  const recordPageUrl = getRecordPageUrl({
-    tableId: p.tabularData.table.oid,
-    recordId: p.recordId,
-  });
+  const recordPageUrl = getRecordPageUrlByTable(
+    p.tabularData.table,
+    p.recordId,
+  );
   if (!recordPageUrl) return;
 
   yield hyperlinkMenuEntry({

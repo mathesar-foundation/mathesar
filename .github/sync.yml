@@ -3,16 +3,10 @@ mathesar-foundation/mathesar-infrastructure:
   - .github/workflows/stale.yml
 mathesar-foundation/mathesar-data-playground:
   - .github/workflows/toc.yml
-  - .github/workflows/stale.yml
-mathesar-foundation/mathesar-design:
-  - .github/workflows/toc.yml
-  - .github/workflows/stale.yml
 mathesar-foundation/mathesar-internal-crm:
   - .github/workflows/toc.yml
-  - .github/workflows/stale.yml
 mathesar-foundation/mathesar-private-notes:
   - .github/workflows/toc.yml
-  - .github/workflows/stale.yml
 mathesar-foundation/mathesar-scripts:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
@@ -21,4 +15,3 @@ mathesar-foundation/mathesar-website:
   - .github/workflows/stale.yml
 mathesar-foundation/mathesar-wiki:
   - .github/workflows/toc.yml
-  - .github/workflows/stale.yml

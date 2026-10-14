@@ -55,12 +55,23 @@
 
   .home-page-header {
     --AppSecondaryHeader__background: linear-gradient(
-      135deg in hsl,
-      var(--color-brand-15),
-      var(--color-database-15),
-      var(--color-schema-15),
-      var(--color-table-15)
-    );
+        90deg,
+        color-mix(in srgb, var(--color-brand), transparent 45%) 0%,
+        color-mix(in srgb, var(--color-database), transparent 58%) 38%,
+        color-mix(in srgb, var(--color-record-fk), transparent 70%) 72%,
+        transparent 100%
+      ),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-bg-base), var(--color-database) 14%) 0%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-bg-supporting) 26%)
+          36%,
+        color-mix(in srgb, var(--color-bg-base), var(--color-record-fk) 8%) 78%,
+        var(--color-bg-base) 100%
+      );
+    --AppSecondaryHeader__background-size: 100% 3px, 100% 100%;
+    --AppSecondaryHeader__background-position: left top, left top;
+    --AppSecondaryHeader__background-repeat: no-repeat;
   }
 
   .content {

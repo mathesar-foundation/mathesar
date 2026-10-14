@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import select
 from db.deprecated.utils import execute_pg_query
 from db.deprecated.functions.base import ColumnName, Noop, JsonArrayContains
 from db.deprecated.functions.packed import (
@@ -25,7 +26,7 @@ from db.deprecated.functions.operations.apply import apply_db_function_as_filter
 ])
 def test_json_array_filter_functions(json_table_obj, main_db_function, literal_param, expected_count):
     table, engine = json_table_obj
-    selectable = table.select()
+    selectable = select(table)
     json_column_name = "json_array"
     db_function = main_db_function([
         ColumnName([json_column_name]),
