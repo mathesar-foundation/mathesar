@@ -55,7 +55,7 @@ For more example datasets, see the [mathesar-data-playground](https://github.com
 
 ## API
 
-See our [API guide](./mathesar/api/README.md) for more information on API usage and development.
+See our [API documentation](https://docs.mathesar.org/latest/api/) for more information on API usage and development.
 
 ## Back end development
 
