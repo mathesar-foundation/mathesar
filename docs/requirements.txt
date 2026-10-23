@@ -1,7 +1,7 @@
 mike==2.1.3
 mkdocs==1.6.1
 mkdocs-autorefs==1.4.2
-mkdocs-material==9.6.14
+mkdocs-material==9.7.7
 mkdocs-redirects==1.2.2
 mkdocs-macros-plugin==1.3.7
 mkdocs-placeholder-plugin==0.3.1
