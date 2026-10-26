@@ -15,6 +15,7 @@ import type { RawColumnWithMetadata } from '@mathesar/api/rpc/columns';
 import type {
   Result as ApiRecord,
   FileManifest,
+  RecordIdentifier,
   RecordsListParams,
   RecordsResponse,
   RecordsSearchParams,
@@ -25,6 +26,7 @@ import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
 import {
   RpcError,
+  type RpcRequest,
   type RpcResponse,
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
@@ -100,6 +102,55 @@ function buildRecordFromRecipe(
   );
 }
 
+export function getRecordIdentifier(
+  record: ApiRecord,
+  pkColumns: RawColumnWithMetadata[],
+): RecordIdentifier | undefined {
+  if (pkColumns.length === 0) {
+    return undefined;
+  }
+
+  if (pkColumns.length === 1) {
+    const pkColumn = pkColumns[0];
+    return pkColumn ? record[String(pkColumn.id)] : undefined;
+  }
+
+  const recordIdentifier: Record<string, ResultValue> = {};
+  for (const column of pkColumns) {
+    const value = record[String(column.id)];
+    if (value === undefined) {
+      return undefined;
+    }
+    recordIdentifier[String(column.id)] = value;
+  }
+  return recordIdentifier;
+}
+
+export function isRecordReadyToCreate(
+  record: Record<string, unknown>,
+  columns: RawColumnWithMetadata[],
+): boolean {
+  return columns.every((column) => {
+    if (column.nullable || column.default) {
+      return true;
+    }
+    const value = record[String(column.id)];
+    return value !== undefined && value !== null;
+  });
+}
+
+function buildCreateRecordDefinition(
+  rowRecord: ApiRecord,
+  contextualFilters: Map<string, number | string>,
+  recordDef: Record<string, ResultValue>,
+): Record<string, unknown> {
+  return {
+    ...rowRecord,
+    ...Object.fromEntries(contextualFilters),
+    ...recordDef,
+  };
+}
+
 /**
  * A recipe to modify one existing row in the sheet.
  *
@@ -117,24 +168,26 @@ export interface RowModificationRecipe {
  */
 function validateRowModificationRecipe(
   { row, cells }: RowModificationRecipe,
-  pkColumn: RawColumnWithMetadata,
+  pkColumns: RawColumnWithMetadata[],
 ): void {
   // Validate that PK value exists if we're updating a saved row
-  const primaryKeyValue = row.record[pkColumn.id];
-  if (isPersistedRecordRow(row) && primaryKeyValue === undefined) {
+  const recordIdentifier = getRecordIdentifier(row.record, pkColumns);
+  if (isPersistedRecordRow(row) && recordIdentifier === undefined) {
     throw new Error(
       'Unable to update record for a row with a missing primary key value',
     );
   }
 
   // Validate against problems with directly editing PK values
-  const isEditingPk = cells.some((c) => c.columnId === String(pkColumn.id));
-  if (isEditingPk) {
+  const editedPkColumn = pkColumns.find((pkColumn) =>
+    cells.some((c) => c.columnId === String(pkColumn.id)),
+  );
+  if (editedPkColumn) {
     if (!isDraftRecordRow(row)) {
       // If modifying a PK cell in a saved record, then block editing.
       throw new Error('Unable to modify primary key cells of saved rows');
     }
-    if (pkColumn.default && pkColumn.default.is_dynamic) {
+    if (editedPkColumn.default && editedPkColumn.default.is_dynamic) {
       // If modifying a PK cell in a _draft_ row, and when the PK column has a
       // dynamic default value set, then block editing. This is because we
       // want the user to stick with the default PK value when creating new
@@ -492,12 +545,14 @@ export class RecordsData {
   }
 
   /**
-   * @throws Error if PK column does not exist
+   * @throws Error if PK columns do not exist
    */
-  private getPkColumOrError() {
-    const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (!pkColumn) throw new Error('Unable to update without primary key');
-    return pkColumn;
+  private getPkColumnsOrError() {
+    const pkColumns = get(this.columnsDataStore.pkColumns);
+    if (!pkColumns.length) {
+      throw new Error('Unable to update without primary key');
+    }
+    return pkColumns;
   }
 
   private updateSummaryStores(responses: RpcResponse<RecordsResponse>[]): void {
@@ -577,9 +632,9 @@ export class RecordsData {
       .map(({ row }) => row)
       .filter(isDraftRecordRow);
 
-    const pkColumn = this.getPkColumOrError();
+    const pkColumns = this.getPkColumnsOrError();
     const unifiedRecipes = [...modificationRecipes, ...convertedRecipes];
-    unifiedRecipes.forEach((r) => validateRowModificationRecipe(r, pkColumn));
+    unifiedRecipes.forEach((r) => validateRowModificationRecipe(r, pkColumns));
 
     this.newRecords.update((rows) => [...rows, ...additionalRows]);
 
@@ -606,7 +661,8 @@ export class RecordsData {
 
     const cellStatus = this.meta.cellModificationStatus;
     const { cellClientSideErrors, rowCreationStatus } = this.meta;
-    const pkColumn = this.getPkColumOrError();
+    const pkColumns = this.getPkColumnsOrError();
+    const columns = get(this.columnsDataStore.allColumns);
 
     const recipeMap = new Map(
       recipes.map((recipe) => [recipe.row.identifier, recipe]),
@@ -629,53 +685,92 @@ export class RecordsData {
       recipes.forEach(fn);
     }
 
-    function forEachCell(fn: (cellKey: string) => void) {
+    function forEachCell(
+      fn: (cellKey: string, recipe: RowModificationRecipe) => void,
+    ) {
       forEachRow((blueprint) =>
         blueprint.cells.forEach((cell) =>
-          fn(getCellKey(blueprint.row.identifier, cell.columnId)),
+          fn(getCellKey(blueprint.row.identifier, cell.columnId), blueprint),
         ),
       );
     }
 
     if (validateRecipes) {
-      forEachRow((r) => validateRowModificationRecipe(r, pkColumn));
+      forEachRow((r) => validateRowModificationRecipe(r, pkColumns));
     }
 
     const requestId = getGloballyUniqueId();
 
-    forEachCell((cellKey) => {
+    const locallyUpdatedDraftRowIds = new Set<RowKey>();
+    const requestRecipes: RowModificationRecipe[] = [];
+    const requests: RpcRequest<RecordsResponse>[] = [];
+
+    forEachRow((recipe) => {
+      const { row, cells } = recipe;
+      const recordDef = buildRecordFromRecipe(cells);
+      if (isDraftRecordRow(row)) {
+        const createRecordDef = buildCreateRecordDefinition(
+          row.record,
+          this.contextualFilters,
+          recordDef,
+        );
+        if (!isRecordReadyToCreate(createRecordDef, columns)) {
+          locallyUpdatedDraftRowIds.add(row.identifier);
+          return;
+        }
+        requestRecipes.push(recipe);
+        requests.push(
+          api.records.add({
+            ...this.apiContext,
+            record_def: createRecordDef,
+          }),
+        );
+        return;
+      }
+
+      const recordId = getRecordIdentifier(row.record, pkColumns);
+      if (recordId === undefined) {
+        throw new Error(
+          'Unable to update record for a row with a missing primary key value',
+        );
+      }
+      requestRecipes.push(recipe);
+      requests.push(
+        api.records.patch({
+          ...this.apiContext,
+          record_id: recordId,
+          record_def: recordDef,
+        }),
+      );
+    });
+
+    forEachCell((cellKey, { row }) => {
+      if (locallyUpdatedDraftRowIds.has(row.identifier)) {
+        cellStatus.set(cellKey, { state: 'success' });
+        cellClientSideErrors.delete(cellKey);
+        return;
+      }
       cellStatus.set(cellKey, { state: 'processing' });
       this.latestCellUpdateRequestId.set(cellKey, requestId);
     });
     forEachRow(({ row }) => {
       if (isDraftRecordRow(row)) {
-        rowCreationStatus.set(row.identifier, { state: 'processing' });
+        if (locallyUpdatedDraftRowIds.has(row.identifier)) {
+          rowCreationStatus.delete(row.identifier);
+        } else {
+          rowCreationStatus.set(row.identifier, { state: 'processing' });
+        }
       }
     });
 
-    const requests = recipes.map(({ row, cells }) => {
-      const recordDef = buildRecordFromRecipe(cells);
-      if (isDraftRecordRow(row)) {
-        return api.records.add({
-          ...this.apiContext,
-          record_def: {
-            ...row.record,
-            ...Object.fromEntries(this.contextualFilters),
-            ...recordDef,
-          },
-        });
-      }
-      return api.records.patch({
-        ...this.apiContext,
-        record_id: row.record[pkColumn.id],
-        record_def: recordDef,
-      });
-    });
+    if (!requests.length) {
+      return;
+    }
 
     const responses = await batchSend(requests);
     const responseMap = new Map(
       execPipe(
-        zip(recipes, responses),
+        zip(requestRecipes, responses),
         map(([blueprint, response]) => [
           blueprint.row.identifier,
           { blueprint, response },
@@ -765,18 +860,16 @@ export class RecordsData {
     if (!isPersistedRecordRow(row)) return;
 
     const { record } = row;
-    const pkColumn = get(this.columnsDataStore.pkColumn);
-    if (pkColumn === undefined) return;
-
-    const primaryKeyValue = record[pkColumn.id];
-    if (primaryKeyValue === undefined) return;
+    const pkColumns = get(this.columnsDataStore.pkColumns);
+    const recordId = getRecordIdentifier(record, pkColumns);
+    if (recordId === undefined) return;
 
     const { joining } = get(this.meta.recordsRequestParamsData);
 
     const response = await api.records
       .get({
         ...this.apiContext,
-        record_id: primaryKeyValue,
+        record_id: recordId,
         return_record_summaries: this.loadIntrinsicRecordSummaries,
         ...joining.recordsRequestParams(),
       })
@@ -874,12 +967,10 @@ export class RecordsData {
   }
 
   async duplicateRecord(sourceRow: RecordRow): Promise<void> {
-    const pkColumn = get(this.columnsDataStore.pkColumn);
+    const pkColumns = get(this.columnsDataStore.pkColumns);
 
     const fields = { ...sourceRow.record };
-    if (pkColumn) {
-      delete fields[pkColumn.id];
-    }
+    pkColumns.forEach((pkColumn) => delete fields[pkColumn.id]);
 
     const newRow = new DraftRecordRow({
       record: {

@@ -381,7 +381,8 @@ def get(
     Get a single record from a table by its primary key.
 
     Args:
-        record_id: The primary key value of the record to retrieve.
+        record_id: The primary key value of the record to retrieve. For composite
+            primary keys, this is an object keyed by primary-key attnum.
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
         joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
@@ -505,7 +506,8 @@ def patch(
 
     Args:
         record_def: An object representing the record to be modified.
-        record_id: The primary key value of the record to modify.
+        record_id: The primary key value of the record to modify. For composite
+            primary keys, this is an object keyed by primary-key attnum.
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
         return_record_summaries: Whether to return summaries of the

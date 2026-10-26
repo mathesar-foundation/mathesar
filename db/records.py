@@ -70,22 +70,35 @@ def get_record_from_table(
     Only data from which the user is granted `SELECT` is returned.
 
     Args:
-        record_id: The primary key value of the record.
+        record_id: The primary key value of the record. For composite primary keys,
+                   this is a dict keyed by primary-key attnum.
         table_id: The OID of the table whose record we'll get.
         joined_columns: An array of dict(s) that include an "alias" and "join_path" where,
             "join_path" represents linkages via a simple many-to-many mapping to a column in another table.
         return_record_summaries: Whether to return self record summaries.
         table_record_summary_templates: A dict of record summary templates, per table.
     """
-    result = db_conn.exec_msar_func(
+    func_name = 'get_record_from_table'
+    record_id_arg = record_id
+    exec_func = db_conn.exec_msar_func
+    param_types = None
+    if isinstance(record_id, dict):
+        func_name = 'get_record_from_table_by_pk'
+        record_id_arg = json.dumps(record_id)
+        exec_func = db_conn.exec_msar_func_with_param_types
+        param_types = ['oid', 'jsonb', 'jsonb', None, 'jsonb']
+    args = (
         conn,
-        'get_record_from_table',
+        func_name,
         table_oid,
-        record_id,
+        record_id_arg,
         _json_or_none(joined_columns),
         return_record_summaries,
         _json_or_none(table_record_summary_templates),
-    ).fetchone()[0]
+    )
+    if param_types is not None:
+        args = (conn, func_name, param_types, *args[2:])
+    result = exec_func(*args).fetchone()[0]
     return result
 
 
@@ -194,16 +207,32 @@ def patch_record_in_table(
     return_record_summaries=False,
     table_record_summary_templates=None,
 ):
-    """Update a record in a table."""
-    result = db_conn.exec_msar_func(
+    """
+    Update a record in a table.
+
+    Composite primary keys are represented by a dict keyed by primary-key attnum.
+    """
+    func_name = 'patch_record_in_table'
+    record_id_arg = record_id
+    exec_func = db_conn.exec_msar_func
+    param_types = None
+    if isinstance(record_id, dict):
+        func_name = 'patch_record_in_table_by_pk'
+        record_id_arg = json.dumps(record_id)
+        exec_func = db_conn.exec_msar_func_with_param_types
+        param_types = ['oid', 'jsonb', 'jsonb', None, 'jsonb']
+    args = (
         conn,
-        'patch_record_in_table',
+        func_name,
         table_oid,
-        record_id,
+        record_id_arg,
         json.dumps(record_def),
         return_record_summaries,
         _json_or_none(table_record_summary_templates),
-    ).fetchone()[0]
+    )
+    if param_types is not None:
+        args = (conn, func_name, param_types, *args[2:])
+    result = exec_func(*args).fetchone()[0]
     return result
 
 
