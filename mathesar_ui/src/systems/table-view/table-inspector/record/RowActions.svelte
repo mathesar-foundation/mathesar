@@ -1,102 +1,45 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
-  import {
-    iconDeleteMajor,
-    iconLinkToRecordPage,
-    iconModalRecordView,
-  } from '@mathesar/icons';
-  import { getRecordPageUrlByTable } from '@mathesar/routes/urls';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import {
-    extractPrimaryKeyValue,
-    getTabularDataStoreFromContext,
-  } from '@mathesar/stores/table-data';
-  import { toast } from '@mathesar/stores/toast';
-  import RecordStore from '@mathesar/systems/record-view/RecordStore';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { modalRecordViewContext } from '@mathesar/systems/record-view-modal/modalRecordViewContext';
-  import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
+  import { getRowActions } from '@mathesar/systems/table-view/row-actions/getRowActions';
   import { AnchorButton, Button, Icon } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
   const modalRecordView = modalRecordViewContext.get();
 
-  $: ({ table, selection, recordsData, columnsDataStore, canDeleteRecords } =
+  $: ({ selection, canDeleteRecords, canInsertRecords, canViewLinkedEntities } =
     $tabularData);
   $: selectedRowIds = $selection.rowIds;
-  $: selectedRowCount = selectedRowIds.size;
-  $: ({ columns } = columnsDataStore);
-  $: ({ selectableRowsMap } = recordsData);
-  $: recordId = (() => {
-    const id = takeFirstAndOnly(selectedRowIds);
-    if (!id) return undefined;
-    const row = $selectableRowsMap.get(id);
-    if (!row) return undefined;
-    try {
-      return extractPrimaryKeyValue(row.record, $columns);
-    } catch (e) {
-      return undefined;
-    }
-  })();
-  $: recordPageLink = getRecordPageUrlByTable(table, recordId);
-
-  function quickViewRecord() {
-    if (!modalRecordView) return;
-    if (recordId === undefined) return;
-    const recordStore = new RecordStore({
-      table,
-      recordPk: String(recordId),
-    });
-    modalRecordView.open(recordStore);
-  }
-
-  async function handleDeleteRecords() {
-    void confirmDelete({
-      identifierType: $_('multiple_records', {
-        values: { count: selectedRowCount },
-      }),
-      body: [
-        $_('deleted_records_cannot_be_recovered', {
-          values: { count: selectedRowCount },
-        }),
-        $_('are_you_sure_to_proceed'),
-      ],
-      onProceed: () => recordsData.deleteSelected(selectedRowIds),
-      onError: (e) => toast.fromError(e),
-      onSuccess: (count) => {
-        toast.success({
-          title: $_('count_records_deleted_successfully', {
-            values: { count },
-          }),
-        });
-      },
-    });
-  }
+  $: actions = getRowActions({
+    rowIds: selectedRowIds,
+    tabularData: $tabularData,
+    modalRecordView,
+    permissions: {
+      canDeleteRecords: $canDeleteRecords,
+      canInsertRecords: $canInsertRecords,
+      canViewLinkedEntities: $canViewLinkedEntities,
+    },
+  });
 </script>
 
 <div class="actions-container">
-  {#if recordPageLink}
-    <Button on:click={quickViewRecord} appearance="action">
-      <Icon {...iconModalRecordView} />
-      <span>{$_('quick_view_record')}</span>
-    </Button>
-
-    <AnchorButton href={recordPageLink} appearance="action">
-      <Icon {...iconLinkToRecordPage} />
-      <span>{$_('open_record')}</span>
-    </AnchorButton>
-  {/if}
-
-  <Button
-    on:click={handleDeleteRecords}
-    disabled={!$canDeleteRecords}
-    appearance="danger"
-  >
-    <Icon {...iconDeleteMajor} />
-    <span>
-      {$_('delete_records', { values: { count: selectedRowCount } })}
-    </span>
-  </Button>
+  {#each actions as action}
+    {#if action.type === 'hyperlink'}
+      <AnchorButton href={action.href} appearance="action">
+        {#if action.icon}<Icon {...action.icon} />{/if}
+        <span>{action.label}</span>
+      </AnchorButton>
+    {:else}
+      <Button
+        on:click={action.onClick}
+        disabled={action.disabled}
+        appearance={action.danger ? 'danger' : 'action'}
+      >
+        {#if action.icon}<Icon {...action.icon} />{/if}
+        <span>{action.label}</span>
+      </Button>
+    {/if}
+  {/each}
 </div>
 
 <style lang="scss">
