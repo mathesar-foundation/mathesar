@@ -20,6 +20,7 @@ type WithStatus<D> =
     };
 
 export interface BaseCommonData {
+  csrf_token: string;
   current_release_tag_name: string;
   supported_languages: Record<string, string>;
   is_authenticated: boolean;
