@@ -128,6 +128,7 @@ The database specified in this section is used to store Mathesar's internal data
 - **Additional information**: The following tools might help you convert the YAML syntax from `sso.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+    - [Escape JSON strings in the browser](https://jsonviewertool.com/json-escape)
 
 ### `OIDC_CONFIG_DICT` (optional, alias)
 
@@ -164,6 +165,7 @@ The database specified in this section is used to store Mathesar's internal data
 - **Additional information**: The following tools might help you convert the YAML syntax from `file_storage.yml` into the proper format:
     - [Convert YAML to JSON](https://onlineyamltools.com/convert-yaml-to-json)
     - [JSON stringify online](https://jsonformatter.org/json-stringify-online)
+    - [Escape JSON strings in the browser](https://jsonviewertool.com/json-escape)
 
 ## Datafiles storage configuration {: #datafiles-storage}
 
