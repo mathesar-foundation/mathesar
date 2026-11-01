@@ -11,26 +11,27 @@
    * This fork contains the following changes:
    * 1. Ported to Svelte, TS
    * 2. Stripped down to vertical variable size list essentials
-   * 3. Added perfect scrollbar, utilized it's event instead of native
+   * 3. Added perfect scrollbar
    */
-
-  const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
-  const DEFAULT_ESTIMATED_ITEM_SIZE = 30;
 </script>
 
 <script lang="ts">
   import PerfectScrollbar from 'perfect-scrollbar';
-  import {
-    afterUpdate,
-    createEventDispatcher,
-    onDestroy,
-    onMount,
-  } from 'svelte';
+  import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte';
+
+  import { createDebounce } from '@mathesar-component-library';
 
   import type { SheetVirtualRowsApi } from '../types';
 
-  import listUtils, { type ItemInfo, type Props } from './listUtils';
-  import { type Timeout, cancelTimeout, requestTimeout } from './timer';
+  import {
+    DEFAULT_ESTIMATED_ITEM_SIZE,
+    type Props,
+    SCROLLING_DEBOUNCE_INTERVAL,
+    defaultRowKey,
+    getEstimatedTotalSize,
+    getItemStyle,
+    getItemsInfo,
+  } from './listUtils';
 
   const dispatch = createEventDispatcher();
 
@@ -38,67 +39,45 @@
   export { classes as class };
   $: outerClass = ['virtual-list', 'outerElement', classes].join(' ');
 
+  type Row = $$Generic;
+
+  export let rows: Row[];
+
   export let estimatedItemSize: number = DEFAULT_ESTIMATED_ITEM_SIZE;
-  export let height: Props['height'];
-  export let scrollOffset: Props['scrollOffset'] = 0;
-  export let itemCount: Props['itemCount'];
-  export let overscanCount: Props['overscanCount'] = 5;
-  export let itemSize: Props['itemSize'] = (): number => estimatedItemSize;
+  export let height: Props<Row>['height'];
+  export let scrollOffset: Props<Row>['scrollOffset'] = 0;
+  export let overscanCount: Props<Row>['overscanCount'] = 3;
+  export let rowSize: Props<Row>['rowSize'] = (): number => estimatedItemSize;
+  export let rowKey: Props<Row>['rowKey'] = defaultRowKey;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
-  export let itemKey: Props['itemKey'] = listUtils.defaultItemKey;
   export let width: number | undefined = undefined;
 
-  let instanceProps: Props['instanceProps'] = {
+  let instanceProps: Props<Row>['instanceProps'] = {
     lastMeasuredIndex: -1,
     itemMetadataMap: {},
     styleCache: {},
   };
-  let isScrolling: Props['isScrolling'] = false;
-  let scrollDirection: Props['scrollDirection'] = 'forward';
-  let lastHeight: Props['height'] = height;
-
-  let items: ItemInfo['items'] = [];
-  let estimatedTotalSize: number;
+  let isScrolling = false;
 
   let outerRef: HTMLElement;
-
-  let requestResetIsScrolling = false;
-  let resetIsScrollingTimeoutId: Timeout | undefined;
-
-  let requestGetItemStyleCache = false;
   let psRef: PerfectScrollbar | undefined;
 
-  let itemInfo: ItemInfo;
-
-  function recalc(opts: Props) {
-    itemInfo = listUtils.getItemsInfo(opts);
-    items = itemInfo.items;
-    estimatedTotalSize = listUtils.getEstimatedTotalSize(opts);
-
-    // Refetch when container resizes
-    if (lastHeight !== height) {
-      lastHeight = height;
-      dispatch('refetch', itemInfo);
-    }
-  }
-
-  $: recalc({
-    itemSize,
+  $: props = {
+    rowSize,
     instanceProps,
-    isScrolling,
-    scrollDirection,
-    itemCount,
+    rows,
     overscanCount,
     scrollOffset,
     height,
-    itemKey,
+    rowKey,
     estimatedItemSize,
-  });
+  };
+  $: items = getItemsInfo(props).items;
+  $: estimatedTotalSize = getEstimatedTotalSize(props);
 
   $: innerStyle =
     `height:${estimatedTotalSize + paddingBottom}px;` +
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `width:${width ? `${width}px` : '100%'};` +
     `${isScrolling ? 'pointer-events:none;' : ''}`;
 
@@ -115,10 +94,34 @@
   // For direct updates on horizontalScrollOffset
   $: onHscrollChange(horizontalScrollOffset);
 
+  async function updateScrollbar() {
+    await tick();
+    psRef?.update();
+  }
+
+  const {
+    debounced: debounceUpdateScrollbar,
+    cancel: cancelUpdateScrollbarDebounder,
+  } = createDebounce(() => {
+    void updateScrollbar();
+  }, SCROLLING_DEBOUNCE_INTERVAL);
+
+  $: estimatedTotalSize, rows, height, width, debounceUpdateScrollbar();
+
+  const {
+    debounced: debounceSetIsScrollingPropToFalse,
+    cancel: cancelIsScrollingPropDebouncer,
+  } = createDebounce(() => {
+    isScrolling = false;
+  }, SCROLLING_DEBOUNCE_INTERVAL);
+
   function onScroll(event: Event): void {
+    isScrolling = true;
+    debounceSetIsScrollingPropToFalse();
+
     const { clientHeight, scrollHeight, scrollTop, scrollLeft } =
       event.target as HTMLElement;
-    requestResetIsScrolling = true;
+
     if (horizontalScrollOffset !== scrollLeft) {
       horizontalScrollOffset = scrollLeft;
       dispatch('h-scroll', horizontalScrollOffset);
@@ -133,18 +136,8 @@
         0,
         Math.min(scrollTop, scrollHeight - clientHeight),
       );
-      isScrolling = true;
-      scrollDirection = scrollOffset < newScrollOffset ? 'forward' : 'backward';
       scrollOffset = newScrollOffset;
       dispatch('scroll', scrollOffset);
-    }
-  }
-
-  function onHorizontalScroll(event: Event): void {
-    const { scrollLeft } = event.target as HTMLElement;
-    if (horizontalScrollOffset !== scrollLeft) {
-      horizontalScrollOffset = scrollLeft;
-      dispatch('h-scroll', horizontalScrollOffset);
     }
   }
 
@@ -158,62 +151,17 @@
       minScrollbarLength: 40,
       wheelPropagation: false,
     });
-
-    const callback = (ev: Event) => {
-      onScroll(ev);
-    };
-    const hCallback = (ev: Event) => {
-      onHorizontalScroll(ev);
-    };
-
-    dispatch('refetch', itemInfo);
-
-    outerRef.addEventListener('ps-scroll-y', callback);
-    outerRef.addEventListener('ps-scroll-x', hCallback);
+    outerRef.addEventListener('scroll', onScroll);
 
     return () => {
-      outerRef.removeEventListener('ps-scroll-y', callback);
-      outerRef.removeEventListener('ps-scroll-x', hCallback);
+      outerRef.removeEventListener('scroll', onScroll);
       psRef?.destroy();
     };
   });
 
-  const scrollStopped = () => {
-    resetIsScrollingTimeoutId = undefined;
-    isScrolling = false;
-    requestGetItemStyleCache = true;
-    dispatch('refetch', itemInfo);
-  };
-
-  function resetIsScrollingDebounced() {
-    if (resetIsScrollingTimeoutId !== undefined) {
-      cancelTimeout(resetIsScrollingTimeoutId);
-    }
-    resetIsScrollingTimeoutId = requestTimeout(
-      scrollStopped,
-      IS_SCROLLING_DEBOUNCE_INTERVAL,
-    );
-  }
-
-  // For updates that need to run after the tick, and dom is updated
-  afterUpdate(() => {
-    if (requestResetIsScrolling) {
-      requestResetIsScrolling = false;
-      resetIsScrollingDebounced();
-    }
-    if (requestGetItemStyleCache) {
-      requestGetItemStyleCache = false;
-      instanceProps.styleCache = {};
-    }
-    if (psRef) {
-      psRef.update();
-    }
-  });
-
   onDestroy(() => {
-    if (resetIsScrollingTimeoutId !== undefined) {
-      cancelTimeout(resetIsScrollingTimeoutId);
-    }
+    cancelIsScrollingPropDebouncer();
+    cancelUpdateScrollbarDebounder();
   });
 
   export function recalculateHeightsAfterIndex(index: number): void {
@@ -264,11 +212,16 @@
     }
   }
 
+  function getStyle(index: number) {
+    return getItemStyle(props, index);
+  }
+
   const api: SheetVirtualRowsApi = {
     scrollToTop,
     scrollToBottom,
     scrollToPosition,
     recalculateHeightsAfterIndex,
+    getStyle,
   };
 </script>
 
