@@ -1,0 +1,190 @@
+# Translators:
+# Timo Z, 2026
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-13 21:33+0000\n"
+"PO-Revision-Date: 2024-03-04 05:44+0000\n"
+"Last-Translator: Timo Z, 2026\n"
+"Language-Team: Chinese Simplified (https://app.transifex.com/mathesar/teams/172265/zh-Hans/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh-Hans\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: mathesar/templates/installation/complete_installation.html:3
+msgid "Finalizing Installation..."
+msgstr "正在完成安装……"
+
+#: mathesar/templates/installation/complete_installation.html:5
+#: mathesar/templates/installation/complete_installation.html:268
+msgid "Complete Installation"
+msgstr "完成安装"
+
+#: mathesar/templates/installation/complete_installation.html:129
+msgid "Finish Setting Up Mathesar"
+msgstr "完成 Mathesar 设置"
+
+#: mathesar/templates/installation/complete_installation.html:132
+msgid "Welcome to Mathesar!"
+msgstr "欢迎使用 Mathesar！"
+
+#: mathesar/templates/installation/complete_installation.html:135
+msgid ""
+"Create an Admin user to start using Mathesar. You can also choose to share "
+"anonymous data to help us improve."
+msgstr "创建管理员用户以开始使用 Mathesar。你也可以选择共享匿名数据，帮助我们改进。"
+
+#: mathesar/templates/installation/complete_installation.html:142
+msgid "Create Admin User"
+msgstr "创建管理员用户"
+
+#: mathesar/templates/installation/complete_installation.html:144
+msgid ""
+"Set up an Admin user account. This account will have full control over your "
+"Mathesar installation."
+msgstr "设置管理员用户账户。此账户将拥有对 Mathesar 安装的完全控制权。"
+
+#: mathesar/templates/installation/complete_installation.html:153
+#: mathesar/templates/registration/login.html:16
+msgid "Username"
+msgstr "用户名"
+
+#: mathesar/templates/installation/complete_installation.html:170
+#: mathesar/templates/registration/login.html:37
+msgid "Password"
+msgstr "密码"
+
+#: mathesar/templates/installation/complete_installation.html:180
+msgid "Confirm Password"
+msgstr "确认密码"
+
+#: mathesar/templates/installation/complete_installation.html:193
+msgid "Your password must be at least 8 characters long."
+msgstr "密码长度必须至少为 8 个字符。"
+
+#: mathesar/templates/installation/complete_installation.html:194
+msgid ""
+"We recommend a mix of letters, numbers, and symbols for added security."
+msgstr "建议混合使用字母、数字和符号，以提升安全性。"
+
+#: mathesar/templates/installation/complete_installation.html:228
+msgid "Support Mathesar's Growth"
+msgstr "支持 Mathesar 发展"
+
+#: mathesar/templates/installation/complete_installation.html:237
+msgid "Send a one-time confirmation to let us know you've installed Mathesar"
+msgstr "发送一次性确认，让我们知道你已安装 Mathesar"
+
+#: mathesar/templates/installation/complete_installation.html:240
+msgid "Let our open-source team know we have real users out there."
+msgstr "让我们的开源团队知道 Mathesar 有真实用户在使用。"
+
+#: mathesar/templates/installation/complete_installation.html:241
+msgid ""
+"No personal data is shared, just an acknowledgment of your installation."
+msgstr "不会共享个人数据，只会确认你已完成安装。"
+
+#: mathesar/templates/installation/complete_installation.html:243
+#: mathesar/templates/installation/complete_installation.html:259
+msgid "See what's shared."
+msgstr "查看共享内容。"
+
+#: mathesar/templates/installation/complete_installation.html:253
+msgid "Enable anonymous usage data collection"
+msgstr "启用匿名使用数据收集"
+
+#: mathesar/templates/installation/complete_installation.html:256
+msgid "Share anonymous usage data periodically to help us improve features."
+msgstr "定期共享匿名使用数据，帮助我们改进功能。"
+
+#: mathesar/templates/installation/complete_installation.html:257
+msgid ""
+"No personal data is collected, and you can change this setting anytime."
+msgstr "不会收集个人数据，并且你可以随时更改此设置。"
+
+#: mathesar/templates/mathesar/login_base.html:4
+msgid "Login"
+msgstr "登录"
+
+#: mathesar/templates/registration/login.html:3
+msgid "Logging In..."
+msgstr "正在登录……"
+
+#: mathesar/templates/registration/login.html:5
+msgid "Log in to Mathesar"
+msgstr "登录 Mathesar"
+
+#: mathesar/templates/registration/login.html:65
+msgid "Log In"
+msgstr "登录"
+
+#: mathesar/templates/registration/login.html:123
+#, python-format
+msgid ""
+"By logging in, you agree to the <a href=\"%(terms_of_service_url)s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Terms of Service</a> and "
+"acknowledge the <a href=\"%(privacy_policy_url)s\" target=\"_blank\" "
+"rel=\"noopener noreferrer\">Privacy Policy</a>."
+msgstr ""
+"登录即表示您同意<a href=\"%(terms_of_service_url)s\" target=\"_blank\" "
+"rel=\"noopener noreferrer\">服务条款</a>并知晓<a href=\"%(privacy_policy_url)s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">隐私政策</a>。"
+
+#: mathesar/templates/registration/login.html:130
+#, python-format
+msgid ""
+"By logging in, you agree to the <a href=\"%(terms_of_service_url)s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Terms of Service</a>."
+msgstr ""
+"登录即表示您同意<a href=\"%(terms_of_service_url)s\" target=\"_blank\" "
+"rel=\"noopener noreferrer\">服务条款</a>。"
+
+#: mathesar/templates/registration/login.html:135
+#, python-format
+msgid ""
+"By logging in, you acknowledge the <a href=\"%(privacy_policy_url)s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy</a>."
+msgstr ""
+"登录即表示您知晓<a href=\"%(privacy_policy_url)s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">隐私政策</a>。"
+
+#: mathesar/templates/users/password_reset_confirmation.html:4
+msgid "Update Your Password"
+msgstr "更新密码"
+
+#: mathesar/templates/users/password_reset_confirmation.html:8
+msgid ""
+"Since your password was set by an administrator, you need to update your "
+"password to continue."
+msgstr "由于你的密码是由管理员设置的，你需要更新密码才能继续。"
+
+#: mathesar/templates/users/password_reset_confirmation.html:14
+msgid "New Password"
+msgstr "新密码"
+
+#: mathesar/templates/users/password_reset_confirmation.html:41
+msgid "Confirm"
+msgstr "确认"
+
+#: mathesar/templates/users/password_reset_confirmation.html:67
+msgid "Update Password"
+msgstr "更新密码"
+
+#: mathesar/templates/users/password_reset_confirmation.html:71
+msgid "After updating your password, you'll need to log in again."
+msgstr "更新密码后，你需要重新登录。"
+
+#: mathesar/templates/users/password_reset_confirmation.html:76
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr "密码重置链接无效，可能是因为该链接已被使用。请重新请求密码重置。"
+
+#: mathesar/views/users/password_reset.py:24
+msgid "Change Default Password"
+msgstr "更改默认密码"

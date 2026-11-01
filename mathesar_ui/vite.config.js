@@ -46,6 +46,7 @@ export default defineConfig({
         es: './src/i18n/languages/es/index.ts',
         fr: './src/i18n/languages/fr/index.ts',
         ja: './src/i18n/languages/ja/index.ts',
+        'zh-hans': './src/i18n/languages/zh-hans/index.ts',
       },
     },
     outDir: '../mathesar/static/mathesar/',

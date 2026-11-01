@@ -345,6 +345,7 @@ LANGUAGES = [
     ('es', 'Spanish'),
     ('fr', 'French'),
     ('ja', 'Japanese'),
+    ('zh-hans', 'Simplified Chinese'),
 ]
 LOCALE_PATHS = [
     'translations'
