@@ -19,6 +19,7 @@ class ConfiguredDatabaseInfo(TypedDict):
             were confirmed to have been run on this database.
         needs_upgrade_attention: This is `True` if the SQL version isn't the
             same as the service version.
+        postgresql_version: The version of the PostgreSQL server.
         nickname: A optional user-configurable name for the database.
     """
     id: int
@@ -26,6 +27,7 @@ class ConfiguredDatabaseInfo(TypedDict):
     server_id: int
     last_confirmed_sql_version: str
     needs_upgrade_attention: bool
+    postgresql_version: Optional[int]
     nickname: Optional[str]
 
     @classmethod
@@ -36,6 +38,7 @@ class ConfiguredDatabaseInfo(TypedDict):
             server_id=model.server.id,
             last_confirmed_sql_version=model.last_confirmed_sql_version,
             needs_upgrade_attention=model.needs_upgrade_attention,
+            postgresql_version=model.postgresql_version,
             nickname=model.nickname,
         )
 
