@@ -18,6 +18,7 @@
   import {
     type InstallationSchema,
     getSampleSchemasFromInstallationSchemas,
+    shouldInstallTypes,
   } from './createDatabaseUtils';
   import InstallationSchemaSelector from './InstallationSchemaSelector.svelte';
 
@@ -26,7 +27,9 @@
 
   const databaseName = requiredField('');
   const nickname = optionalField<string | undefined>(undefined);
-  const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
+  const installationSchemas = optionalField<InstallationSchema[]>([
+    'mathesar_types',
+  ]);
   const form = makeForm({
     databaseName,
     nickname,
@@ -39,6 +42,7 @@
       nickname: $nickname ?? null,
       sample_data:
         getSampleSchemasFromInstallationSchemas($installationSchemas),
+      install_types: shouldInstallTypes($installationSchemas),
     });
     onSuccess(newDatabase);
   }

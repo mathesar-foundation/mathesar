@@ -45,6 +45,7 @@ def create_new(
     database: str,
     sample_data: list[str] = [],
     nickname: Optional[str] = None,
+    install_types: bool = True,
     **kwargs,
 ) -> DatabaseConnectionResult:
     """
@@ -67,13 +68,15 @@ def create_new(
             - 'museum_exhibits'
             - 'nonprofit_grants'
         nickname: An optional nickname for the database.
+        install_types: Whether to install Mathesar custom types (email,
+            uri, money, etc.) on the database. Defaults to True.
 
     Returns:
         Info about the objects resulting from calling the setup functions.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_new_database_for_user_on_internal_server(
-        database, nickname, user, sample_data=sample_data
+        database, nickname, user, sample_data=sample_data, install_types=install_types
     )
     return DatabaseConnectionResult.from_model(result)
 
@@ -89,6 +92,7 @@ def connect_existing(
     sample_data: list[str] = [],
     nickname: Optional[str] = None,
     sslmode: str = "prefer",
+    install_types: bool = True,
     **kwargs,
 ) -> DatabaseConnectionResult:
     """
@@ -117,6 +121,8 @@ def connect_existing(
         nickname: An optional nickname for the database.
         sslmode: SSL mode for the connection. One of 'disable', 'prefer',
             or 'require'. Defaults to 'prefer'.
+        install_types: Whether to install Mathesar custom types (email,
+            uri, money, etc.) on the database. Defaults to True.
 
     Returns:
         Info about the objects resulting from calling the setup functions.
@@ -132,5 +138,6 @@ def connect_existing(
         user,
         sample_data=sample_data,
         sslmode=sslmode,
+        install_types=install_types,
     )
     return DatabaseConnectionResult.from_model(result)

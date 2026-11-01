@@ -175,9 +175,14 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        databases.upgrade_sql,
-        "databases.upgrade_sql",
-        [user_is_superuser]
+        databases.install_types,
+        "databases.install_types",
+        [user_is_authenticated]
+    ),
+    (
+        databases.remove_mathesar_schemas,
+        "databases.remove_mathesar_schemas",
+        [user_is_authenticated]
     ),
 
     (

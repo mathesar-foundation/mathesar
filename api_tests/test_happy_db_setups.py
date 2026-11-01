@@ -95,6 +95,7 @@ def test_create_mathesar_db_internal(admin_rpc_call):
 
 def test_connect_mathesar_db_external(admin_rpc_call):
     global external_db_id
+    global external_server_id
     result = admin_rpc_call(
         'databases.setup.connect_existing',
         host=EXTERNAL_HOST,
@@ -109,31 +110,19 @@ def test_connect_mathesar_db_external(admin_rpc_call):
     assert external_db['needs_upgrade_attention'] is False
     assert result['configured_role']['name'] == 'data_admin'
     external_db_id = external_db['id']
+    external_server_id = result['server']['id']
+
+
+def test_install_types_on_external_db(admin_rpc_call):
+    admin_rpc_call(
+        'databases.install_types',
+        database_id=external_db_id,
+    )
 
 
 def test_list_databases_has_upgrade_status(admin_rpc_call):
     result = admin_rpc_call('databases.configured.list')
     assert all(d['needs_upgrade_attention'] is False for d in result)
-
-
-def test_batch_sql_update_no_error(admin_session):
-    admin_session.post(
-        RPC_ENDPOINT,
-        json=[
-            {
-                "jsonrpc": "2.0",
-                "method": "databases.upgrade_sql",
-                "id": "0",
-                "params": {"database_id": internal_db_id}
-            },
-            {
-                "jsonrpc": "2.0",
-                "method": "databases.upgrade_sql",
-                "id": "2",
-                "params": {"database_id": external_db_id}
-            },
-        ]
-    )
 
 
 def test_get_current_role(admin_rpc_call):
@@ -386,27 +375,38 @@ def test_schema_delete(admin_rpc_call):
     assert library_management_oid not in [s['oid'] for s in result]
 
 
-def test_disconnect_fails_when_dependencies(admin_session):
-    response = admin_session.post(
-        RPC_ENDPOINT,
-        json={
-            "jsonrpc": "2.0",
-            "method": "databases.configured.disconnect",
-            "params": {
-                "database_id": internal_db_id,
-            },
-            "id": 0,
-        },
-    ).json()
-    assert response['error']['code'] == -30035  # DependentObjectsStillExist
+def test_remove_mathesar_schemas(admin_rpc_call):
+    # The external DB was pre-seeded with legacy msar and __msar schemas
+    # via a docker-entrypoint-initdb.d script. schemas.list filters out
+    # internal schemas, so we can't verify presence/absence via that RPC;
+    # we verify the cleanup call succeeds end-to-end instead. The pgTAP
+    # suite (test_msar_remove.sql) covers SQL-level correctness.
+    admin_rpc_call(
+        'databases.remove_mathesar_schemas',
+        database_id=external_db_id,
+    )
+    # DB should still be present and usable after cleanup.
+    result = admin_rpc_call('databases.configured.list')
+    assert external_db_id in [d['id'] for d in result]
 
 
-def test_disconnect_succeeds_when_no_dependencies(admin_rpc_call):
+def test_disconnect_database(admin_rpc_call):
     admin_rpc_call(
         "databases.configured.disconnect",
         database_id=internal_db_id,
-        schemas_to_remove=["msar", "__msar"]
     )
     result = admin_rpc_call('databases.configured.list')
     assert len(result) == 1
     assert internal_db_id not in [d["id"] for d in result]
+
+
+def test_disconnect_last_db_with_server(admin_rpc_call):
+    admin_rpc_call(
+        "databases.configured.disconnect",
+        database_id=external_db_id,
+        disconnect_db_server=True,
+    )
+    result = admin_rpc_call('databases.configured.list')
+    assert len(result) == 0
+    servers = admin_rpc_call('servers.configured.list')
+    assert external_server_id not in [s['id'] for s in servers]

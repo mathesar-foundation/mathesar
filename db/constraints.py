@@ -12,7 +12,7 @@ def create_constraint(table_oid, constraint_obj_list, conn):
     Create a constraint using a psycopg connection.
 
     Args:
-        constraint_obj_list: (See __msar.process_con_def_jsonb for details)
+        constraint_obj_list: (See pg_temp.process_con_def_jsonb for details)
         conn: a psycopg connection
 
     Returns:

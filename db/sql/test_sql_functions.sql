@@ -1,7 +1,7 @@
 DROP EXTENSION IF EXISTS pgtap CASCADE;
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
--- msar.drop_columns -------------------------------------------------------------------------------
+-- pg_temp.drop_columns -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_drop_columns() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -16,7 +16,7 @@ DECLARE
 BEGIN
   PERFORM __setup_drop_columns();
   rel_id := 'atable'::regclass::oid;
-  PERFORM msar.drop_columns(rel_id, 1, 2);
+  PERFORM pg_temp.drop_columns(rel_id, 1, 2);
   RETURN NEXT has_column(
     'atable', 'dontdrop', 'Keeps correct columns'
   );
@@ -34,7 +34,7 @@ CREATE OR REPLACE FUNCTION test_drop_columns_ne_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE "12345" (bleh text, bleh2 numeric);
   RETURN NEXT throws_ok(
-    'SELECT msar.drop_columns(12345, 1);',
+    'SELECT pg_temp.drop_columns(12345, 1);',
     '42P01',
     'Relation with OID 12345 does not exist',
     'Column dropper throws when trying to drop from stupidly-named table'
@@ -46,7 +46,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.drop_table ---------------------------------------------------------------------------------
+-- pg_temp.drop_table ---------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_drop_tables() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -60,7 +60,7 @@ DECLARE
 BEGIN
   PERFORM __setup_drop_tables();
   rel_id := 'dropme'::regclass::oid;
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false);
+  PERFORM pg_temp.drop_table(tab_id => rel_id, cascade_ => false);
   RETURN NEXT hasnt_table('dropme', 'Drops table');
 END;
 $$ LANGUAGE plpgsql;
@@ -75,7 +75,7 @@ BEGIN
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
   RETURN NEXT throws_ok(
-    format('SELECT msar.drop_table(tab_id => %s, cascade_ => false);', rel_id),
+    format('SELECT pg_temp.drop_table(tab_id => %s, cascade_ => false);', rel_id),
     '2BP01',
     'cannot drop table dropme because other objects depend on it',
     'Table dropper throws for dependent objects'
@@ -92,7 +92,7 @@ BEGIN
   rel_id := 'dropme'::regclass::oid;
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => true);
+  PERFORM pg_temp.drop_table(tab_id => rel_id, cascade_ => true);
   RETURN NEXT hasnt_table('dropme', 'Drops table with dependent using CASCADE');
 END;
 $$ LANGUAGE plpgsql;
@@ -101,7 +101,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_table_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_tables();
-  PERFORM msar.drop_table(
+  PERFORM pg_temp.drop_table(
     tab_id => 'dropme'::regclass::oid,
     cascade_ => false
   );
@@ -113,7 +113,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_table_name_missing_no_if_exists() RETURNS SETOF TEXT AS $$
 BEGIN
   RETURN NEXT throws_ok(
-    'SELECT msar.drop_table(''doesntexist''::regclass::oid, false);',
+    'SELECT pg_temp.drop_table(''doesntexist''::regclass::oid, false);',
     '42P01',
     'relation "doesntexist" does not exist',
     'Table dropper throws for missing table'
@@ -122,7 +122,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.build_type_text ----------------------------------------------------------------------------
+-- pg_temp.build_type_text ----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_build_type_text() RETURNS SETOF TEXT AS $$/*
 Note that many type building tests are in the column adding section, to make sure the strings the
@@ -130,40 +130,40 @@ function writes are as expected, and also valid type definitions.
 */
 
 BEGIN
-  RETURN NEXT is(msar.build_type_text('{}'), 'text');
-  RETURN NEXT is(msar.build_type_text(null), 'text');
-  RETURN NEXT is(msar.build_type_text('{"name": "varchar"}'), 'character varying');
-  CREATE DOMAIN msar.testtype AS text CHECK (value LIKE '%test');
+  RETURN NEXT is(pg_temp.build_type_text('{}'), 'text');
+  RETURN NEXT is(pg_temp.build_type_text(null), 'text');
+  RETURN NEXT is(pg_temp.build_type_text('{"name": "varchar"}'), 'character varying');
+  CREATE DOMAIN pg_temp.testtype AS text CHECK (value LIKE '%test');
   RETURN NEXT is(
-    msar.build_type_text('{"schema": "msar", "name": "testtype"}'), 'msar.testtype'
+    pg_temp.build_type_text('{"schema": "pg_temp", "name": "testtype"}'), 'testtype'
   );
 END;
 $$ LANGUAGE plpgsql;
 
 
--- __msar.process_col_def_jsonb ----------------------------------------------------------------------
+-- pg_temp.process_col_def_jsonb ----------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_process_col_def_jsonb() RETURNS SETOF TEXT AS $f$
 BEGIN
   RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
+    pg_temp.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
     ARRAY[
       ('"Column 1"', 'text', null, null, null, null),
       ('"Column 2"', 'text', null, null, null, null)
-    ]::__msar.col_def[],
+    ]::pg_temp.col_def[],
     'Should not add default "id" column when create_id is false'
   );
   RETURN NEXT is(
-    __msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
+    pg_temp.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
     ARRAY[
       ('"Column 1"', 'text', null, null, null, '''Some comment''')
-    ]::__msar.col_def[],
+    ]::pg_temp.col_def[],
     'Comments should be sanitized'
   );
 END;
 $f$ LANGUAGE plpgsql;
 
--- msar.add_pkey_column -------------------------------------------------------------
+-- pg_temp.add_pkey_column -------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_add_pkey_col() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -177,7 +177,7 @@ CREATE OR REPLACE FUNCTION test_add_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_add_pkey_col();
   RETURN NEXT is(
-    msar.add_pkey_column(
+    pg_temp.add_pkey_column(
       tab_id => 'add_pkey_col_testable'::regclass,
       pkey_type => 'UUIDv4',
       drop_old_pkey_col => true,
@@ -194,7 +194,7 @@ CREATE OR REPLACE FUNCTION test_add_pkey_column_identity() RETURNS SETOF TEXT AS
 BEGIN
   PERFORM __setup_add_pkey_col();
   RETURN NEXT is(
-    msar.add_pkey_column(
+    pg_temp.add_pkey_column(
       tab_id => 'add_pkey_col_testable'::regclass,
       pkey_type => 'IDENTITY',
       drop_old_pkey_col => true,
@@ -211,7 +211,7 @@ CREATE OR REPLACE FUNCTION test_add_pkey_column_collision() RETURNS SETOF TEXT A
 BEGIN
   PERFORM __setup_add_pkey_col();
   RETURN NEXT is(
-    msar.add_pkey_column(
+    pg_temp.add_pkey_column(
       tab_id => 'add_pkey_col_testable'::regclass,
       pkey_type => 'IDENTITY',
       drop_old_pkey_col => true,
@@ -220,7 +220,7 @@ BEGIN
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'col1 1', 'rename when collision');
   RETURN NEXT is(
-    msar.add_pkey_column(
+    pg_temp.add_pkey_column(
       tab_id => 'add_pkey_col_testable'::regclass,
       pkey_type => 'IDENTITY',
       drop_old_pkey_col => true,
@@ -231,7 +231,7 @@ BEGIN
     'add_pkey_col_testable', 'col1 1', 'do not rename when collision with previous dropped pkey'
   );
   RETURN NEXT is(
-    msar.add_pkey_column(
+    pg_temp.add_pkey_column(
       tab_id => 'add_pkey_col_testable'::regclass,
       pkey_type => 'IDENTITY',
       drop_old_pkey_col => false,
@@ -250,14 +250,14 @@ CREATE OR REPLACE FUNCTION test_add_pkey_column_defaults_collide() RETURNS SETOF
 BEGIN
   PERFORM __setup_add_pkey_col();
   RETURN NEXT is(
-    msar.add_pkey_column(
+    pg_temp.add_pkey_column(
       tab_id => 'add_pkey_col_testable'::regclass,
       pkey_type => 'IDENTITY'
     ), 3, 'Should return correct attnum'
   );
   RETURN NEXT col_is_pk('add_pkey_col_testable', 'id');
   RETURN NEXT is(
-    msar.add_pkey_column(
+    pg_temp.add_pkey_column(
       tab_id => 'add_pkey_col_testable'::regclass,
       pkey_type => 'IDENTITY'
     ), 4, 'Should return correct attnum'
@@ -271,7 +271,7 @@ CREATE OR REPLACE FUNCTION test_add_pkey_column_malformed() RETURNS SETOF TEXT A
 BEGIN
   PERFORM __setup_add_pkey_col();
   RETURN NEXT throws_like(
-    $s$SELECT msar.add_pkey_column(
+    $s$SELECT pg_temp.add_pkey_column(
         tab_id => 'add_pkey_col_testable'::regclass,
         pkey_type => 'ident',
         drop_old_pkey_col => false
@@ -282,7 +282,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- msar.set_pkey_column ----------------------------------------------------------------------------
+-- pg_temp.set_pkey_column ----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_set_pkey_col() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -302,7 +302,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_set_pkey_column_numeric() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_set_pkey_col();
-  PERFORM msar.set_pkey_column(
+  PERFORM pg_temp.set_pkey_column(
     tab_id => 'set_pkey_col_testable'::regclass,
     col_id => 2,
     default_type => 'IDENTITY',
@@ -320,7 +320,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_set_pkey_column_identity_reuse() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_set_pkey_col();
-  PERFORM msar.set_pkey_column(
+  PERFORM pg_temp.set_pkey_column(
     tab_id => 'set_pkey_col_testable'::regclass,
     col_id => 2,
     default_type => 'IDENTITY',
@@ -329,7 +329,7 @@ BEGIN
   RETURN NEXT col_is_pk('set_pkey_col_testable', 'col1');
   RETURN NEXT col_type_is('set_pkey_col_testable', 'col1', 'integer');
   RETURN NEXT columns_are('set_pkey_col_testable', ARRAY['id', 'col1', 'col2', 'Column 3']);
-  PERFORM msar.set_pkey_column(
+  PERFORM pg_temp.set_pkey_column(
     tab_id => 'set_pkey_col_testable'::regclass,
     col_id => 1,
     default_type => 'IDENTITY',
@@ -347,7 +347,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_set_pkey_column_uuid() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_set_pkey_col();
-  PERFORM msar.set_pkey_column(
+  PERFORM pg_temp.set_pkey_column(
     tab_id => 'set_pkey_col_testable'::regclass,
     col_id => 4,
     default_type => 'UUIDv4',
@@ -364,7 +364,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- msar.add_columns --------------------------------------------------------------------------------
+-- pg_temp.add_columns --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_add_columns() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -382,7 +382,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   RETURN NEXT is(
-    msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4}'::smallint[]
+    pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4}'::smallint[]
   );
   RETURN NEXT col_not_null('add_col_testable', 'tcol');
   RETURN NEXT col_type_is('add_col_testable', 'tcol', 'text');
@@ -400,7 +400,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "text"}}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_is_null('add_col_testable', 'Column');
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'text');
   RETURN NEXT col_hasnt_default('add_col_testable', 'Column');
@@ -419,10 +419,10 @@ BEGIN
   PERFORM __setup_add_columns();
   tab_id := 'add_col_testable'::regclass::oid;
   col_create_arr := format('[{"name": "%s", "description": "%s"}]', col_name, description);
-  PERFORM msar.add_columns(tab_id, col_create_arr);
-  col_id := msar.get_attnum(tab_id, col_name);
+  PERFORM pg_temp.add_columns(tab_id, col_create_arr);
+  col_id := pg_temp.get_attnum(tab_id, col_name);
   RETURN NEXT is(
-    msar.col_description(tab_id, col_id),
+    pg_temp.col_description(tab_id, col_id),
     description
   );
 END;
@@ -439,7 +439,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_columns();
   RETURN NEXT is(
-    msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4, 5}'::smallint[]
+    pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4, 5}'::smallint[]
   );
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'text');
   RETURN NEXT col_type_is('add_col_testable', 'Column 1', 'numeric');
@@ -452,7 +452,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "numeric"}, "default": 3.14159}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric');
   RETURN NEXT col_default_is('add_col_testable', 'Column', 3.14159);
 END;
@@ -464,7 +464,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "numeric", "options": {"precision": 3}}}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric(3,0)');
 END;
 $f$ LANGUAGE plpgsql;
@@ -477,7 +477,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric(3,2)');
 END;
 $f$ LANGUAGE plpgsql;
@@ -488,7 +488,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "NUMERIC"}}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'numeric');
 END;
 $f$ LANGUAGE plpgsql;
@@ -499,7 +499,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "varchar", "options": {"length": 128}}}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'character varying(128)');
 END;
 $f$ LANGUAGE plpgsql;
@@ -509,7 +509,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"precision": 6}}}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval(6)');
 END;
 $f$ LANGUAGE plpgsql;
@@ -520,7 +520,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"fields": "year"}}}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval year');
 END;
 $f$ LANGUAGE plpgsql;
@@ -533,7 +533,7 @@ DECLARE
   $j$;
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'interval second(3)');
 END;
 $f$ LANGUAGE plpgsql;
@@ -546,7 +546,7 @@ DECLARE
   $j$;
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'timestamp(3) without time zone');
 END;
 $f$ LANGUAGE plpgsql;
@@ -560,7 +560,7 @@ DECLARE
   col_create_arr jsonb := '[{"type": {"name": "timestamp"}, "default": "now()::timestamp"}]';
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
   RETURN NEXT col_type_is('add_col_testable', 'Column', 'timestamp without time zone');
   RETURN NEXT col_default_is(
     'add_col_testable', 'Column', '(now())::timestamp without time zone'
@@ -581,7 +581,7 @@ DECLARE
   $j$;
 BEGIN
   PERFORM __setup_add_columns();
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => false);
+  PERFORM pg_temp.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => false);
   RETURN NEXT has_table('add_col_testable');
 END;
 $f$ LANGUAGE plpgsql;
@@ -592,7 +592,7 @@ BEGIN
   PERFORM __setup_add_columns();
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.add_columns(tab_id => %s, col_defs => ''%s'');',
+      'SELECT pg_temp.add_columns(tab_id => %s, col_defs => ''%s'');',
       'add_col_testable'::regclass::oid,
       '[{"type": {"name": "taxt"}}]'::jsonb
     ),
@@ -602,7 +602,7 @@ BEGIN
   RETURN NEXT CASE WHEN pg_version_num() < 150000
     THEN throws_ok(
       format(
-        'SELECT msar.add_columns(tab_id => %s, col_defs => ''%s'');',
+        'SELECT pg_temp.add_columns(tab_id => %s, col_defs => ''%s'');',
         'add_col_testable'::regclass::oid,
         '[{"type": {"name": "numeric", "options": {"scale": 23, "precision": 3}}}]'::jsonb
       ),
@@ -615,7 +615,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- msar.copy_column --------------------------------------------------------------------------------
+-- pg_temp.copy_column --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_copy_column() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -642,7 +642,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_copies_unique() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 2::smallint, 'col1 supercopy', true, true
   );
   RETURN NEXT col_type_is('copy_coltest', 'col1 supercopy', 'character varying');
@@ -664,7 +664,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_copies_unique_and_nnull() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 3::smallint, null, true, true
   );
   RETURN NEXT col_type_is('copy_coltest', 'col2 1', 'character varying');
@@ -686,7 +686,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_false_copy_data_and_con() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 3::smallint, null, false, false
   );
   RETURN NEXT col_type_is('copy_coltest', 'col2 1', 'character varying');
@@ -703,7 +703,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_num_options_static_default() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 4::smallint, null, true, false
   );
   RETURN NEXT col_type_is('copy_coltest', 'col3 1', 'numeric(5,3)');
@@ -720,7 +720,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_nullable_dynamic_default() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 5::smallint, null, true, false
   );
   RETURN NEXT col_type_is('copy_coltest', 'col4 1', 'timestamp without time zone');
@@ -733,7 +733,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_non_null_dynamic_default() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 6::smallint, null, true, true
   );
   RETURN NEXT col_type_is('copy_coltest', 'col5 1', 'timestamp without time zone');
@@ -746,7 +746,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_interval_notation() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 7::smallint, null, false, false
   );
   RETURN NEXT col_type_is('copy_coltest', 'col6 1', 'interval second(3)');
@@ -757,7 +757,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_space_name() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 8::smallint, null, false, false
   );
   RETURN NEXT col_type_is('copy_coltest', 'col space 1', 'character varying');
@@ -768,7 +768,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_pkey() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 1::smallint, null, true, true
   );
   RETURN NEXT col_type_is('copy_coltest', 'id 1', 'integer');
@@ -785,18 +785,18 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_copy_column_increment_name() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_copy_column();
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 2::smallint, null, true, true
   );
   RETURN NEXT has_column('copy_coltest', 'col1 1');
-  PERFORM msar.copy_column(
+  PERFORM pg_temp.copy_column(
     'copy_coltest'::regclass::oid, 2::smallint, null, true, true
   );
   RETURN NEXT has_column('copy_coltest', 'col1 2');
 END;
 $f$ LANGUAGE plpgsql;
 
--- msar.add_constraints ----------------------------------------------------------------------------
+-- pg_temp.add_constraints ----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_add_pkey() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -822,7 +822,7 @@ DECLARE
   deferrable_ boolean;
 BEGIN
   PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
     WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND contype = 'p';
@@ -839,7 +839,7 @@ DECLARE
   created_name text;
 BEGIN
   PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
     WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1}' AND contype = 'p';
@@ -854,7 +854,7 @@ DECLARE
   created_name text;
 BEGIN
   PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
   created_name := conname FROM pg_constraint
     WHERE conrelid='add_pkeytest'::regclass::oid AND conkey='{1, 2}';
@@ -868,7 +868,7 @@ DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": ["col1"]}]';
 BEGIN
   PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
 END;
 $f$ LANGUAGE plpgsql;
@@ -879,7 +879,7 @@ DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": ["col1", "col2"]}]';
 BEGIN
   PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
 END;
 $f$ LANGUAGE plpgsql;
@@ -890,7 +890,7 @@ DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [1, "col2"]}]';
 BEGIN
   PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
 END;
 $f$ LANGUAGE plpgsql;
@@ -937,7 +937,7 @@ BEGIN
       }
     ]$j$, 'add_fk_users'::regclass::oid
   );
-  PERFORM msar.add_constraints('add_fk_comments'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_fk_comments'::regclass::oid, con_create_arr);
   RETURN NEXT fk_ok(
     'public', 'add_fk_comments', 'user_id', 'public', 'add_fk_users', 'id'
   );
@@ -971,7 +971,7 @@ BEGIN
     ]$j$,
     'add_fk_users'::regclass::oid, $1, $2, $3
   );
-  PERFORM msar.add_constraints('add_fk_comments'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_fk_comments'::regclass::oid, con_create_arr);
   RETURN results_eq(
     $h$
     SELECT conname, confupdtype, confdeltype, confmatchtype
@@ -1079,7 +1079,7 @@ DECLARE
   con_create_arr jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [2]}]';
 BEGIN
   PERFORM __setup_add_unique();
-  PERFORM msar.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_unique('add_unique_con', ARRAY['col1']);
 END;
 $f$ LANGUAGE plpgsql;
@@ -1090,7 +1090,7 @@ DECLARE
   con_create_arr jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [2, 3]}]';
 BEGIN
   PERFORM __setup_add_unique();
-  PERFORM msar.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_unique('add_unique_con', ARRAY['col1', 'col2']);
 END;
 $f$ LANGUAGE plpgsql;
@@ -1102,10 +1102,10 @@ DECLARE
   con_create_arr2 jsonb := '[{"name": "myuniqcons", "type": "u", "columns": [3]}]';
 BEGIN
   PERFORM __setup_add_unique();
-  PERFORM msar.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
+  PERFORM pg_temp.add_constraints('add_unique_con'::regclass::oid, con_create_arr);
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.add_constraints(%s, ''%s'');', 'add_unique_con'::regclass::oid, con_create_arr
+      'SELECT pg_temp.add_constraints(%s, ''%s'');', 'add_unique_con'::regclass::oid, con_create_arr
     ),
     '42P07',
     'relation "myuniqcons" already exists',
@@ -1136,7 +1136,7 @@ BEGIN
   orig_oid := oid
     FROM pg_constraint
     WHERE conrelid='copy_unique_con'::regclass::oid AND conname='olduniqcon';
-  PERFORM msar.copy_constraint(orig_oid, 4::smallint, 5::smallint);
+  PERFORM pg_temp.copy_constraint(orig_oid, 4::smallint, 5::smallint);
   RETURN NEXT col_is_unique('copy_unique_con', ARRAY['col1', 'col2', 'col4']);
 END;
 $f$ LANGUAGE plpgsql;
@@ -1149,7 +1149,7 @@ BEGIN
   PERFORM __setup_add_pkey();
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.add_constraints(%s, ''%s'');',
+      'SELECT pg_temp.add_constraints(%s, ''%s'');',
       'add_pkeytest'::regclass::oid,
       '[{"type": "p", "columns": [7]}]'::jsonb
     ),
@@ -1159,7 +1159,7 @@ BEGIN
   );
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.add_constraints(%s, ''%s'');', 234, '[{"type": "p", "columns": [1]}]'::jsonb
+      'SELECT pg_temp.add_constraints(%s, ''%s'');', 234, '[{"type": "p", "columns": [1]}]'::jsonb
     ),
     '42601',
     'syntax error at or near "234"',
@@ -1167,7 +1167,7 @@ BEGIN
   );
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.add_constraints(%s, ''%s'');',
+      'SELECT pg_temp.add_constraints(%s, ''%s'');',
       'add_pkeytest'::regclass::oid,
       '[{"type": "k", "columns": [1]}]'::jsonb
     ),
@@ -1177,7 +1177,7 @@ BEGIN
   );
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.add_constraints(%s, ''%s'');',
+      'SELECT pg_temp.add_constraints(%s, ''%s'');',
       'add_pkeytest'::regclass::oid,
       '[{"type": "p", "columns": [1, "col1"]}]'::jsonb
     ),
@@ -1189,7 +1189,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- msar.drop_constraint ---------------------------------------------------------------------------
+-- pg_temp.drop_constraint ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_drop_constraint() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -1212,12 +1212,12 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_constraint() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_constraint();
-  PERFORM msar.drop_constraint(
+  PERFORM pg_temp.drop_constraint(
     sch_name => 'public',
     tab_name => 'category',
     con_name => 'uq_cat'
   );
-  PERFORM msar.drop_constraint(
+  PERFORM pg_temp.drop_constraint(
     sch_name => 'public',
     tab_name => 'orders',
     con_name => 'fk_cat'
@@ -1238,11 +1238,11 @@ BEGIN
   PERFORM __setup_drop_constraint();
   uq_cat_oid := oid FROM pg_constraint WHERE conname='uq_cat';
   fk_cat_oid := oid FROM pg_constraint WHERE conname='fk_cat';
-  PERFORM msar.drop_constraint(
+  PERFORM pg_temp.drop_constraint(
     tab_id => 'category'::regclass::oid,
     con_id => uq_cat_oid
   );
-  PERFORM msar.drop_constraint(
+  PERFORM pg_temp.drop_constraint(
     tab_id => 'orders'::regclass::oid,
     con_id => fk_cat_oid
   );
@@ -1254,7 +1254,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.create_link -------------------------------------------------------------------------------
+-- pg_temp.create_link -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_link_tables() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -1279,7 +1279,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_foreign_key_column() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.add_foreign_key_column(
+  PERFORM pg_temp.add_foreign_key_column(
     frel_id => 'actors'::regclass::oid,
     rel_id => 'movies'::regclass::oid,
     col_name => 'act_id'
@@ -1294,7 +1294,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_one_to_one_link() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.add_foreign_key_column(
+  PERFORM pg_temp.add_foreign_key_column(
     frel_id => 'actors'::regclass::oid,
     rel_id => 'movies'::regclass::oid,
     col_name => 'act_id',
@@ -1311,7 +1311,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_mapping_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.add_mapping_table(
+  PERFORM pg_temp.add_mapping_table(
     sch_id => 'public'::regnamespace::oid,
     tab_name => 'movies_actors',
     mapping_columns => jsonb_build_array(
@@ -1330,14 +1330,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.schema_ddl --------------------------------------------------------------------------------
+-- pg_temp.schema_ddl --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_create_schema_without_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar', NULL) ->> 'oid' INTO sch_oid;
+  SELECT pg_temp.create_schema('foo bar', NULL) ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
-  RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
+  RETURN NEXT is(sch_oid, pg_temp.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), NULL);
 END;
 $$ LANGUAGE plpgsql;
@@ -1346,9 +1346,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_with_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar', NULL, 'yay') ->> 'oid' INTO sch_oid;
+  SELECT pg_temp.create_schema('foo bar', NULL, 'yay') ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
-  RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
+  RETURN NEXT is(sch_oid, pg_temp.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), 'yay');
 END;
 $$ LANGUAGE plpgsql;
@@ -1357,8 +1357,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_that_already_exists() RETURNS SETOF TEXT AS $t$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar', NULL) ->> 'oid' INTO sch_oid;
-  RETURN NEXT throws_ok($$SELECT msar.create_schema('foo bar', NULL)$$, '42P06');
+  SELECT pg_temp.create_schema('foo bar', NULL) ->> 'oid' INTO sch_oid;
+  RETURN NEXT throws_ok($$SELECT pg_temp.create_schema('foo bar', NULL)$$, '42P06');
 END;
 $t$ LANGUAGE plpgsql;
 
@@ -1373,7 +1373,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_schema_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_schema();
-  PERFORM msar.drop_schemas(ARRAY['drop_test_schema'::regnamespace::oid]);
+  PERFORM pg_temp.drop_schemas(ARRAY['drop_test_schema'::regnamespace::oid]);
   RETURN NEXT hasnt_schema('drop_test_schema');
 END;
 $$ LANGUAGE plpgsql;
@@ -1384,7 +1384,7 @@ BEGIN
   PERFORM __setup_drop_schema();
   RETURN NEXT throws_ok(
     $d$
-      SELECT msar.drop_schemas(ARRAY[0::oid])
+      SELECT pg_temp.drop_schemas(ARRAY[0::oid])
     $d$,
     '3F000'
   );
@@ -1424,7 +1424,7 @@ BEGIN
   PERFORM __setup_schemas_with_dependent_obj();
   RETURN NEXT set_has(
       format(
-        'SELECT obj_name, obj_kind FROM msar.get_schema_objects_table(ARRAY[%L::regnamespace])',
+        'SELECT obj_name, obj_kind FROM pg_temp.get_schema_objects_table(ARRAY[%L::regnamespace])',
         'people'::regnamespace
       ),
       $v$VALUES
@@ -1439,7 +1439,7 @@ BEGIN
         ('directors', 'TABLE'),
         ('directors_pkey', 'INDEX')
       $v$,
-      'msar.get_schema_objects_table() should return objects for single schema'
+      'pg_temp.get_schema_objects_table() should return objects for single schema'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -1450,7 +1450,7 @@ BEGIN
   PERFORM __setup_schemas_with_dependent_obj();
   RETURN NEXT set_has(
       format(
-        'SELECT obj_schema, obj_name, obj_kind FROM msar.get_schema_objects_table(ARRAY[%L::regnamespace, %L::regnamespace])',
+        'SELECT obj_schema, obj_name, obj_kind FROM pg_temp.get_schema_objects_table(ARRAY[%L::regnamespace, %L::regnamespace])',
         'people'::regnamespace, 'projects'::regnamespace
       ),
       $v$VALUES
@@ -1470,7 +1470,7 @@ BEGIN
         ('projects', 'actors_copy', 'VIEW'),
         ('projects', 'movies_pkey', 'INDEX')
       $v$,
-      'msar.get_schema_objects_table() should return objects for multiple schemas'
+      'pg_temp.get_schema_objects_table() should return objects for multiple schemas'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -1480,7 +1480,7 @@ CREATE OR REPLACE FUNCTION test_drop_single_schema_with_dependent_objs() RETURNS
 BEGIN
   PERFORM __setup_schemas_with_dependent_obj();
   RETURN NEXT throws_ok(
-    $d$SELECT msar.drop_schemas(ARRAY['people'::regnamespace])$d$,
+    $d$SELECT pg_temp.drop_schemas(ARRAY['people'::regnamespace])$d$,
     '2BP01'
   );
   RETURN NEXT has_table('people'::name, 'actors'::name);
@@ -1493,7 +1493,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_schemas_multi_success() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_schemas_with_dependent_obj();
-  PERFORM msar.drop_schemas(ARRAY['people'::regnamespace, 'projects'::regnamespace]);
+  PERFORM pg_temp.drop_schemas(ARRAY['people'::regnamespace, 'projects'::regnamespace]);
   RETURN NEXT hasnt_schema('people'::name);
   RETURN NEXT hasnt_schema('projects'::name);
 END;
@@ -1504,34 +1504,34 @@ CREATE OR REPLACE FUNCTION test_patch_schema() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
   CREATE SCHEMA foo;
-  SELECT msar.get_schema_oid('foo') INTO sch_oid;
+  SELECT pg_temp.get_schema_oid('foo') INTO sch_oid;
 
-  PERFORM msar.patch_schema(sch_oid, '{"description": "yay"}');
+  PERFORM pg_temp.patch_schema(sch_oid, '{"description": "yay"}');
   RETURN NEXT is(obj_description(sch_oid), 'yay');
 
   -- Description is removed when NULL is passed.
-  PERFORM msar.patch_schema(sch_oid, '{"description": null}');
+  PERFORM pg_temp.patch_schema(sch_oid, '{"description": null}');
   RETURN NEXT is(obj_description(sch_oid), NULL);
 
   -- Description is removed when an empty string is passed.
-  PERFORM msar.patch_schema(sch_oid, '{"description": ""}');
+  PERFORM pg_temp.patch_schema(sch_oid, '{"description": ""}');
   RETURN NEXT is(obj_description(sch_oid), NULL);
 
-  PERFORM msar.patch_schema(sch_oid, '{"name": "NEW", "description": "WOW"}');
+  PERFORM pg_temp.patch_schema(sch_oid, '{"name": "NEW", "description": "WOW"}');
   RETURN NEXT has_schema('NEW');
-  RETURN NEXT is(msar.get_schema_name(sch_oid), 'NEW');
+  RETURN NEXT is(pg_temp.get_schema_name(sch_oid), 'NEW');
   RETURN NEXT is(obj_description(sch_oid), 'WOW');
 
   -- Patching should be idempotent
-  PERFORM msar.patch_schema(sch_oid, '{"name": "NEW", "description": "WOW"}');
+  PERFORM pg_temp.patch_schema(sch_oid, '{"name": "NEW", "description": "WOW"}');
   RETURN NEXT has_schema('NEW');
-  RETURN NEXT is(msar.get_schema_name(sch_oid), 'NEW');
+  RETURN NEXT is(pg_temp.get_schema_name(sch_oid), 'NEW');
   RETURN NEXT is(obj_description(sch_oid), 'WOW');
 END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.alter_table
+-- pg_temp.alter_table
 
 CREATE OR REPLACE FUNCTION __setup_alter_table() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -1543,7 +1543,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_rename_table_with_same_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
-  PERFORM msar.rename_table(
+  PERFORM pg_temp.rename_table(
     tab_id => 'alter_this_table'::regclass::oid,
     new_tab_name => 'alter_this_table'
   );
@@ -1555,7 +1555,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_rename_table_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
-  PERFORM msar.rename_table(
+  PERFORM pg_temp.rename_table(
     tab_id => 'alter_this_table'::regclass::oid,
     new_tab_name => 'renamed_table'
   );
@@ -1568,7 +1568,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_comment_on_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
-  PERFORM msar.comment_on_table(
+  PERFORM pg_temp.comment_on_table(
     tab_id => 'alter_this_table'::regclass::oid,
     comment_ => 'This is a comment!'
   );
@@ -1577,7 +1577,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.infer_table_column_data_types --------------------------------------------------------------
+-- pg_temp.infer_table_column_data_types --------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_type_inference() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -1607,7 +1607,7 @@ CREATE OR REPLACE FUNCTION test_infer_table_column_data_types() RETURNS SETOF TE
 BEGIN
   PERFORM __setup_type_inference();
   RETURN NEXT is(
-    msar.infer_table_column_data_types('"Types Test"'::regclass),
+    pg_temp.infer_table_column_data_types('"Types Test"'::regclass),
     jsonb_build_object(
       1, jsonb_build_object('type', 'integer'),
       2, jsonb_build_object('type', 'text'),
@@ -1633,22 +1633,22 @@ BEGIN
   PERFORM __setup_type_inference();
   tab_id := '"Types Test"'::regclass;
   RETURN NEXT is(
-    msar.retype_column(tab_id, 3::smallint, 'boolean'::text, cast_options_1),
+    pg_temp.retype_column(tab_id, 3::smallint, 'boolean'::text, cast_options_1),
     'ALTER TABLE public."Types Test" '
     || 'ALTER COLUMN "Boolean" TYPE boolean '
-    || 'USING msar.cast_to_boolean("Boolean")'
+    || 'USING pg_temp.cast_to_boolean("Boolean")'
   );
   RETURN NEXT is(
-    msar.retype_column(tab_id, 5::smallint, 'numeric'::text, cast_options_2),
+    pg_temp.retype_column(tab_id, 5::smallint, 'numeric'::text, cast_options_2),
     'ALTER TABLE public."Types Test" '
     || 'ALTER COLUMN "Numeric" TYPE numeric '
-    || 'USING msar.cast_to_numeric("Numeric", group_sep =>''''::"char", decimal_p =>''.''::"char")'
+    || 'USING pg_temp.cast_to_numeric("Numeric", group_sep =>''''::"char", decimal_p =>''.''::"char")'
   );
   RETURN NEXT is(
-    msar.retype_column(tab_id, 8::smallint, 'mathesar_types.mathesar_money'::text, cast_options_3),
+    pg_temp.retype_column(tab_id, 8::smallint, 'mathesar_types.mathesar_money'::text, cast_options_3),
     'ALTER TABLE public."Types Test" '
     || 'ALTER COLUMN "Money" TYPE mathesar_types.mathesar_money '
-    || 'USING msar.cast_to_mathesar_money("Money", group_sep =>'',''::"char", decimal_p =>''.''::"char", curr_pref =>''$''::text, curr_suff =>''''::text)'
+    || 'USING pg_temp.cast_to_mathesar_money("Money", group_sep =>'',''::"char", decimal_p =>''.''::"char", curr_pref =>''$''::text, curr_suff =>''''::text)'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -1664,16 +1664,16 @@ BEGIN
   tab_id := '"Types Test"'::regclass;
   -- retyping a column inferred as numeric to mathesar_types.mathesar_money instead of numeric
   RETURN NEXT is(
-    msar.retype_column(tab_id, 5::smallint, 'mathesar_types.mathesar_money'::text, cast_options_1),
+    pg_temp.retype_column(tab_id, 5::smallint, 'mathesar_types.mathesar_money'::text, cast_options_1),
     'ALTER TABLE public."Types Test" '
     || 'ALTER COLUMN "Numeric" TYPE mathesar_types.mathesar_money '
-    || 'USING msar.cast_to_mathesar_money("Numeric", group_sep =>''''::"char", decimal_p =>''.''::"char", curr_pref =>''''::text, curr_suff =>''''::text)'
+    || 'USING pg_temp.cast_to_mathesar_money("Numeric", group_sep =>''''::"char", decimal_p =>''.''::"char", curr_pref =>''''::text, curr_suff =>''''::text)'
   );
   -- retyping a column inferred as mathesar_types.mathesar_money to numeric instead of mathesar_types.mathesar_money
   RETURN NEXT throws_ok(
     format(
       $s$
-        SELECT msar.retype_column(%s, 8::smallint, 'numeric'::text, %L::jsonb);
+        SELECT pg_temp.retype_column(%s, 8::smallint, 'numeric'::text, %L::jsonb);
       $s$,
       tab_id::oid,
       cast_options_2
@@ -1686,7 +1686,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- msar.add_mathesar_table
+-- pg_temp.add_mathesar_table
 
 CREATE OR REPLACE FUNCTION __setup_create_table() RETURNS SETOF TEXT AS $f$
 BEGIN
@@ -1698,7 +1698,7 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_create_table();
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null, null
   );
   RETURN NEXT col_is_pk(
@@ -1720,7 +1720,7 @@ DECLARE
   badname text := '"new"''dsf'' \t"';
 BEGIN
   PERFORM __setup_create_table();
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, badname, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, badname::name);
@@ -1733,7 +1733,7 @@ DECLARE
   generated_name text := 'Table 1';
 BEGIN
   PERFORM __setup_create_table();
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
@@ -1747,20 +1747,20 @@ DECLARE
   generated_name text := 'Table 3';
 BEGIN
   PERFORM __setup_create_table();
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
-  PERFORM msar.drop_table(
+  PERFORM pg_temp.drop_table(
     tab_id => 'tab_create_schema."Table 1"'::regclass::oid,
     cascade_ => false
   );
   RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, null, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
@@ -1777,7 +1777,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_create_table();
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
     null,
@@ -1805,7 +1805,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_create_table();
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
     null,
@@ -1849,7 +1849,7 @@ BEGIN
   PERFORM __setup_create_table();
   CREATE TABLE tab_create_schema.foo(id INTEGER GENERATED BY DEFAULT AS IDENTITY, length FLOAT8);
   INSERT INTO tab_create_schema.foo(length) VALUES (2), (3), (4), (5.2225);
-  have_records := msar.get_preview(
+  have_records := pg_temp.get_preview(
     tab_id => 'tab_create_schema.foo'::regclass::oid,
     col_cast_def => col_cast_def,
     rec_limit => NULL
@@ -1864,7 +1864,7 @@ DECLARE
   comment_ text := $c$my "Super;";'; DROP SCHEMA tab_create_schema;'$c$;
 BEGIN
   PERFORM __setup_create_table();
-  PERFORM msar.add_mathesar_table(
+  PERFORM pg_temp.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, null, comment_
   );
   RETURN NEXT col_is_pk(
@@ -1878,7 +1878,7 @@ BEGIN
 END;
 $f$ LANGUAGE plpgsql;
 
--- msar.prepare_table_for_import --------------------------------------------
+-- pg_temp.prepare_table_for_import --------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_prepare_table_for_import_null_cols()
 RETURNS SETOF TEXT AS $f$
@@ -1886,7 +1886,7 @@ DECLARE
   response jsonb;
 BEGIN
   PERFORM __setup_create_table();
-  response := msar.prepare_table_for_import(
+  response := pg_temp.prepare_table_for_import(
     'tab_create_schema'::regnamespace::oid, 'anewtable', null, null
   );
   RETURN NEXT col_is_pk(
@@ -1912,7 +1912,7 @@ DECLARE
   response jsonb;
 BEGIN
   PERFORM __setup_create_table();
-  response := msar.prepare_table_for_import(
+  response := pg_temp.prepare_table_for_import(
     'tab_create_schema'::regnamespace::oid, 'anewtable', ARRAY[]::text[], null
   );
   RETURN NEXT col_is_pk(
@@ -1938,7 +1938,7 @@ DECLARE
   response jsonb;
 BEGIN
   PERFORM __setup_create_table();
-  response := msar.prepare_table_for_import(
+  response := pg_temp.prepare_table_for_import(
     'tab_create_schema'::regnamespace::oid,
     'anewtable',
     ARRAY['My Col', 'col2'],
@@ -1965,7 +1965,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- msar.prepare_temp_table_for_import -------------------------------------------------------------
+-- pg_temp.prepare_temp_table_for_import -------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_prepare_temp_table_multiple_id_cols()
 RETURNS SETOF TEXT AS $f$
@@ -1973,7 +1973,7 @@ DECLARE
   response jsonb;
   tmp_tab_oid oid;
 BEGIN
-  response := msar.prepare_temp_table_for_import(
+  response := pg_temp.prepare_temp_table_for_import(
     tab_name := 'tmp_multi_id',
     col_names := ARRAY['id', 'id', 'id', 'other']
   );
@@ -2003,7 +2003,7 @@ DECLARE
   response jsonb;
   tmp_tab_oid oid;
 BEGIN
-  response := msar.prepare_temp_table_for_import(
+  response := pg_temp.prepare_temp_table_for_import(
     tab_name := 'tmp_explicit_table',
     col_names := ARRAY['col1','col2']
   );
@@ -2030,7 +2030,7 @@ DECLARE
   response jsonb;
   tmp_tab_oid oid;
 BEGIN
-  response := msar.prepare_temp_table_for_import(
+  response := pg_temp.prepare_temp_table_for_import(
     tab_name := null,
     col_names := ARRAY['col1','col2']
   );
@@ -2051,7 +2051,7 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- msar.insert_from_select -----------------------------------------------------------------------
+-- pg_temp.insert_from_select -----------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_insert_from_select() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -2085,7 +2085,7 @@ DECLARE
   records jsonb;
 BEGIN
   PERFORM __setup_insert_from_select();
-  SELECT msar.insert_from_select(
+  SELECT pg_temp.insert_from_select(
     src_tab_id := 'src'::regclass,
     dst_tab_id := 'dest'::regclass,
     mappings := jsonb_build_array(
@@ -2100,7 +2100,7 @@ BEGIN
 
   RETURN NEXT is(insert_count, 2::bigint);
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => 'dest'::regclass::oid,
       limit_ => NULL,
       offset_ => NULL,
@@ -2126,7 +2126,7 @@ BEGIN
   PERFORM __setup_insert_from_select();
   /* Invaid mappings, as the type of src col can't be type casted to dest col type */
   RETURN NEXT throws_ok(
-    $$SELECT msar.insert_from_select(
+    $$SELECT pg_temp.insert_from_select(
       src_tab_id := 'src'::regclass,
       dst_tab_id := 'dest'::regclass,
       mappings := jsonb_build_array(
@@ -2138,7 +2138,7 @@ BEGIN
   );
 
   RETURN NEXT throws_ok(
-    $$SELECT msar.insert_from_select(
+    $$SELECT pg_temp.insert_from_select(
       src_tab_id := 'src'::regclass,
       dst_tab_id := 'dest'::regclass,
       mappings := jsonb_build_array(
@@ -2150,7 +2150,7 @@ BEGIN
   );
 
   RETURN NEXT throws_ok(
-    $$SELECT msar.insert_from_select(
+    $$SELECT pg_temp.insert_from_select(
       src_tab_id := 'src'::regclass,
       dst_tab_id := 'dest'::regclass,
       mappings := jsonb_build_array(
@@ -2184,7 +2184,7 @@ DECLARE
   col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
   RETURN NEXT columns_are(
     'test_schema',
     'col_alters',
@@ -2202,7 +2202,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
   RETURN NEXT columns_are(
     'test_schema',
     'col_alters',
@@ -2221,7 +2221,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
   RETURN NEXT col_type_is('test_schema', 'col_alters', 'col1', 'character varying(48)', 'type should be varchar');
   RETURN NEXT col_type_is('test_schema', 'col_alters', 'col2', 'integer', 'type should be integer');
   RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', 5, 'default should be 5');
@@ -2237,7 +2237,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
   RETURN NEXT col_type_is('test_schema', 'col_alters', 'col_opts', 'numeric(4,0)', 'type should be numeric');
 END;
 $f$ LANGUAGE plpgsql;
@@ -2251,7 +2251,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
   RETURN NEXT columns_are('test_schema', 'col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
 END;
 $f$ LANGUAGE plpgsql;
@@ -2265,7 +2265,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
   RETURN NEXT col_is_null('test_schema', 'col_alters', 'col1', 'should allow null');
   RETURN NEXT col_not_null('test_schema', 'col_alters', 'col_opts', 'should not allow null');
 END;
@@ -2280,7 +2280,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
   RETURN NEXT col_default_is('test_schema', 'col_alters', 'col2', '5', 'default should be 5');
   RETURN NEXT col_default_is('test_schema', 'col_alters', 'coltim', '(now())::date', 'default should be now()');
 END;
@@ -2295,7 +2295,7 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT is(pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
   RETURN NEXT col_hasnt_default('test_schema', 'col_alters', 'col2', 'should have no default');
   RETURN NEXT col_hasnt_default('test_schema', 'col_alters', 'coltim', 'should have no default');
 END;
@@ -2313,7 +2313,7 @@ DECLARE
 BEGIN
   PERFORM __setup_column_alter();
   RETURN NEXT is(
-    msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb),
+    pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb),
     ARRAY[2, 3, 5, 6]
   );
   RETURN NEXT col_default_is('test_schema', 'col_alters', 'col1', 'test34', 'default should be test34');
@@ -2342,7 +2342,7 @@ DECLARE
 BEGIN
   PERFORM __setup_column_alter();
   RETURN NEXT is(
-    msar.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
+    pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
   );
   RETURN NEXT columns_are(
     'test_schema', 'col_alters', ARRAY['id', 'nullab numeric', 'newcol2', 'col_opts', 'timecol']
@@ -2353,8 +2353,8 @@ BEGIN
   RETURN NEXT col_type_is('test_schema', 'col_alters', 'col_opts', 'numeric(5,3)', 'type should be numeric(5,3)');
   RETURN NEXT col_not_null('test_schema', 'col_alters', 'col_opts', 'should not allow null');
   RETURN NEXT col_not_null('test_schema', 'col_alters', 'timecol', 'should not allow null');
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), NULL);
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 3), NULL);
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -2405,17 +2405,17 @@ DECLARE
   ]$j$;
 BEGIN
   PERFORM __setup_column_alter();
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
-  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change1);
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change1col2description');
-  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change2);
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
-  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change3);
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
-  PERFORM msar.alter_columns('test_schema.col_alters'::regclass::oid, change4);
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
-  RETURN NEXT is(msar.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
+  PERFORM pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, change1);
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 2), 'change1col2description');
+  PERFORM pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, change2);
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
+  PERFORM pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, change3);
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 2), 'change2col2description');
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
+  PERFORM pg_temp.alter_columns('test_schema.col_alters'::regclass::oid, change4);
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 2), NULL);
+  RETURN NEXT is(pg_temp.col_description('test_schema.col_alters'::regclass::oid, 3), 'change2col3description');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2691,7 +2691,7 @@ CREATE OR REPLACE FUNCTION test_extract_columns_data() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_roster();
   CREATE TABLE roster_snapshot AS SELECT * FROM "Roster" ORDER BY id;
-  PERFORM msar.extract_columns_from_table('"Roster"'::regclass::oid, ARRAY[3, 4], 'Teachers', null);
+  PERFORM pg_temp.extract_columns_from_table('"Roster"'::regclass::oid, ARRAY[3, 4], 'Teachers', null);
   RETURN NEXT columns_are('Teachers', ARRAY['id', 'Teacher', 'Teacher Email']);
   RETURN NEXT columns_are('Roster', ARRAY['id', 'Student Name', 'Subject', 'Grade', 'Teachers_id']);
   RETURN NEXT fk_ok('Roster', 'Teachers_id', 'Teachers', 'id');
@@ -2744,7 +2744,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_extract_columns_keeps_fkey() RETURNS SETOF TEXT AS $f$
 BEGIN
   PERFORM __setup_extract_fkey_cols();
-  PERFORM msar.extract_columns_from_table(
+  PERFORM pg_temp.extract_columns_from_table(
     '"Referrer"'::regclass::oid, ARRAY[3, 5], 'Classes', 'Class'
   );
   RETURN NEXT columns_are('Referent', ARRAY['id', 'Teacher', 'Teacher Email']);
@@ -2776,12 +2776,12 @@ DECLARE
 BEGIN
   PERFORM __setup_dynamic_defaults();
   tab_id := 'defaults_test'::regclass::oid;
-  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 1), true);
-  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 2), false);
-  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 3), false);
-  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 4), true);
-  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 5), false);
-  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 6), true);
+  RETURN NEXT is(pg_temp.is_default_possibly_dynamic(tab_id, 1), true);
+  RETURN NEXT is(pg_temp.is_default_possibly_dynamic(tab_id, 2), false);
+  RETURN NEXT is(pg_temp.is_default_possibly_dynamic(tab_id, 3), false);
+  RETURN NEXT is(pg_temp.is_default_possibly_dynamic(tab_id, 4), true);
+  RETURN NEXT is(pg_temp.is_default_possibly_dynamic(tab_id, 5), false);
+  RETURN NEXT is(pg_temp.is_default_possibly_dynamic(tab_id, 6), true);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2799,24 +2799,24 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_is_pkey_col() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_is_pkey_col_tests();
-  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 1), false);
-  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 2), true);
-  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 3), false);
-  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 1), true);
-  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 2), true);
-  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 3), false);
-  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 1), false);
-  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 2), false);
-  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 3), false);
+  RETURN NEXT is(pg_temp.is_pkey_col('simple_pkey'::regclass::oid, 1), false);
+  RETURN NEXT is(pg_temp.is_pkey_col('simple_pkey'::regclass::oid, 2), true);
+  RETURN NEXT is(pg_temp.is_pkey_col('simple_pkey'::regclass::oid, 3), false);
+  RETURN NEXT is(pg_temp.is_pkey_col('multi_pkey'::regclass::oid, 1), true);
+  RETURN NEXT is(pg_temp.is_pkey_col('multi_pkey'::regclass::oid, 2), true);
+  RETURN NEXT is(pg_temp.is_pkey_col('multi_pkey'::regclass::oid, 3), false);
+  RETURN NEXT is(pg_temp.is_pkey_col('no_pkey'::regclass::oid, 1), false);
+  RETURN NEXT is(pg_temp.is_pkey_col('no_pkey'::regclass::oid, 2), false);
+  RETURN NEXT is(pg_temp.is_pkey_col('no_pkey'::regclass::oid, 3), false);
 END;
 $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_create_role() RETURNS SETOF TEXT AS $$
 BEGIN
-  PERFORM msar.create_role('testuser', 'mypass1234', true);
+  PERFORM pg_temp.create_role('testuser', 'mypass1234', true);
   RETURN NEXT database_privs_are('mathesar_testing', 'testuser', ARRAY['CONNECT', 'TEMPORARY']);
-  PERFORM msar.create_role(
+  PERFORM pg_temp.create_role(
     'Ro"\bert''); DROP SCHEMA public;', 'my''pass1234"; DROP SCHEMA public;', true
   );
   RETURN NEXT has_schema('public');
@@ -2824,13 +2824,13 @@ BEGIN
   RETURN NEXT database_privs_are (
     'mathesar_testing', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['CONNECT', 'TEMPORARY']
   );
-  PERFORM msar.create_role('testnopass', null, null);
+  PERFORM pg_temp.create_role('testnopass', null, null);
   RETURN NEXT database_privs_are('mathesar_testing', 'testnopass', ARRAY['CONNECT', 'TEMPORARY']);
 END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.get_column_info (and related) --------------------------------------------------------------
+-- pg_temp.get_column_info (and related) --------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_manytypes() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -2897,7 +2897,7 @@ BEGIN
   PERFORM __setup_manytypes();
   RETURN NEXT results_eq(
     $h$
-    SELECT msar.get_interval_fields(atttypmod)
+    SELECT pg_temp.get_interval_fields(atttypmod)
     FROM pg_attribute
     WHERE attrelid='manytypes'::regclass AND atttypid='interval'::regtype
     ORDER BY attnum;
@@ -2939,135 +2939,135 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_type_options() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_manytypes();
-  RETURN NEXT is(msar.get_type_options(atttypid, atttypmod, attndims), NULL)
+  RETURN NEXT is(pg_temp.get_type_options(atttypid, atttypmod, attndims), NULL)
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='id';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"fields": null, "precision": null}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_plain';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"fields": "day to second", "precision": null}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_dy_se';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"fields": "second", "precision": 3}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_se_3';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"fields": "hour to second", "precision": 0}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_hr_se_0';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"fields": null, "precision": null, "item_type": "interval"}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_plain_arr';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"fields": "minute to second", "precision": 6, "item_type": "interval"}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_mi_se6_arr';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": null, "scale": null}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_plain';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 8, "scale": 0}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_8';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 17, "scale": 2}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_17_2';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": null, "scale": null, "item_type": "numeric"}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_plain_arr';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 17, "scale": 2, "item_type": "numeric"}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_17_2_arr';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"length": null}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='var_plain';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"length": 16}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='var_16';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"length": 255}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='var_255';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"length": 1}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='cha_1';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"length": 20}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='cha_20';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"length": 16, "item_type": "character varying"}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='var_16_arr';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"length": 20, "item_type": "character"}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='cha_20_arr';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 8}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='bit_8';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 8}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='vbt_8';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 2}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='tim_2';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 3}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ttz_3';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 4}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='tsp_4';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"precision": 5}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='tsz_5';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"original_type": "test_enum", "enum_values": ["a", "b", "c"]}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='enum_col';
   RETURN NEXT is(
-    msar.get_type_options(atttypid, atttypmod, attndims),
+    pg_temp.get_type_options(atttypid, atttypmod, attndims),
     '{"item_type": "_enum"}'::jsonb
   )
   FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='enum_arr';
@@ -3078,9 +3078,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_has_dependents() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_extract_fkey_cols();
-  RETURN NEXT is(msar.has_dependents('"Referent"'::regclass::oid, 1::smallint), true);
-  RETURN NEXT is(msar.has_dependents('"Referent"'::regclass::oid, 2::smallint), false);
-  RETURN NEXT is(msar.has_dependents('"Referrer"'::regclass::oid, 1::smallint), false);
+  RETURN NEXT is(pg_temp.has_dependents('"Referent"'::regclass::oid, 1::smallint), true);
+  RETURN NEXT is(pg_temp.has_dependents('"Referent"'::regclass::oid, 2::smallint), false);
+  RETURN NEXT is(pg_temp.has_dependents('"Referrer"'::regclass::oid, 1::smallint), false);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3116,7 +3116,7 @@ DECLARE
   col_info jsonb;
 BEGIN
   PERFORM __setup_get_column_info();
-  col_info = msar.get_column_info('column_variety');
+  col_info = pg_temp.get_column_info('column_variety');
   RETURN NEXT is(jsonb_array_length(col_info), 8, 'Should have info for all 8 columns.');
 
   -- Column 1
@@ -3248,7 +3248,7 @@ BEGIN
   -- Add a unique index on the primary key column (in addition to the PK index)
   CREATE UNIQUE INDEX idx_test_id ON index_test(id);
 
-  col_info = msar.get_column_info('index_test');
+  col_info = pg_temp.get_column_info('index_test');
 
   RETURN NEXT is(
     jsonb_array_length(col_info), 2, 'Should have exactly 2 columns, not duplicates.'
@@ -3289,8 +3289,8 @@ DECLARE
  alice_table_info jsonb;
 BEGIN
   PERFORM __setup_get_table_info();
-  SELECT msar.get_table_info('pi') INTO pi_table_info;
-  SELECT msar.get_table_info('alice') INTO alice_table_info;
+  SELECT pg_temp.get_table_info('pi') INTO pi_table_info;
+  SELECT pg_temp.get_table_info('alice') INTO alice_table_info;
 
   -- Test table info for schema 'pi'
     -- Check if all the required keys exist in the json blob
@@ -3337,14 +3337,14 @@ DECLARE
   foo_schema jsonb;
 BEGIN
   -- Get the initial schema count
-  SELECT jsonb_array_length(msar.list_schemas()) INTO initial_schema_count;
+  SELECT jsonb_array_length(pg_temp.list_schemas()) INTO initial_schema_count;
 
   -- Create a schema
   CREATE SCHEMA foo;
   -- We should now have one additional schema
-  RETURN NEXT is(jsonb_array_length(msar.list_schemas()), initial_schema_count + 1);
+  RETURN NEXT is(jsonb_array_length(pg_temp.list_schemas()), initial_schema_count + 1);
   -- Reflect the "foo" schema
-  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(pg_temp.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- We should have a foo schema object
   RETURN NEXT is(jsonb_typeof(foo_schema), 'object');
   -- It should have no description
@@ -3358,7 +3358,7 @@ BEGIN
   CREATE TABLE foo.test_table_1 (id serial PRIMARY KEY);
   CREATE TABLE foo.test_table_2 (id serial PRIMARY KEY);
   -- Reflect again
-  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(pg_temp.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- We should see the description we set
   RETURN NEXT is(foo_schema->'description'#>>'{}', 'A test schema');
   -- We should see two tables
@@ -3368,16 +3368,16 @@ BEGIN
   DROP TABLE foo.test_table_1;
   DROP TABLE foo.test_table_2;
   -- Reflect the "foo" schema
-  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(pg_temp.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- The "foo" schema should now have no tables
   RETURN NEXT is((foo_schema->'table_count')::int, 0);
 
   -- Drop the "foo" schema
   DROP SCHEMA foo;
   -- We should now have no "foo" schema
-  RETURN NEXT ok(NOT jsonb_path_exists(msar.list_schemas(), '$[*] ? (@.name == "foo")'));
+  RETURN NEXT ok(NOT jsonb_path_exists(pg_temp.list_schemas(), '$[*] ? (@.name == "foo")'));
   -- We should see the initial schema count again
-  RETURN NEXT is(jsonb_array_length(msar.list_schemas()), initial_schema_count);
+  RETURN NEXT is(jsonb_array_length(pg_temp.list_schemas()), initial_schema_count);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3386,19 +3386,19 @@ CREATE OR REPLACE FUNCTION test_list_schema_privileges_basic() RETURNS SETOF TEX
 BEGIN
 CREATE SCHEMA restricted;
 RETURN NEXT is(
-  msar.list_schema_privileges('restricted'::regnamespace),
+  pg_temp.list_schema_privileges('restricted'::regnamespace),
   format('[{"direct": ["USAGE", "CREATE"], "role_oid": %s}]', 'mathesar'::regrole::oid)::jsonb,
   'Initially, only privileges for creator'
 );
 CREATE USER "Alice";
 RETURN NEXT is(
-  msar.list_schema_privileges('restricted'::regnamespace),
+  pg_temp.list_schema_privileges('restricted'::regnamespace),
   format('[{"direct": ["USAGE", "CREATE"], "role_oid": %s}]', 'mathesar'::regrole::oid)::jsonb,
   'Alice should not have any privileges'
 );
 GRANT USAGE ON SCHEMA restricted TO "Alice";
 RETURN NEXT is(
-  msar.list_schema_privileges('restricted'::regnamespace),
+  pg_temp.list_schema_privileges('restricted'::regnamespace),
   format(
     '[{"direct": ["USAGE", "CREATE"], "role_oid": %1$s}, {"direct": ["USAGE"], "role_oid": %2$s}]',
     'mathesar'::regrole::oid,
@@ -3414,48 +3414,48 @@ CREATE OR REPLACE FUNCTION test_list_table_privileges_basic() RETURNS SETOF TEXT
 BEGIN
 CREATE TABLE restricted_table();
 RETURN NEXT is(
-  msar.list_table_privileges('restricted_table'::regclass)->0->'direct'
+  pg_temp.list_table_privileges('restricted_table'::regclass)->0->'direct'
   @>'["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'::jsonb,
   true,
   'Initially, only privileges for creator'
 );
 RETURN NEXT is(
-  CAST(msar.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
+  CAST(pg_temp.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
   'mathesar'::regrole::oid,
   'Initially, only privileges for creator'
 );
 CREATE USER "Alice";
 RETURN NEXT is(
-  msar.list_table_privileges('restricted_table'::regclass)->0->'direct'
+  pg_temp.list_table_privileges('restricted_table'::regclass)->0->'direct'
   @>'["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'::jsonb,
   true,
   'Alice should not have any privileges on restricted_table'
 );
 RETURN NEXT is(
-  CAST(msar.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
+  CAST(pg_temp.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
   'mathesar'::regrole::oid,
   'Alice should not have any privileges on restricted_table'
 );
 GRANT SELECT, DELETE ON TABLE restricted_table TO "Alice";
 RETURN NEXT is(
-  msar.list_table_privileges('restricted_table'::regclass)->0->'direct'
+  pg_temp.list_table_privileges('restricted_table'::regclass)->0->'direct'
   @>'["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'::jsonb,
   true,
   'mathesar''s privileges should stay the same'
 );
 RETURN NEXT is(
-  CAST(msar.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
+  CAST(pg_temp.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
   'mathesar'::regrole::oid,
   'mathesar''s privileges should stay the same'
 );
 RETURN NEXT is(
-  msar.list_table_privileges('restricted_table'::regclass)->1->'direct'
+  pg_temp.list_table_privileges('restricted_table'::regclass)->1->'direct'
   @>'["SELECT", "DELETE"]'::jsonb,
   true,
   'Alice should have SELECT & DELETE privileges on restricted_table'
 );
 RETURN NEXT is(
-  CAST(msar.list_table_privileges('restricted_table'::regclass)->1->>'role_oid' AS oid),
+  CAST(pg_temp.list_table_privileges('restricted_table'::regclass)->1->>'role_oid' AS oid),
   '"Alice"'::regrole::oid,
   'Alice should have SELECT & DELETE privileges on restricted_table'
 );
@@ -3469,12 +3469,12 @@ DECLARE
   foo_role jsonb;
   bar_role jsonb;
 BEGIN
-  SELECT jsonb_array_length(msar.list_roles()) INTO initial_role_count;
+  SELECT jsonb_array_length(pg_temp.list_roles()) INTO initial_role_count;
 
   -- Create role and check if role is present in response & count is increased
   CREATE ROLE foo;
-  RETURN NEXT is(jsonb_array_length(msar.list_roles()), initial_role_count + 1);
-  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  RETURN NEXT is(jsonb_array_length(pg_temp.list_roles()), initial_role_count + 1);
+  SELECT jsonb_path_query(pg_temp.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
 
   -- Check if role has expected properties
   RETURN NEXT is(jsonb_typeof(foo_role), 'object');
@@ -3488,7 +3488,7 @@ BEGIN
 
   -- Modify properties and check role again
   ALTER ROLE foo WITH CREATEDB CREATEROLE LOGIN NOINHERIT;
-  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  SELECT jsonb_path_query(pg_temp.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
   RETURN NEXT is((foo_role->>'super')::boolean, false);
   RETURN NEXT is((foo_role->>'inherits')::boolean, false);
   RETURN NEXT is((foo_role->>'create_role')::boolean, true);
@@ -3497,15 +3497,15 @@ BEGIN
 
   -- Add comment and check if comment is present
   COMMENT ON ROLE foo IS 'A test role';
-  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  SELECT jsonb_path_query(pg_temp.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
   RETURN NEXT is(foo_role->'description'#>>'{}', 'A test role');
 
   -- Add members and check result
   CREATE ROLE bar;
   GRANT foo TO bar;
-  RETURN NEXT is(jsonb_array_length(msar.list_roles()), initial_role_count + 2);
-  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
-  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "bar")') INTO bar_role;
+  RETURN NEXT is(jsonb_array_length(pg_temp.list_roles()), initial_role_count + 2);
+  SELECT jsonb_path_query(pg_temp.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  SELECT jsonb_path_query(pg_temp.list_roles(), '$[*] ? (@.name == "bar")') INTO bar_role;
   RETURN NEXT is(jsonb_typeof(foo_role->'members'), 'array');
   RETURN NEXT is(
     foo_role->'members'->0->>'oid', bar_role->>'oid'
@@ -3514,70 +3514,70 @@ BEGIN
 
   -- Drop role and ensure role is not present in response
   DROP ROLE foo;
-  RETURN NEXT ok(NOT jsonb_path_exists(msar.list_roles(), '$[*] ? (@.name == "foo")'));
+  RETURN NEXT ok(NOT jsonb_path_exists(pg_temp.list_roles(), '$[*] ? (@.name == "foo")'));
 END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.format_data --------------------------------------------------------------------------------
+-- pg_temp.format_data --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_format_data() RETURNS SETOF TEXT AS $$
 BEGIN
-  RETURN NEXT is(msar.format_data('3 Jan, 2021'::date), '2021-01-03 AD');
-  RETURN NEXT is(msar.format_data('3 Jan, 23 BC'::date), '0023-01-03 BC');
-  RETURN NEXT is(msar.format_data('1 day'::interval), 'P0Y0M1DT0H0M0S');
+  RETURN NEXT is(pg_temp.format_data('3 Jan, 2021'::date), '2021-01-03 AD');
+  RETURN NEXT is(pg_temp.format_data('3 Jan, 23 BC'::date), '0023-01-03 BC');
+  RETURN NEXT is(pg_temp.format_data('1 day'::interval), 'P0Y0M1DT0H0M0S');
   RETURN NEXT is(
-    msar.format_data('1 year 2 months 3 days 4 hours 5 minutes 6 seconds'::interval),
+    pg_temp.format_data('1 year 2 months 3 days 4 hours 5 minutes 6 seconds'::interval),
     'P1Y2M3DT4H5M6S'
   );
-  RETURN NEXT is(msar.format_data('1 day 3 hours ago'::interval), 'P0Y0M-1DT-3H0M0S');
-  RETURN NEXT is(msar.format_data('1 day -3 hours'::interval), 'P0Y0M1DT-3H0M0S');
+  RETURN NEXT is(pg_temp.format_data('1 day 3 hours ago'::interval), 'P0Y0M-1DT-3H0M0S');
+  RETURN NEXT is(pg_temp.format_data('1 day -3 hours'::interval), 'P0Y0M1DT-3H0M0S');
   RETURN NEXT is(
-    msar.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds'::interval),
+    pg_temp.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds'::interval),
     'P0Y11M3DT13H50M30.4S'
   );
   RETURN NEXT is(
-    msar.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds ago'::interval),
+    pg_temp.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds ago'::interval),
     'P0Y-11M-3DT-13H-50M-30.4S'
   );
-  RETURN NEXT is(msar.format_data('45 hours 70 seconds'::interval), 'P0Y0M0DT45H1M10S');
+  RETURN NEXT is(pg_temp.format_data('45 hours 70 seconds'::interval), 'P0Y0M0DT45H1M10S');
   RETURN NEXT is(
-    msar.format_data('5 decades 22 years 14 months 1 week 3 days'::interval),
+    pg_temp.format_data('5 decades 22 years 14 months 1 week 3 days'::interval),
     'P73Y2M10DT0H0M0S'
   );
-  RETURN NEXT is(msar.format_data('1 century'::interval), 'P100Y0M0DT0H0M0S');
-  RETURN NEXT is(msar.format_data('2 millennia'::interval), 'P2000Y0M0DT0H0M0S');
-  RETURN NEXT is(msar.format_data('12:30:45+05:30'::time with time zone), '12:30:45.0+05:30');
-  RETURN NEXT is(msar.format_data('12:30:45'::time with time zone), '12:30:45.0Z');
+  RETURN NEXT is(pg_temp.format_data('1 century'::interval), 'P100Y0M0DT0H0M0S');
+  RETURN NEXT is(pg_temp.format_data('2 millennia'::interval), 'P2000Y0M0DT0H0M0S');
+  RETURN NEXT is(pg_temp.format_data('12:30:45+05:30'::time with time zone), '12:30:45.0+05:30');
+  RETURN NEXT is(pg_temp.format_data('12:30:45'::time with time zone), '12:30:45.0Z');
   RETURN NEXT is(
-    msar.format_data('12:30:45.123456-08'::time with time zone), '12:30:45.123456-08:00'
+    pg_temp.format_data('12:30:45.123456-08'::time with time zone), '12:30:45.123456-08:00'
   );
-  RETURN NEXT is(msar.format_data('12:30'::time without time zone), '12:30:00.0');
+  RETURN NEXT is(pg_temp.format_data('12:30'::time without time zone), '12:30:00.0');
   RETURN NEXT is(
-    msar.format_data('30 July, 2000 19:15:03.65'::timestamp with time zone),
+    pg_temp.format_data('30 July, 2000 19:15:03.65'::timestamp with time zone),
     '2000-07-30T19:15:03.65Z AD'
   );
   RETURN NEXT is(
-    msar.format_data('10000-01-01 00:00:00'::timestamp with time zone),
+    pg_temp.format_data('10000-01-01 00:00:00'::timestamp with time zone),
     '10000-01-01T00:00:00.0Z AD'
   );
   RETURN NEXT is(
-    msar.format_data('3 March, 25 BC, 17:30:15+01'::timestamp with time zone),
+    pg_temp.format_data('3 March, 25 BC, 17:30:15+01'::timestamp with time zone),
     '0025-03-03T16:30:15.0Z BC'
   );
   RETURN NEXT is(
-    msar.format_data('17654-03-02 01:00:00'::timestamp without time zone),
+    pg_temp.format_data('17654-03-02 01:00:00'::timestamp without time zone),
     '17654-03-02T01:00:00.0 AD'
   );
-  RETURN NEXT is(msar.format_data(null::jsonb), null);
-  RETURN NEXT is(msar.format_data('null'::jsonb), 'null');
-  RETURN NEXT is(msar.format_data('"null"'::jsonb), '"null"');
-  RETURN NEXT is(msar.format_data('"a"'::jsonb), '"a"');
-  RETURN NEXT is(msar.format_data('3'::jsonb), '3');
-  RETURN NEXT is(msar.format_data('"3"'::jsonb), '"3"');
-  RETURN NEXT is(msar.format_data('true'::jsonb), 'true');
-  RETURN NEXT is(msar.format_data('"true"'::jsonb), '"true"');
-  RETURN NEXT is(msar.format_data(
+  RETURN NEXT is(pg_temp.format_data(null::jsonb), null);
+  RETURN NEXT is(pg_temp.format_data('null'::jsonb), 'null');
+  RETURN NEXT is(pg_temp.format_data('"null"'::jsonb), '"null"');
+  RETURN NEXT is(pg_temp.format_data('"a"'::jsonb), '"a"');
+  RETURN NEXT is(pg_temp.format_data('3'::jsonb), '3');
+  RETURN NEXT is(pg_temp.format_data('"3"'::jsonb), '"3"');
+  RETURN NEXT is(pg_temp.format_data('true'::jsonb), 'true');
+  RETURN NEXT is(pg_temp.format_data('"true"'::jsonb), '"true"');
+  RETURN NEXT is(pg_temp.format_data(
     ARRAY[
       '{"nested":{"k":"v"}}'::jsonb,
       '{"list":[1,2,3]}'::jsonb,
@@ -3587,18 +3587,18 @@ BEGIN
   );
   -- It suffices to check that the resulting string casts to the same json as the input.
   RETURN NEXT is(
-    msar.format_data('{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb)::jsonb,
+    pg_temp.format_data('{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb)::jsonb,
     '{"true": true, "1": 1, "arr": [1, "2", false]}'::jsonb
   );
   -- double-check that other json types (other than jsonb) cast properly to text.
-  RETURN NEXT is(pg_typeof(msar.format_data('[]'::mathesar_types.mathesar_json_array)), 'text');
-  RETURN NEXT is(pg_typeof(msar.format_data('{}'::mathesar_types.mathesar_json_object)), 'text');
-  RETURN NEXT is(pg_typeof(msar.format_data('true'::json)), 'text');
+  RETURN NEXT is(pg_typeof(pg_temp.format_data('[]'::mathesar_types.mathesar_json_array)), 'text');
+  RETURN NEXT is(pg_typeof(pg_temp.format_data('{}'::mathesar_types.mathesar_json_object)), 'text');
+  RETURN NEXT is(pg_typeof(pg_temp.format_data('true'::json)), 'text');
 
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.list_records_from_table --------------------------------------------------------------------
+-- pg_temp.list_records_from_table --------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_list_records_table() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -3819,7 +3819,7 @@ BEGIN
   PERFORM __setup_wide_table();
   rel_id := 'wide_table'::regclass::oid;
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -3868,7 +3868,7 @@ BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -3890,7 +3890,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 2,
       offset_ => null,
@@ -3911,7 +3911,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => 1,
@@ -3932,7 +3932,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 0,
       offset_ => null,
@@ -3950,7 +3950,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 1,
       offset_ => 1,
@@ -3970,7 +3970,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 5,
       offset_ => 10,
@@ -4000,7 +4000,7 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
 
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -4020,7 +4020,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id  => rel_id,
       limit_  => null,
       offset_ => null,
@@ -4040,7 +4040,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -4060,7 +4060,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -4082,7 +4082,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -4113,7 +4113,7 @@ BEGIN
   PERFORM __setup_customers_table();
   rel_id := '"Customers"'::regclass::oid;
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 10,
       offset_ => null,
@@ -4177,7 +4177,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 3,
       offset_ => null,
@@ -4210,7 +4210,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 3,
       offset_ => null,
@@ -4239,7 +4239,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 5,
       offset_ => null,
@@ -4281,7 +4281,7 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
 
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id  => rel_id,
       limit_  => null,
       offset_ => null,
@@ -4314,7 +4314,7 @@ BEGIN
   rel_id := '"Customers"'::regclass::oid;
 
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id  => rel_id,
       limit_  => null,
       offset_ => null,
@@ -4368,7 +4368,7 @@ BEGIN
   PERFORM __setup_table_with_self_referential_fk();
   rel_id := 'categories'::regclass::oid;
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => 10,
       offset_ => null,
@@ -4411,7 +4411,7 @@ BEGIN
   rel_id := 'categories'::regclass::oid;
 
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id  => rel_id,
       limit_  => null,
       offset_ => null,
@@ -4444,7 +4444,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.list_records_from_table listing joined columns ------------------------------------------------------
+-- pg_temp.list_records_from_table listing joined columns ------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_list_records_table_joined_columns()
 RETURNS SETOF TEXT AS $$
@@ -4518,7 +4518,7 @@ RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_list_records_table_joined_columns();
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       'vehicles'::regclass,
       3, 0, null, null, null,
       joined_columns => jsonb_build_array(
@@ -4600,7 +4600,7 @@ RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_list_records_table_joined_columns();
   RETURN NEXT is(
-    msar.get_record_from_table(
+    pg_temp.get_record_from_table(
       'vehicles'::regclass,
       3, joined_columns => jsonb_build_array(
         jsonb_build_object(
@@ -4666,7 +4666,7 @@ RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_list_records_table_joined_columns();
   RETURN NEXT is(
-    msar.get_joined_columns_expr_json(
+    pg_temp.get_joined_columns_expr_json(
       joined_columns => jsonb_build_array(
         jsonb_build_object(
           'alias', 'colors_alias',
@@ -4736,7 +4736,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.get_table_columns_and_records ---------------------------------------------------------------------------
+-- pg_temp.get_table_columns_and_records ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_get_table_columns_records() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -4764,7 +4764,7 @@ BEGIN
   RETURN NEXT results_eq(
     format(
       $q$
-      SELECT msar.get_table_columns_and_records(
+      SELECT pg_temp.get_table_columns_and_records(
         tab_id => %1$L,
         limit_ => %2$L,
         offset_ => %3$L,
@@ -4788,7 +4788,7 @@ BEGIN
   RETURN NEXT results_eq(
     format(
       $q$
-      SELECT msar.get_table_columns_and_records(
+      SELECT pg_temp.get_table_columns_and_records(
         tab_id => %1$L,
         limit_ => %2$L,
         offset_ => %3$L,
@@ -4811,7 +4811,7 @@ BEGIN
   RETURN NEXT results_eq(
     format(
       $q$
-      SELECT msar.get_table_columns_and_records(
+      SELECT pg_temp.get_table_columns_and_records(
         tab_id => %1$L,
         limit_ => %2$L,
         offset_ => %3$L,
@@ -4834,7 +4834,7 @@ BEGIN
   RETURN NEXT results_eq(
     format(
       $q$
-      SELECT msar.get_table_columns_and_records(
+      SELECT pg_temp.get_table_columns_and_records(
         tab_id => %1$L,
         limit_ => %2$L,
         offset_ => %3$L,
@@ -4861,7 +4861,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.get_current_role ---------------------------------------------------------------------------
+-- pg_temp.get_current_role ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_get_current_role() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -4870,8 +4870,6 @@ BEGIN
   CREATE ROLE child_role;
   GRANT parent1 TO child_role;
   GRANT parent2 TO child_role;
-  GRANT USAGE ON SCHEMA msar, __msar TO child_role;
-  -- GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -4888,7 +4886,7 @@ BEGIN
   parent1_oid := 'parent1'::regrole::oid;
   parent2_oid := 'parent2'::regrole::oid;
   RETURN NEXT is(
-    msar.get_current_role(),
+    pg_temp.get_current_role(),
     format($j${
         "current_role":{
           "oid": %1$s,
@@ -4932,7 +4930,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.build_order_by_expr ------------------------------------------------------------------------
+-- pg_temp.build_order_by_expr ------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_build_order_by_expr() RETURNS SETOF TEXT AS $$
 DECLARE
@@ -4940,34 +4938,32 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  RETURN NEXT is(msar.build_order_by_expr(rel_id, null), 'ORDER BY "1" ASC');
+  RETURN NEXT is(pg_temp.build_order_by_expr(rel_id, null), 'ORDER BY "1" ASC');
   RETURN NEXT is(
-    msar.build_order_by_expr(rel_id, '[{"attnum": 1, "direction": "desc"}]'),
+    pg_temp.build_order_by_expr(rel_id, '[{"attnum": 1, "direction": "desc"}]'),
     'ORDER BY "1" DESC, "1" ASC'
   );
   RETURN NEXT is(
-    msar.build_order_by_expr(
+    pg_temp.build_order_by_expr(
       rel_id, '[{"attnum": 3, "direction": "asc"}, {"attnum": 5, "direction": "DESC"}]'
     ),
     'ORDER BY "3" ASC, "5" DESC, "1" ASC'
   );
   CREATE ROLE intern_no_pkey;
-  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
   GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
   SET ROLE intern_no_pkey;
   RETURN NEXT is(
-    msar.build_order_by_expr(rel_id, null), 'ORDER BY "2" ASC, "3" ASC, "5" ASC'
+    pg_temp.build_order_by_expr(rel_id, null), 'ORDER BY "2" ASC, "3" ASC, "5" ASC'
   );
   SET ROLE NONE;
   REVOKE ALL ON TABLE atable FROM intern_no_pkey;
   SET ROLE intern_no_pkey;
-  RETURN NEXT is(msar.build_order_by_expr(rel_id, null), null);
+  RETURN NEXT is(pg_temp.build_order_by_expr(rel_id, null), null);
 END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.build_expr ---------------------------------------------------------------------------------
+-- pg_temp.build_expr ---------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_build_expr() RETURNS SETOF TEXT AS $$
 DECLARE
@@ -4976,7 +4972,7 @@ BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'equal', 'args', jsonb_build_array(
@@ -4985,7 +4981,7 @@ BEGIN
     '(atable.col1) = (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'lesser', 'args', jsonb_build_array(
@@ -4994,7 +4990,7 @@ BEGIN
     '(atable.col1) < (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'greater', 'args', jsonb_build_array(
@@ -5003,7 +4999,7 @@ BEGIN
     '(atable.col1) > (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'lesser_or_equal', 'args', jsonb_build_array(
@@ -5012,7 +5008,7 @@ BEGIN
     '(atable.col1) <= (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'greater_or_equal', 'args', jsonb_build_array(
@@ -5021,7 +5017,7 @@ BEGIN
     '(atable.col1) >= (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'null', 'args', jsonb_build_array(
@@ -5029,7 +5025,7 @@ BEGIN
     '(atable.col1) IS NULL'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'not_null', 'args', jsonb_build_array(
@@ -5037,7 +5033,7 @@ BEGIN
     '(atable.col1) IS NOT NULL'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'contains_case_insensitive', 'args', jsonb_build_array(
@@ -5046,7 +5042,7 @@ BEGIN
     'strpos(lower(atable.col1), lower(''ABc''))::boolean'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'starts_with_case_insensitive', 'args', jsonb_build_array(
@@ -5056,7 +5052,7 @@ BEGIN
   );
   RETURN NEXT is(
     -- composition for json_array_length_equals
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'equal', 'args', jsonb_build_array(
@@ -5070,7 +5066,7 @@ BEGIN
   );
   RETURN NEXT is(
     -- composition for json_array_length_greater_than
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'greater', 'args', jsonb_build_array(
@@ -5083,7 +5079,7 @@ BEGIN
     '(jsonb_array_length((atable.col1)::jsonb)) > (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
     -- composition for json_array_length_greater_or_equal
       rel_id,
       jsonb_build_object(
@@ -5097,7 +5093,7 @@ BEGIN
     '(jsonb_array_length((atable.col1)::jsonb)) >= (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
     -- composition for json_array_length_less_than
       rel_id,
       jsonb_build_object(
@@ -5111,7 +5107,7 @@ BEGIN
     '(jsonb_array_length((atable.col1)::jsonb)) < (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
     -- composition for json_array_length_less_or_equal
       rel_id,
       jsonb_build_object(
@@ -5125,7 +5121,7 @@ BEGIN
     '(jsonb_array_length((atable.col1)::jsonb)) <= (''500'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
     -- composition for json_array_not_empty
       rel_id,
       jsonb_build_object(
@@ -5139,7 +5135,7 @@ BEGIN
     '(jsonb_array_length((atable.col1)::jsonb)) > (''0'')'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'json_array_contains', 'args', jsonb_build_array(
@@ -5148,7 +5144,7 @@ BEGIN
     '(atable.col1)::jsonb @> (''"500"'')::jsonb'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
     -- composition for uri_scheme_equals
       rel_id,
       jsonb_build_object(
@@ -5159,11 +5155,11 @@ BEGIN
             )
           ),
           jsonb_build_object('type', 'literal', 'value', 'https')))),
-    '(msar.uri_scheme(atable.col1)) = (''https'')'
+    '(pg_temp.uri_scheme(atable.col1)) = (''https'')'
   );
   RETURN NEXT is(
     -- composition for uri_authority_contains
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'contains', 'args', jsonb_build_array(
@@ -5173,11 +5169,11 @@ BEGIN
             )
           ),
           jsonb_build_object('type', 'literal', 'value', 'google')))),
-    'strpos((msar.uri_authority(atable.col1)), (''google''))::boolean'
+    'strpos((pg_temp.uri_authority(atable.col1)), (''google''))::boolean'
   );
   RETURN NEXT is(
     -- composition for email_domain_equals
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'equal', 'args', jsonb_build_array(
@@ -5187,11 +5183,11 @@ BEGIN
             )
           ),
           jsonb_build_object('type', 'literal', 'value', 'gmail.com')))),
-    '(msar.email_domain_name(atable.col1)) = (''gmail.com'')'
+    '(pg_temp.email_domain_name(atable.col1)) = (''gmail.com'')'
   );
   RETURN NEXT is(
     -- composition for email_domain_contains
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'contains', 'args', jsonb_build_array(
@@ -5201,10 +5197,10 @@ BEGIN
             )
           ),
           jsonb_build_object('type', 'literal', 'value', 'mail')))),
-    'strpos((msar.email_domain_name(atable.col1)), (''mail''))::boolean'
+    'strpos((pg_temp.email_domain_name(atable.col1)), (''mail''))::boolean'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'or', 'args', jsonb_build_array(
@@ -5225,10 +5221,10 @@ BEGIN
         )
       )
     ),
-    '(strpos((msar.email_domain_name(atable.col1)), (''mail''))::boolean) OR ((atable.col2) = (''500''))'
+    '(strpos((pg_temp.email_domain_name(atable.col1)), (''mail''))::boolean) OR ((atable.col2) = (''500''))'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'or', 'args', jsonb_build_array(
@@ -5257,7 +5253,7 @@ BEGIN
     '(((atable.col2) = (''500'')) AND ((atable.col3) < (''abcde''))) OR ((atable.id) > (''20''))'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'not', 'args', jsonb_build_array(
@@ -5272,7 +5268,7 @@ BEGIN
     'NOT ((atable.col1) = (''500''))'
   );
   RETURN NEXT is(
-    msar.build_expr(
+    pg_temp.build_expr(
       rel_id,
       jsonb_build_object(
         'type', 'not', 'args', jsonb_build_array(
@@ -5299,7 +5295,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.search_records_from_table ------------------------------------------------------------------
+-- pg_temp.search_records_from_table ------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_search_records_table() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -5326,7 +5322,7 @@ DECLARE
 BEGIN
   PERFORM __setup_search_records_table();
   rel_id := 'search_table'::regclass::oid;
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 2, 'literal', 3)
@@ -5336,7 +5332,7 @@ BEGIN
   RETURN NEXT is(search_result -> 'results', jsonb_build_array());
   RETURN NEXT is((search_result -> 'count')::integer, 0);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 3, 'literal', 'bc')
@@ -5352,7 +5348,7 @@ BEGIN
   );
   RETURN NEXT is((search_result -> 'count')::integer, 2);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(),
     10
@@ -5368,7 +5364,7 @@ BEGIN
   );
   RETURN NEXT is((search_result -> 'count')::integer, 4);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     null,
     10
@@ -5384,7 +5380,7 @@ BEGIN
   );
   RETURN NEXT is((search_result -> 'count')::integer, 4);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 3, 'literal', 'bc')
@@ -5400,7 +5396,7 @@ BEGIN
   );
   RETURN NEXT is((search_result -> 'count')::integer, 2);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 3, 'literal', 'b'),
@@ -5418,7 +5414,7 @@ BEGIN
   );
   RETURN NEXT is((search_result -> 'count')::integer, 3);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 3, 'literal', 'a'),
@@ -5436,7 +5432,7 @@ BEGIN
   );
   RETURN NEXT is((search_result -> 'count')::integer, 3);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 3, 'literal', 'a')
@@ -5454,7 +5450,7 @@ BEGIN
   RETURN NEXT is((search_result -> 'count')::integer, 3);
 
   -- Test that LIMIT and OFFSET work
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 3, 'literal', 'bc')
@@ -5496,7 +5492,7 @@ DECLARE
 BEGIN
   PERFORM __setup_uuid_search_records_table();
   rel_id := 'uuid_table'::regclass::oid;
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 1, 'literal', 4)
@@ -5513,7 +5509,7 @@ BEGIN
   );
   RETURN NEXT is ((search_result -> 'count')::integer, 3);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 1, 'literal', '1e')
@@ -5528,7 +5524,7 @@ BEGIN
   );
   RETURN NEXT is ((search_result -> 'count')::integer, 1);
 
-  search_result := msar.search_records_from_table(
+  search_result := pg_temp.search_records_from_table(
     rel_id,
     jsonb_build_array(
       jsonb_build_object('attnum', 1, 'literal', 'asdf')
@@ -5558,13 +5554,13 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
 
   -- We should be able to retrieve a single record
-  RETURN NEXT is(msar.get_record_from_table(rel_id, 2) -> 'results', record_2_results);
+  RETURN NEXT is(pg_temp.get_record_from_table(rel_id, 2) -> 'results', record_2_results);
 
   -- We should be able to retrieve a record via stringified primary key
-  RETURN NEXT is(msar.get_record_from_table(rel_id, '2') -> 'results', record_2_results);
+  RETURN NEXT is(pg_temp.get_record_from_table(rel_id, '2') -> 'results', record_2_results);
 
   -- We should get an empty array if the record does not exist
-  RETURN NEXT is(msar.get_record_from_table(rel_id, 200) -> 'results', '[]'::jsonb);
+  RETURN NEXT is(pg_temp.get_record_from_table(rel_id, 200) -> 'results', '[]'::jsonb);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -5576,7 +5572,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  delete_result := msar.delete_records_from_table(
+  delete_result := pg_temp.delete_records_from_table(
     rel_id,
     '[2]'
   );
@@ -5596,7 +5592,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  delete_result := msar.delete_records_from_table(
+  delete_result := pg_temp.delete_records_from_table(
     rel_id,
     null
   );
@@ -5616,7 +5612,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  delete_result := msar.delete_records_from_table(
+  delete_result := pg_temp.delete_records_from_table(
     rel_id,
     '[]'
   );
@@ -5636,7 +5632,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  delete_result := msar.delete_records_from_table(
+  delete_result := pg_temp.delete_records_from_table(
     rel_id,
     '[1, 2]'
   );
@@ -5656,7 +5652,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  delete_result := msar.delete_records_from_table(
+  delete_result := pg_temp.delete_records_from_table(
     rel_id,
     '[1, 2, 342]'
   );
@@ -5676,7 +5672,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  delete_result := msar.delete_records_from_table(
+  delete_result := pg_temp.delete_records_from_table(
     rel_id,
     '["1", "2"]'
   );
@@ -5705,7 +5701,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
@@ -5727,7 +5723,7 @@ BEGIN
   ALTER TABLE atable RENAME COLUMN id TO "ID";
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{}'
     ),
@@ -5748,7 +5744,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": "{\"key2\": \"val2\"}"}'
     ),
@@ -5769,7 +5765,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{"3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
@@ -5790,7 +5786,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{"2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
@@ -5811,7 +5807,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{"2": null, "3": "ab234", "4": 3, "5": "\"234\""}'
     ),
@@ -5832,7 +5828,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
+    pg_temp.patch_record_in_table( rel_id, 2, '{"2": 10}'),
     '{
       "results": [
         {"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
@@ -5852,7 +5848,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.patch_record_in_table( rel_id, '2', '{"2": 10}'),
+    pg_temp.patch_record_in_table( rel_id, '2', '{"2": 10}'),
     '{
       "results": [
         {"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": "[1, 2, 3, 4]"}
@@ -5872,7 +5868,7 @@ BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
+    pg_temp.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
     '{
       "results": [
         {"1": 2, "2": 10, "3": "sdflfflsk", "4": "{\"a\": \"json\"}", "5": "[1, 2, 3, 4]"}
@@ -5892,7 +5888,7 @@ DECLARE
 BEGIN
   PERFORM __setup_add_record_table();
   rel_id := 'atable'::regclass::oid;
-  PERFORM msar.patch_record_in_table( rel_id, 2, '{"2": 10}');
+  PERFORM pg_temp.patch_record_in_table( rel_id, 2, '{"2": 10}');
   RETURN NEXT results_eq(
     'SELECT id, col1 FROM atable ORDER BY id',
     'VALUES (1, 5), (2, 10), (3, 2)'
@@ -5908,7 +5904,7 @@ BEGIN
   CREATE TABLE things(id uuid PRIMARY KEY, name TEXT);
   INSERT INTO things VALUES (rec_id, 'chair');
 
-  PERFORM msar.patch_record_in_table('things'::regclass, rec_id, '{"2": "recliner"}');
+  PERFORM pg_temp.patch_record_in_table('things'::regclass, rec_id, '{"2": "recliner"}');
 
   RETURN NEXT results_eq(
     format($q$ SELECT name FROM things WHERE id = %L $q$, rec_id),
@@ -5925,7 +5921,7 @@ BEGIN
   CREATE TABLE spaceships(name TEXT PRIMARY KEY, max_speed real);
   INSERT INTO spaceships VALUES (rec_id, 9.0);
 
-  PERFORM msar.patch_record_in_table('spaceships'::regclass, rec_id, '{"2": 10.3}');
+  PERFORM pg_temp.patch_record_in_table('spaceships'::regclass, rec_id, '{"2": 10.3}');
 
   RETURN NEXT results_eq(
     format($q$ SELECT max_speed FROM spaceships WHERE name = %L $q$, rec_id),
@@ -5951,7 +5947,7 @@ BEGIN
   PERFORM __setup_add_records_table_only_pk();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{}'::jsonb
     ),
@@ -5962,7 +5958,7 @@ BEGIN
     }$a$
   );
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       rel_id,
       '{}'::jsonb
     ),
@@ -6030,7 +6026,7 @@ DECLARE
 BEGIN
   PERFORM __setup_preview_fkey_cols();
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => '"Students"'::regclass::oid,
       limit_ => null,
       offset_ => null,
@@ -6076,7 +6072,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => '"Students"'::regclass::oid,
       limit_ => 3,
       offset_ => 1,
@@ -6107,7 +6103,7 @@ BEGIN
     }$j$
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => '"Students"'::regclass::oid,
       limit_ => 2,
       offset_ => null,
@@ -6149,7 +6145,7 @@ BEGIN
 
   -- Render a custom record summary for a student
   RETURN NEXT is(
-    msar.get_record_from_table(
+    pg_temp.get_record_from_table(
       tab_id => '"Students"'::regclass::oid,
       rec_id => 4,
       return_record_summaries => true,
@@ -6170,7 +6166,7 @@ BEGIN
 
   -- NULL cell values should be rendered as empty strings within the record summary
   RETURN NEXT is(
-    msar.get_record_from_table(
+    pg_temp.get_record_from_table(
       tab_id => '"Students"'::regclass::oid,
       rec_id => 7,
       return_record_summaries => true,
@@ -6193,7 +6189,7 @@ BEGIN
   -- is necessary to ensure that the front end can render a preview of the default template when a
   -- customized template is already saved.
   RETURN NEXT is(
-    msar.get_record_from_table(
+    pg_temp.get_record_from_table(
       tab_id => '"Students"'::regclass::oid,
       rec_id => 2,
       return_record_summaries => true,
@@ -6216,7 +6212,7 @@ BEGIN
   -- a pk column. (We could improve this in the future by using the first column with a unique
   -- constaint if necessary.)
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => '"Counselors"'::regclass::oid,
       limit_ => null,
       offset_ => null,
@@ -6235,10 +6231,6 @@ CREATE OR REPLACE FUNCTION test_record_summary_with_limited_privileges() RETURNS
 DECLARE result jsonb;
 BEGIN
   CREATE ROLE roland;
-
-  GRANT USAGE ON SCHEMA __msar, msar TO roland;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO roland;
-  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO roland;
 
   -- Tables:
   --
@@ -6301,7 +6293,7 @@ BEGIN
 
   SET ROLE roland;
 
-  SELECT msar.get_record_from_table(
+  SELECT pg_temp.get_record_from_table(
     tab_id => 'widget'::regclass::oid,
     rec_id => 2,
     return_record_summaries => true,
@@ -6350,7 +6342,7 @@ BEGIN
 
   ALTER TABLE "Counselors" DROP COLUMN "Name";
   RETURN NEXT is(
-    msar.get_record_from_table(
+    pg_temp.get_record_from_table(
       tab_id => '"Students"'::regclass::oid,
       rec_id => 4,
       return_record_summaries => true,
@@ -6371,7 +6363,7 @@ CREATE OR REPLACE FUNCTION test_add_record_to_table_with_preview() RETURNS SETOF
 BEGIN
   PERFORM __setup_preview_fkey_cols();
   RETURN NEXT is(
-    msar.add_record_to_table(
+    pg_temp.add_record_to_table(
       '"Students"'::regclass::oid,
       '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}',
       true
@@ -6395,7 +6387,7 @@ CREATE OR REPLACE FUNCTION test_patch_record_in_table_with_preview() RETURNS SET
 BEGIN
   PERFORM __setup_preview_fkey_cols();
   RETURN NEXT is(
-    msar.patch_record_in_table(
+    pg_temp.patch_record_in_table(
       '"Students"'::regclass::oid,
       2,
       '{"2": 2.345, "3": 2, "5": 85}'
@@ -6419,7 +6411,7 @@ CREATE OR REPLACE FUNCTION test_search_records_in_table_with_preview() RETURNS S
 BEGIN
   PERFORM __setup_preview_fkey_cols();
   RETURN NEXT is(
-    msar.search_records_from_table(
+    pg_temp.search_records_from_table(
       '"Students"'::regclass::oid,
       '[{"attnum": 4, "literal": "k"}]',
       2
@@ -6433,7 +6425,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.replace_database_privileges_for_roles ------------------------------------------------------
+-- pg_temp.replace_database_privileges_for_roles ------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
 test_replace_database_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
@@ -6451,7 +6443,7 @@ BEGIN
   RETURN NEXT set_eq(
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
+        pg_temp.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
           'role_oid', %1$s, 'direct', jsonb_build_array('CONNECT', 'CREATE')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t1$,
@@ -6471,7 +6463,7 @@ BEGIN
   RETURN NEXT set_eq(
     format(
       $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
+        pg_temp.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
               'role_oid', %1$s, 'direct', jsonb_build_array('CONNECT')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t2$,
@@ -6525,7 +6517,7 @@ BEGIN
     -- Revoke CREATE from Alice, Grant CREATE to Bob.
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_database_privileges_for_roles(jsonb_build_array(
+        pg_temp.replace_database_privileges_for_roles(jsonb_build_array(
           jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('CONNECT')),
           jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('CONNECT', 'CREATE')))))
         AS x(direct jsonb, role_oid regrole)
@@ -6556,7 +6548,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.replace_schema_privileges_for_roles --------------------------------------------------------
+-- pg_temp.replace_schema_privileges_for_roles --------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
 test_replace_schema_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
@@ -6577,7 +6569,7 @@ BEGIN
   RETURN NEXT set_eq(
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+        pg_temp.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
           'role_oid', %1$s, 'direct', jsonb_build_array('USAGE', 'CREATE')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t1$,
@@ -6598,7 +6590,7 @@ BEGIN
   RETURN NEXT set_eq(
     format(
       $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+        pg_temp.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
               'role_oid', %1$s, 'direct', jsonb_build_array('USAGE')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t2$,
@@ -6652,7 +6644,7 @@ BEGIN
     -- Revoke CREATE from Alice, Grant CREATE to Bob.
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_schema_privileges_for_roles(%3$s, jsonb_build_array(
+        pg_temp.replace_schema_privileges_for_roles(%3$s, jsonb_build_array(
           jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('USAGE')),
           jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('USAGE', 'CREATE')))))
         AS x(direct jsonb, role_oid regrole)
@@ -6684,7 +6676,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.replace_table_privileges_for_roles --------------------------------------------------------
+-- pg_temp.replace_table_privileges_for_roles --------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
 test_replace_table_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
@@ -6705,7 +6697,7 @@ BEGIN
   RETURN NEXT set_eq(
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+        pg_temp.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
           'role_oid', %1$s, 'direct', jsonb_build_array('SELECT', 'UPDATE')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t1$,
@@ -6726,7 +6718,7 @@ BEGIN
   RETURN NEXT set_eq(
     format(
       $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+        pg_temp.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
               'role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'DELETE')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t2$,
@@ -6781,7 +6773,7 @@ BEGIN
     -- Grant SELECT and DELETE to Bob, Revoke INSERT and UPDATE.
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
-        msar.replace_table_privileges_for_roles(%3$s, jsonb_build_array(
+        pg_temp.replace_table_privileges_for_roles(%3$s, jsonb_build_array(
           jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'UPDATE')),
           jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('SELECT', 'DELETE')))))
         AS x(direct jsonb, role_oid regrole)
@@ -6821,39 +6813,37 @@ CREATE TABLE mytab (col1 varchar, col2 varchar);
 tab_id := 'mytab'::regclass::oid;
 CREATE ROLE test_intern1;
 CREATE ROLE test_intern2;
-GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
 GRANT SELECT, INSERT (col1) ON TABLE mytab TO test_intern1;
 GRANT SELECT (col2) ON TABLE mytab TO test_intern1;
 GRANT UPDATE (col1) ON TABLE mytab TO test_intern2;
 GRANT UPDATE, REFERENCES (col2) ON TABLE mytab TO test_intern2;
 
 RETURN NEXT is(
-  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  pg_temp.list_column_privileges_for_current_role(tab_id, 1::smallint),
   '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
 );
 RETURN NEXT is(
-  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  pg_temp.list_column_privileges_for_current_role(tab_id, 2::smallint),
   '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
 );
 
 SET ROLE test_intern1;
 RETURN NEXT is(
-  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  pg_temp.list_column_privileges_for_current_role(tab_id, 1::smallint),
   '["SELECT", "INSERT"]'
 );
 RETURN NEXT is(
-  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  pg_temp.list_column_privileges_for_current_role(tab_id, 2::smallint),
   '["SELECT"]'
 );
 
 SET ROLE test_intern2;
 RETURN NEXT is(
-  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  pg_temp.list_column_privileges_for_current_role(tab_id, 1::smallint),
   '["UPDATE"]'
 );
 RETURN NEXT is(
-  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  pg_temp.list_column_privileges_for_current_role(tab_id, 2::smallint),
   '["UPDATE", "REFERENCES"]'
 );
 END;
@@ -6868,18 +6858,16 @@ CREATE SCHEMA restricted;
 sch_id := 'restricted'::regnamespace::oid;
 CREATE ROLE test_intern1;
 CREATE ROLE test_intern2;
-GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
 GRANT USAGE ON SCHEMA restricted TO test_intern1;
 GRANT USAGE, CREATE ON SCHEMA restricted TO test_intern2;
 
-RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+RETURN NEXT is(pg_temp.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
 
 SET ROLE test_intern1;
-RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE"]');
+RETURN NEXT is(pg_temp.list_schema_privileges_for_current_role(sch_id), '["USAGE"]');
 
 SET ROLE test_intern2;
-RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+RETURN NEXT is(pg_temp.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -6892,26 +6880,24 @@ CREATE TABLE mytab (col1 varchar);
 tab_id := 'mytab'::regclass::oid;
 CREATE ROLE test_intern1;
 CREATE ROLE test_intern2;
-GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
 
 GRANT SELECT, INSERT, UPDATE ON TABLE mytab TO test_intern1;
 GRANT DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE mytab TO test_intern2;
 
 RETURN NEXT is(
-  msar.list_table_privileges_for_current_role(tab_id),
+  pg_temp.list_table_privileges_for_current_role(tab_id),
   '["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
 );
 
 SET ROLE test_intern1;
 RETURN NEXT is(
-  msar.list_table_privileges_for_current_role(tab_id),
+  pg_temp.list_table_privileges_for_current_role(tab_id),
   '["SELECT", "INSERT", "UPDATE"]'
 );
 
 SET ROLE test_intern2;
 RETURN NEXT is(
-  msar.list_table_privileges_for_current_role(tab_id),
+  pg_temp.list_table_privileges_for_current_role(tab_id),
   '["DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
 );
 END;
@@ -6924,23 +6910,21 @@ DECLARE
 BEGIN
 CREATE ROLE test_intern1;
 CREATE ROLE test_intern2;
-GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
 
 REVOKE ALL ON DATABASE mathesar_testing FROM PUBLIC;
 GRANT CONNECT, CREATE ON DATABASE mathesar_testing TO test_intern1;
 GRANT CONNECT, TEMPORARY ON DATABASE mathesar_testing TO test_intern2;
 
 RETURN NEXT is(
-  msar.list_database_privileges_for_current_role(dat_id),
+  pg_temp.list_database_privileges_for_current_role(dat_id),
   '["CONNECT", "CREATE", "TEMPORARY"]'
 );
 
 SET ROLE test_intern1;
-RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "CREATE"]');
+RETURN NEXT is(pg_temp.list_database_privileges_for_current_role(dat_id), '["CONNECT", "CREATE"]');
 
 SET ROLE test_intern2;
-RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "TEMPORARY"]');
+RETURN NEXT is(pg_temp.list_database_privileges_for_current_role(dat_id), '["CONNECT", "TEMPORARY"]');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -7047,7 +7031,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_move_columns_to_referenced_table_nodata() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_move_columns_nodata();
-  PERFORM msar.move_columns_to_referenced_table(
+  PERFORM pg_temp.move_columns_to_referenced_table(
     '"Books"'::regclass, '"Authors"'::regclass, ARRAY[8, 9]::smallint[]
   );
   RETURN NEXT columns_are(
@@ -7067,7 +7051,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_move_columns_to_referenced_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_move_columns();
-  PERFORM msar.move_columns_to_referenced_table(
+  PERFORM pg_temp.move_columns_to_referenced_table(
     '"Books"'::regclass, '"Authors"'::regclass, ARRAY[8, 9]::smallint[]
   );
   RETURN NEXT columns_are(
@@ -7127,7 +7111,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_move_columns_not_referenced_by_multicol_fk() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_move_columns_multicol_fk();
-  PERFORM msar.move_columns_to_referenced_table(
+  PERFORM pg_temp.move_columns_to_referenced_table(
     'source_table'::regclass, 'target_table'::regclass, ARRAY[4]::smallint[]
   );
   RETURN NEXT columns_are(
@@ -7146,7 +7130,7 @@ CREATE OR REPLACE FUNCTION test_move_columns_referenced_by_multicol_fk() RETURNS
 BEGIN
   PERFORM __setup_move_columns_multicol_fk();
   RETURN NEXT throws_ok(
-    $w$SELECT msar.move_columns_to_referenced_table(
+    $w$SELECT pg_temp.move_columns_to_referenced_table(
       'source_table'::regclass, 'target_table'::regclass, ARRAY[2, 3, 4]::smallint[]
     );$w$,
     '2BP01',
@@ -7191,7 +7175,7 @@ CREATE OR REPLACE FUNCTION test_move_columns_referenced_by_singlecol_fk() RETURN
 BEGIN
   PERFORM __setup_move_columns_singlecol_fk();
   RETURN NEXT throws_ok(
-    $w$SELECT msar.move_columns_to_referenced_table(
+    $w$SELECT pg_temp.move_columns_to_referenced_table(
       'source_table'::regclass, 'target_table'::regclass, ARRAY[2]::smallint[]
     );$w$,
     '2BP01',
@@ -7215,22 +7199,22 @@ BEGIN
   CREATE USER "Bob";
   CREATE USER carol;
   RETURN NEXT is(
-    msar.build_grant_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
+    pg_temp.build_grant_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
     E'GRANT "Alice" TO "Bob";\n'
   );
   RETURN NEXT is(
-    msar.build_grant_membership_expr(
+    pg_temp.build_grant_membership_expr(
       '"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid, 'carol'::regrole::oid]
     ),
     E'GRANT "Alice" TO "Bob";\nGRANT "Alice" TO carol;\n'
   );
 
   RETURN NEXT is(
-    msar.build_revoke_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
+    pg_temp.build_revoke_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
     E'REVOKE "Alice" FROM "Bob";\n'
   );
   RETURN NEXT is(
-    msar.build_revoke_membership_expr(
+    pg_temp.build_revoke_membership_expr(
       '"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid, 'carol'::regrole::oid]
     ),
     E'REVOKE "Alice" FROM "Bob";\nREVOKE "Alice" FROM carol;\n'
@@ -7257,14 +7241,11 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
 
   CREATE ROLE intern_no_pkey;
-  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
-  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO intern_no_pkey;
   GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
   GRANT SELECT (col1, col2) ON TABLE search_table TO intern_no_pkey;
   SET ROLE intern_no_pkey;
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
         tab_id => rel_id,
         limit_ => null,
         offset_ => null,
@@ -7280,7 +7261,7 @@ BEGIN
     'Results should not have column 1, and should be ordered by remaining columns'
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -7296,7 +7277,7 @@ BEGIN
     'Results should not have a column 1, and ordering spec should work'
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -7312,7 +7293,7 @@ BEGIN
     'specifying that you want to order by a column without permissions is ignored'
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -7328,7 +7309,7 @@ BEGIN
     'ignore order by column without permissions, use one with permissions'
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -7349,7 +7330,7 @@ BEGIN
   RETURN NEXT throws_ok(
     format(
       $s$SELECT
-        msar.list_records_from_table(
+        pg_temp.list_records_from_table(
           tab_id => %s,
           limit_ => null,
           offset_ => null,
@@ -7371,7 +7352,7 @@ BEGIN
     'Records lister throws permission error when filtering on column without privilege'
   );
   RETURN NEXT is(
-    msar.list_records_from_table(
+    pg_temp.list_records_from_table(
       tab_id => rel_id,
       limit_ => null,
       offset_ => null,
@@ -7392,7 +7373,7 @@ BEGIN
   );
 
   RETURN NEXT is(
-    msar.search_records_from_table(
+    pg_temp.search_records_from_table(
       'search_table'::regclass::oid,
       jsonb_build_array(
         jsonb_build_object('attnum', 3, 'literal', 'bc')
@@ -7406,7 +7387,7 @@ BEGIN
     'search ignores unspecified columns without permissions'
   );
   RETURN NEXT is(
-    msar.search_records_from_table(
+    pg_temp.search_records_from_table(
       'search_table'::regclass::oid,
       jsonb_build_array(
         jsonb_build_object('attnum', 1, 'literal', 2),
@@ -7422,7 +7403,7 @@ BEGIN
   );
 
   RETURN NEXT throws_ok(
-    format('SELECT msar.delete_records_from_table(%s, ''[2, 3]'')', rel_id),
+    format('SELECT pg_temp.delete_records_from_table(%s, ''[2, 3]'')', rel_id),
     '42501',
     'permission denied for table atable',
     'Throw error when trying to delete without SELECT on id'
@@ -7430,7 +7411,7 @@ BEGIN
 
   RETURN NEXT throws_ok(
     format(
-      $s$SELECT msar.patch_record_in_table(
+      $s$SELECT pg_temp.patch_record_in_table(
         tab_id => %s,
         rec_id => 1,
         rec_def => '{"2": 10}'::jsonb
@@ -7444,7 +7425,7 @@ BEGIN
 
   RETURN NEXT throws_ok(
     format(
-      $s$SELECT msar.add_record_to_table(
+      $s$SELECT pg_temp.add_record_to_table(
         tab_id => %s,
         rec_def => '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'::jsonb
       );$s$,
@@ -7458,12 +7439,9 @@ BEGIN
 
   SET ROLE NONE;
   CREATE ROLE intern_students_only;
-  GRANT USAGE ON SCHEMA msar, __msar TO intern_students_only;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_students_only;
-  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO intern_students_only;
   GRANT SELECT ON TABLE "Students" TO intern_students_only;
   SET ROLE intern_students_only;
-  jsonb_result = msar.get_record_from_table(
+  jsonb_result = pg_temp.get_record_from_table(
     tab_id => '"Students"'::regclass::oid,
     rec_id => 4
   );
@@ -7478,7 +7456,7 @@ BEGIN
     'Record summaries are ignored when no access to linked tables'
   );
   RETURN NEXT is(
-    msar.get_record_from_table(
+    pg_temp.get_record_from_table(
       tab_id => '"Students"'::regclass::oid,
       rec_id => 4,
       table_record_summary_templates => jsonb_build_object(
@@ -7492,13 +7470,10 @@ BEGIN
 
   SET ROLE NONE;
   CREATE ROLE intern_no_access;
-  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_access;
-  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO intern_no_access;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_access;
   SET ROLE intern_no_access;
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.list_records_from_table(%s, null, null, null, null, null);',
+      'SELECT pg_temp.list_records_from_table(%s, null, null, null, null, null);',
       rel_id
     ),
     '42501',
@@ -7507,7 +7482,7 @@ BEGIN
   );
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.get_record_from_table(%s, 1, null, true);',
+      'SELECT pg_temp.get_record_from_table(%s, 1, null, true);',
       rel_id
     ),
     '42501',
@@ -7517,7 +7492,7 @@ BEGIN
 
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.search_records_from_table(%s, ''[{"attnum": 3, "literal": "bc"}]'', null);',
+      'SELECT pg_temp.search_records_from_table(%s, ''[{"attnum": 3, "literal": "bc"}]'', null);',
       'search_table'::regclass::oid
     ),
     '42501',
@@ -7526,7 +7501,7 @@ BEGIN
   );
   RETURN NEXT throws_ok(
     format(
-      'SELECT msar.search_records_from_table(%s, ''[]'', null);',
+      'SELECT pg_temp.search_records_from_table(%s, ''[]'', null);',
       'search_table'::regclass::oid
     ),
     '42501',
@@ -7545,7 +7520,7 @@ BEGIN
   CREATE TABLE anewone.mytab (col1 text);
   CREATE TABLE "12345" (bleh text, bleh2 numeric);
   CREATE TABLE tableno3 (id INTEGER);
-  object_counts = msar.get_object_counts();
+  object_counts = pg_temp.get_object_counts();
   RETURN NEXT is((object_counts ->> 'schema_count')::integer, 2);
   RETURN NEXT is((object_counts ->> 'table_count')::integer, 3);
   -- Can't check actual record count without a vacuum, since we just estimate based on catalog.
@@ -7557,11 +7532,11 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_downsize_table_sample() RETURNS SETOF TEXT AS $$
 BEGIN
-  RETURN NEXT is(msar.downsize_table_sample(100), 100::numeric);
-  RETURN NEXT is(msar.downsize_table_sample(50), 25::numeric);
-  RETURN NEXT is(msar.downsize_table_sample(5), 0.25::numeric);
-  RETURN NEXT is(msar.downsize_table_sample(1), 0.01::numeric);
-  RETURN NEXT is(msar.downsize_table_sample(0), 0::numeric);
+  RETURN NEXT is(pg_temp.downsize_table_sample(100), 100::numeric);
+  RETURN NEXT is(pg_temp.downsize_table_sample(50), 25::numeric);
+  RETURN NEXT is(pg_temp.downsize_table_sample(5), 0.25::numeric);
+  RETURN NEXT is(pg_temp.downsize_table_sample(1), 0.01::numeric);
+  RETURN NEXT is(pg_temp.downsize_table_sample(0), 0::numeric);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -7584,21 +7559,21 @@ BEGIN
   PERFORM __setup_numeric_infer();
   tab_id = 'numinfer'::regclass;
   RETURN NEXT is(
-    msar.find_numeric_separators(tab_id, 1::smallint, test_perc),
+    pg_temp.find_numeric_separators(tab_id, 1::smallint, test_perc),
     jsonb_populate_record(
-      null::msar.type_compat_details,
+      null::pg_temp.type_compat_details,
       jsonb_build_object('group_sep', ',', 'decimal_p', '.')
     )
   );
   RETURN NEXT is(
-    msar.find_numeric_separators(tab_id, 2::smallint, test_perc),
+    pg_temp.find_numeric_separators(tab_id, 2::smallint, test_perc),
     jsonb_populate_record(
-      null::msar.type_compat_details,
+      null::pg_temp.type_compat_details,
       jsonb_build_object('group_sep', '.', 'decimal_p', ',')
     )
   );
   RETURN NEXT throws_ok(
-    $s$SELECT msar.find_numeric_separators(
+    $s$SELECT pg_temp.find_numeric_separators(
         tab_id => 'numinfer'::regclass, col_id => '3'::smallint, test_perc => 100
     );$s$,
     'Too many grouping separators found!'
@@ -7609,12 +7584,12 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_cast_to_numeric() RETURNS SETOF TEXT AS $$
 BEGIN
-  RETURN NEXT is(msar.cast_to_numeric('0', ',', '.'), 0::numeric);
-  RETURN NEXT is(msar.cast_to_numeric('55', '.', ','), 55::numeric);
-  RETURN NEXT is(msar.cast_to_numeric('2345', ' ', ','), 2345::numeric);
-  RETURN NEXT is(msar.cast_to_numeric('1,00,000.5', ',', '.'), 100000.5::numeric);
-  RETURN NEXT is(msar.cast_to_numeric('555,234', '.', ','), 555.234::numeric);
-  RETURN NEXT is(msar.cast_to_numeric('2 345', ' ', ','), 2345::numeric);
+  RETURN NEXT is(pg_temp.cast_to_numeric('0', ',', '.'), 0::numeric);
+  RETURN NEXT is(pg_temp.cast_to_numeric('55', '.', ','), 55::numeric);
+  RETURN NEXT is(pg_temp.cast_to_numeric('2345', ' ', ','), 2345::numeric);
+  RETURN NEXT is(pg_temp.cast_to_numeric('1,00,000.5', ',', '.'), 100000.5::numeric);
+  RETURN NEXT is(pg_temp.cast_to_numeric('555,234', '.', ','), 555.234::numeric);
+  RETURN NEXT is(pg_temp.cast_to_numeric('2 345', ' ', ','), 2345::numeric);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -7642,60 +7617,60 @@ BEGIN
   PERFORM __setup_mathesar_money_inference();
   tab_id = 'moneyinfer'::regclass;
   RETURN NEXT is(
-    msar.find_mathesar_money_attrs(tab_id, 1::smallint, test_perc),
+    pg_temp.find_mathesar_money_attrs(tab_id, 1::smallint, test_perc),
     jsonb_populate_record(
-      null::msar.type_compat_details,
+      null::pg_temp.type_compat_details,
       jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '$', 'curr_suff', '')
     )
   );
   RETURN NEXT is(
-    msar.find_mathesar_money_attrs(tab_id, 2::smallint, test_perc),
+    pg_temp.find_mathesar_money_attrs(tab_id, 2::smallint, test_perc),
     jsonb_populate_record(
-      null::msar.type_compat_details,
+      null::pg_temp.type_compat_details,
       jsonb_build_object('group_sep', '.', 'decimal_p', ',', 'curr_pref', '€', 'curr_suff', '')
     )
   );
   RETURN NEXT is(
-    msar.find_mathesar_money_attrs(tab_id, 3::smallint, test_perc),
+    pg_temp.find_mathesar_money_attrs(tab_id, 3::smallint, test_perc),
     jsonb_populate_record(
-      null::msar.type_compat_details,
+      null::pg_temp.type_compat_details,
       jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', 'USD ', 'curr_suff', '')
     )
   );
   RETURN NEXT is(
-    msar.find_mathesar_money_attrs(tab_id, 4::smallint, test_perc),
+    pg_temp.find_mathesar_money_attrs(tab_id, 4::smallint, test_perc),
     jsonb_populate_record(
-      null::msar.type_compat_details,
+      null::pg_temp.type_compat_details,
       jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '₹', 'curr_suff', '')
     )
   );
   RETURN NEXT is(
-    msar.find_mathesar_money_attrs(tab_id, 5::smallint, test_perc),
+    pg_temp.find_mathesar_money_attrs(tab_id, 5::smallint, test_perc),
     jsonb_populate_record(
-      null::msar.type_compat_details,
+      null::pg_temp.type_compat_details,
       jsonb_build_object('group_sep', ',', 'decimal_p', '.', 'curr_pref', '', 'curr_suff', '')
     )
   );
   RETURN NEXT throws_ok(
-    $s$SELECT msar.find_mathesar_money_attrs(
+    $s$SELECT pg_temp.find_mathesar_money_attrs(
         tab_id => 'moneyinfer'::regclass, col_id => '6'::smallint, test_perc => 100
     );$s$,
     'Too many grouping separators found!'
   );
   RETURN NEXT throws_ok(
-    $s$SELECT msar.find_mathesar_money_attrs(
+    $s$SELECT pg_temp.find_mathesar_money_attrs(
         tab_id => 'moneyinfer'::regclass, col_id => '7'::smallint, test_perc => 100
     );$s$,
     'Too many decimal separators found!'
   );
   RETURN NEXT throws_ok(
-    $s$SELECT msar.find_mathesar_money_attrs(
+    $s$SELECT pg_temp.find_mathesar_money_attrs(
         tab_id => 'moneyinfer'::regclass, col_id => '8'::smallint, test_perc => 100
     );$s$,
     'Too many currency prefixes found!'
   );
   RETURN NEXT throws_ok(
-    $s$SELECT msar.find_mathesar_money_attrs(
+    $s$SELECT pg_temp.find_mathesar_money_attrs(
         tab_id => 'moneyinfer'::regclass, col_id => '9'::smallint, test_perc => 100
     );$s$,
     'Too many currency suffixes found!'
@@ -7710,7 +7685,7 @@ BEGIN
   PERFORM __setup_mathesar_money_inference();
   RETURN NEXT results_eq(
     $q$
-      SELECT array_agg(msar.cast_to_mathesar_money(us_loc, ',', '.', '$', ''))
+      SELECT array_agg(pg_temp.cast_to_mathesar_money(us_loc, ',', '.', '$', ''))
       FROM moneyinfer
     $q$,
     $v$
@@ -7721,7 +7696,7 @@ BEGIN
   );
   RETURN NEXT results_eq(
     $q$
-      SELECT array_agg(msar.cast_to_mathesar_money(de_loc, '.', ',', '€', ''))
+      SELECT array_agg(pg_temp.cast_to_mathesar_money(de_loc, '.', ',', '€', ''))
       FROM moneyinfer
     $q$,
     $v$
@@ -7732,7 +7707,7 @@ BEGIN
   );
   RETURN NEXT results_eq(
     $q$
-      SELECT array_agg(msar.cast_to_mathesar_money(us_loc_verbose, ',', '.', 'USD ', ''))
+      SELECT array_agg(pg_temp.cast_to_mathesar_money(us_loc_verbose, ',', '.', 'USD ', ''))
       FROM moneyinfer
     $q$,
     $v$
@@ -7743,7 +7718,7 @@ BEGIN
   );
   RETURN NEXT results_eq(
     $q$
-      SELECT array_agg(msar.cast_to_mathesar_money(in_loc, ',', '.', '₹', ''))
+      SELECT array_agg(pg_temp.cast_to_mathesar_money(in_loc, ',', '.', '₹', ''))
       FROM moneyinfer
     $q$,
     $v$
@@ -7754,7 +7729,7 @@ BEGIN
   );
   RETURN NEXT results_eq(
     $q$
-      SELECT array_agg(msar.cast_to_mathesar_money(no_curr, ',', '.', '', ''))
+      SELECT array_agg(pg_temp.cast_to_mathesar_money(no_curr, ',', '.', '', ''))
       FROM moneyinfer
     $q$,
     $v$
@@ -7766,7 +7741,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.list_by_record_summaries --------------------------------------------------------------------
+-- pg_temp.list_by_record_summaries --------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_list_by_record_summaries()
 RETURNS SETOF TEXT AS $$
@@ -7779,7 +7754,7 @@ BEGIN
 
   -- Empty table behavior
   RETURN NEXT is(
-    msar.list_by_record_summaries('vehicles'::regclass, 10, 0),
+    pg_temp.list_by_record_summaries('vehicles'::regclass, 10, 0),
     '{"count": 0, "mapping": null, "results": []}'::jsonb
   );
 
@@ -7822,7 +7797,7 @@ BEGIN
   
   -- Basic test
   RETURN NEXT is(
-    msar.list_by_record_summaries('vehicles'::regclass, 2, 0),
+    pg_temp.list_by_record_summaries('vehicles'::regclass, 2, 0),
     '{
       "count": 8,
       "mapping": null,
@@ -7834,7 +7809,7 @@ BEGIN
   );
 
   RETURN NEXT is(
-    msar.list_by_record_summaries(
+    pg_temp.list_by_record_summaries(
       'vehicles'::regclass, 2, 0,
       linked_record_path => jsonb_build_object(
         'record_pkey', 2,
@@ -7862,7 +7837,7 @@ BEGIN
 
   -- Pagination
   RETURN NEXT is(
-    msar.list_by_record_summaries(
+    pg_temp.list_by_record_summaries(
       'vehicles'::regclass, 3, 3,
       linked_record_path => jsonb_build_object(
         'record_pkey', 2,
@@ -7895,7 +7870,7 @@ BEGIN
 
   -- Search query
   RETURN NEXT is(
-    msar.list_by_record_summaries('vehicles'::regclass, 2, 0, 'cycle'),
+    pg_temp.list_by_record_summaries('vehicles'::regclass, 2, 0, 'cycle'),
     '{
       "count": 3,
       "mapping": null,
@@ -7908,13 +7883,13 @@ BEGIN
 
   -- Empty search query
   RETURN NEXT is(
-    msar.list_by_record_summaries('vehicles'::regclass, 2, 0, 'NOPE'),
+    pg_temp.list_by_record_summaries('vehicles'::regclass, 2, 0, 'NOPE'),
     '{"count": 0, "mapping": null, "results": []}'
   );
 
   -- Search in custom record summary template
   RETURN NEXT is(
-    msar.list_by_record_summaries(
+    pg_temp.list_by_record_summaries(
       'vehicles'::regclass,
       2,
       0,
@@ -7926,7 +7901,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- msar.form_insert -------------------------------------------------------------------------------
+-- pg_temp.form_insert -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION __setup_items_books_authors_insert() RETURNS SETOF TEXT AS $$
 BEGIN
@@ -8099,7 +8074,7 @@ BEGIN
     }
   }$j$;
 
-  PERFORM msar.form_insert(field_info_list, values_); -- INSERT function call
+  PERFORM pg_temp.form_insert(field_info_list, values_); -- INSERT function call
 
   SELECT jsonb_agg(to_jsonb(a)) FROM "Authors" a INTO authors_table_record;
   SELECT jsonb_agg(to_jsonb(b)) FROM "Books" b INTO books_table_record;
@@ -8188,7 +8163,7 @@ BEGIN
     "_id-3ac54a1c-b3f2-4519-bdf6-bff188b0c482": "https://johndoebooks.com"
   }$j$;
 
-  PERFORM msar.form_insert(field_info_list, values_);
+  PERFORM pg_temp.form_insert(field_info_list, values_);
 
   SELECT jsonb_agg(to_jsonb(a)) FROM "Authors" a INTO authors_table_record;
 
@@ -8269,7 +8244,7 @@ BEGIN
   }$j$;
 
   RETURN NEXT throws_ok(
-    format('SELECT msar.form_insert(%L, %L)', field_info_list, values_),
+    format('SELECT pg_temp.form_insert(%L, %L)', field_info_list, values_),
     'Inserting into a column with foreign key constraints referencing multiple columns is currently unsupported.'
   );
 END;
@@ -8307,7 +8282,7 @@ BEGIN
   PERFORM __setup_files_table_with_bad_mash();
   tab_a_oid := 'a'::regclass::oid;
 
-  PERFORM msar.reset_mash(tab_a_oid, 3::smallint, uri_mash_map);
+  PERFORM pg_temp.reset_mash(tab_a_oid, 3::smallint, uri_mash_map);
 
   SELECT jsonb_agg(to_jsonb(a)) FROM a INTO results;
 
