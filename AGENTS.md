@@ -115,3 +115,4 @@ The docs are a map. The code is the truth: when they disagree, trust the code an
 Standards written for humans that also bind you: `mathesar_ui/STANDARDS.md` (front end code), `db/sql/STANDARDS.md` (SQL), `docs/STYLE_GUIDE.md` (user docs).
 
 How this folder is organized and kept current: `agents/README.md`.
+
