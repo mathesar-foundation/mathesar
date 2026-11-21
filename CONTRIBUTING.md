@@ -63,7 +63,7 @@ You're welcome to use AI coding assistants. What matters is the result and the p
 - **An agent may open your PR as a draft.** The agent adds a short header that says who drove the PR and which agent raised it. Review the PR and edit the description before you mark it ready for review. Your description must follow these rules from the moment you ask for review.
 - **Talk to us yourself.** Keep PR descriptions, issue comments and review replies short and in your own words. Don't paste generated text. The only exceptions are the agent's header and the agent's replies to bots that you approved. This applies to contributors, not maintainers.
 - **Agents don't join the conversation.** An agent never posts a comment of its own and never replies to a person. It may open an issue, or reply to a bot's review comment such as CodeRabbit's, once you approve the text. This applies to maintainers too.
-- **Maintainers** may open PRs through agents, as drafts or ready for review. They review the PR themselves first.
+- **Maintainers** may open PRs through agents. The agent opens them ready for review, unless the maintainer asks for a draft. They review the PR themselves first.
 - **The usual process still applies.** Pick a "help wanted" issue, run Mathesar locally and keep PRs small.
 - **Respect reviewers' time.** A PR should be worth more to the project than the time it takes to review. We may close PRs that look unreviewed or untested without a detailed review. For example: code that doesn't run, changes unrelated to the issue, or review replies that look copied from a tool.
 
