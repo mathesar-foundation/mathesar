@@ -1,7 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { type JSHandle, type Locator, type Page, expect } from '@playwright/test';
+import {
+  type JSHandle,
+  type Locator,
+  type Page,
+  type Request,
+  type Route,
+  expect,
+} from '@playwright/test';
 
 import type { Schema } from '../../api/mathesar';
 import { holdRequests } from '../../held-requests';
@@ -70,7 +77,7 @@ export class ImportUploadPage {
       name: 'Processing Data',
     });
     this.processingWarning = page.getByText(
-      /^Large data sets can sometimes take several minutes to process\./,
+      'Large data sets can sometimes take several minutes to process.',
     );
     this.errors = page.locator('.error-box').getByRole('listitem');
     this.fileInput = dataSource.locator('input[type="file"]');
@@ -124,6 +131,18 @@ export class ImportUploadPage {
   /** Keeps uploads unfinished until the returned function is called. */
   holdUploads(): Promise<() => void> {
     return holdRequests(this.page, '**/api/db/v0/data_files/');
+  }
+
+  /** Answers the uploads of files and of pasted text in place of the server. */
+  async answerUploads(answer: (route: Route) => Promise<void>): Promise<void> {
+    await this.page.route('**/api/db/v0/data_files/', answer);
+  }
+
+  /** Resolves when the browser drops an upload before its response, as a cancelled upload does. */
+  waitForAbortedUpload(): Promise<Request> {
+    return this.page.waitForEvent('requestfailed', (request) =>
+      request.url().endsWith('/api/db/v0/data_files/'),
+    );
   }
 
   private dataTransferWith(filePath: string): Promise<JSHandle<DataTransfer>> {
