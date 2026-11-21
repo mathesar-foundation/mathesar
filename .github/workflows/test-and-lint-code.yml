@@ -28,14 +28,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: |
-            *.py
-            mathesar/**
-            db/**
-            requirements.txt
-            requirements-dev.txt
+        run: |
+          any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --match '[^/]+\.py|mathesar/.*|db/.*|requirements(-dev)?\.txt')
+          echo "any_changed=$any_changed" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
@@ -48,12 +46,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: |
-            **.py
-            requirements.txt
-            requirements-dev.txt
+        run: |
+          any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --match '.*\.py|requirements(-dev)?\.txt')
+          echo "any_changed=$any_changed" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
@@ -66,9 +64,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: '**.sql'
+        run: |
+          any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --match '.*\.sql')
+          echo "any_changed=$any_changed" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
@@ -81,9 +82,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: 'mathesar_ui/**'
+        run: |
+          any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --match 'mathesar_ui/.*')
+          echo "any_changed=$any_changed" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
@@ -96,12 +100,37 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: |
-            **.yml
-            **.sh
-            Dockerfile*
+        run: |
+          any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --match '.*\.yml|.*\.sh|Dockerfile[^/]*')
+          echo "any_changed=$any_changed" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+      - name: echo
+        run: echo "${{ steps.changed_files.outputs.any_changed }}"
+
+  # Unlike the checkers above, this one lists the paths that do NOT need the
+  # jobs, in .github/build-skip-paths.txt. It also fails if that list overlaps
+  # the build inputs. The merge queue always runs the build jobs.
+  build_required:
+    name: Check for file changes requiring build and install tests
+    runs-on: ubuntu-latest
+    outputs:
+      builds_should_run: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        run: |
+          always=()
+          if [[ "${{ github.event_name }}" == "merge_group" ]]; then
+            always=(--always)
+          fi
+          any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --build-skip-list .github/build-skip-paths.txt "${always[@]}")
+          echo "any_changed=$any_changed" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
       - name: echo
         run: echo "${{ steps.changed_files.outputs.any_changed }}"
 
@@ -229,7 +258,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python_lint_required, all_be_tests_required]
     if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
-        needs.all_be_tests_required.outputs.tests_should_run
+        needs.all_be_tests_required.outputs.tests_should_run == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -400,6 +429,8 @@ jobs:
   build_tests:
     name: Build mathesar
     runs-on: ubuntu-latest
+    needs: build_required
+    if: needs.build_required.outputs.builds_should_run == 'true'
     strategy:
       matrix:
         target: [production, development]
@@ -427,6 +458,8 @@ jobs:
   package:
     name: Package mathesar
     runs-on: ubuntu-latest
+    needs: build_required
+    if: needs.build_required.outputs.builds_should_run == 'true'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -599,6 +632,7 @@ jobs:
       - sql_tests_required
       - front_end_checks_required
       - all_be_tests_required
+      - build_required
       # Backend tests
       - python_tests
       - sql_tests
@@ -618,6 +652,22 @@ jobs:
     steps:
       - name: Check Dependency Results
         run: |
+          # A checker that failed has no outputs, which would read as "nothing
+          # to run". Fail instead.
+          for result in \
+            "${{ needs.python_tests_required.result }}" \
+            "${{ needs.python_lint_required.result }}" \
+            "${{ needs.sql_tests_required.result }}" \
+            "${{ needs.front_end_checks_required.result }}" \
+            "${{ needs.all_be_tests_required.result }}" \
+            "${{ needs.build_required.result }}"
+          do
+            if [[ "$result" != "success" ]]; then
+              echo "One or more file change checkers failed."
+              exit 1
+            fi
+          done
+
           # Check "all_be_tests_required" conditions
           if [[ "${{ needs.all_be_tests_required.outputs.tests_should_run }}" == "true" ]]; then
             if [[ "${{ needs.python_tests.result }}" != "success"
@@ -667,22 +717,20 @@ jobs:
             fi
           fi
 
-          # Check if build succeeds
-          if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
-            echo "Build failed."
-            exit 1
-          fi
-
-          # Check if package succeeds
-          if [[ "${{ needs.package.result }}" != "success" ]]; then
-            echo "Packaging failed."
-            exit 1
-          fi
-
-          # Check if installation succeeds
-          if [[ "${{ needs.install.result }}" != "success" ]]; then
-            echo "Install from script failed."
-            exit 1
+          # Check "build_required" conditions
+          if [[ "${{ needs.build_required.outputs.builds_should_run }}" == "true" ]]; then
+            if [[ "${{ needs.build_tests.result }}" != "success" ]]; then
+              echo "Build failed."
+              exit 1
+            fi
+            if [[ "${{ needs.package.result }}" != "success" ]]; then
+              echo "Packaging failed."
+              exit 1
+            fi
+            if [[ "${{ needs.install.result }}" != "success" ]]; then
+              echo "Install from script failed."
+              exit 1
+            fi
           fi
       - name: Report success
         run: echo "All tests succeeded or skipped!"

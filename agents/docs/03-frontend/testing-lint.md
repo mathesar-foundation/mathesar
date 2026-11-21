@@ -45,7 +45,7 @@ Measured on a 4-core sandbox (Ubuntu 24.04, Node 22):
 - Each job uses Node 18. The format, lint, type check and test jobs run `npm ci --no-audit --prefer-offline`, then one command.
 - Job timeouts: 5 minutes for format, lint, type check and audit. 15 minutes for tests.
 - `front_end_audit` runs an npm audit action at level `moderate` on production dependencies with `continue-on-error: true`.
-- `build_tests` builds the Docker image for the `production` and `development` targets on every pull request. The production target runs `build-scripts/package/package.py`, which runs `npm ci` and `npm run build`. A broken Vite build fails there.
+- `build_tests` builds the Docker image for the `production` and `development` targets on every pull request that changes a path outside `.github/build-skip-paths.txt`, and always in the merge queue. The production target runs `build-scripts/package/package.py`, which runs `npm ci` and `npm run build`. A broken Vite build fails there.
 - `package` runs the same script outside Docker with Node 18.
 - The `checkpoint` job fails the pull request if any required job failed.
 - No CI job runs the scripts in `mathesar_ui/scripts/i18n/`.
