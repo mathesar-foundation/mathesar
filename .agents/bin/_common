@@ -106,21 +106,33 @@ write_build_context() {
 prepare_docker_build() {
   PYTHON_BASE_TAG="${PYTHON_VERSION:-3.14-bookworm}"
   DOCKER_BUILD_FLAGS=()
-  local ca_bundle="${MATHESAR_BUILD_CA_BUNDLE:-${SSL_CERT_FILE:-}}" context ca_store
-  if [ -z "${HTTPS_PROXY:-}" ] || [ ! -f "$ca_bundle" ]; then return; fi
-  log "Proxy detected: building with a base image that trusts $ca_bundle"
+  if ! build_runs_behind_proxy; then return; fi
+  log "Proxy detected: building with a base image that trusts $(proxy_ca_bundle)"
+  add_proxy_ca_to_image "python:$PYTHON_BASE_TAG" "python:$PYTHON_BASE_TAG-proxyca"
+  PYTHON_BASE_TAG="$PYTHON_BASE_TAG-proxyca"
+  DOCKER_BUILD_FLAGS=(--network host --build-arg "HTTPS_PROXY=$HTTPS_PROXY" --build-arg "https_proxy=$HTTPS_PROXY")
+}
+
+proxy_ca_bundle() {
+  echo "${MATHESAR_BUILD_CA_BUNDLE:-${SSL_CERT_FILE:-}}"
+}
+
+build_runs_behind_proxy() {
+  [ -n "${HTTPS_PROXY:-}" ] && [ -f "$(proxy_ca_bundle)" ]
+}
+
+# Builds the image <tag> from <image>, with the CA of the proxy in its trust store.
+add_proxy_ca_to_image() {
+  local image=$1 tag=$2 context ca_store=/etc/ssl/certs/ca-certificates.crt
   context=$(mktemp -d)
-  ca_store=/etc/ssl/certs/ca-certificates.crt
-  cp "$ca_bundle" "$context/proxy-ca.crt"
+  cp "$(proxy_ca_bundle)" "$context/proxy-ca.crt"
   {
-    echo "FROM python:$PYTHON_BASE_TAG"
+    echo "FROM $image"
     echo "COPY proxy-ca.crt /usr/local/share/ca-certificates/build-proxy-ca.crt"
     echo "RUN update-ca-certificates"
     echo "ENV SSL_CERT_FILE=$ca_store REQUESTS_CA_BUNDLE=$ca_store PIP_CERT=$ca_store"
     echo "ENV NODE_EXTRA_CA_CERTS=$ca_store CURL_CA_BUNDLE=$ca_store"
   } >"$context/Dockerfile"
-  PYTHON_BASE_TAG="$PYTHON_BASE_TAG-proxyca"
-  docker build -q -t "python:$PYTHON_BASE_TAG" "$context" >/dev/null
+  docker build -q -t "$tag" "$context" >/dev/null
   rm -rf "$context"
-  DOCKER_BUILD_FLAGS=(--network host --build-arg "HTTPS_PROXY=$HTTPS_PROXY" --build-arg "https_proxy=$HTTPS_PROXY")
 }

@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Run the end-to-end tests in e2e/ (Playwright) from a sandbox. They drive the
+# production Docker Compose setup, built from this working tree. See e2e/README.md.
+#
+# Usage: .agents/bin/e2e <command>
+#   up             Build the Mathesar images and the test runner, and start the stack.
+#                  Safe to re-run: run it again after a change to the app. Data is kept.
+#   run [args]     Run the tests against that stack, starting it if needed. Args go to
+#                  `playwright test`, for example: run tests/table --grep paste
+#   dev [args]     Run the tests against the native dev servers (.agents/bin/start)
+#                  instead. No image build, but also not the production build.
+#   down           Stop the stack and delete its data.
+#   logs [service] Show recent logs: service, db or caddy-reverse-proxy.
+#
+# The stack uses the container names of docker-compose.yml, as .agents/bin/prod
+# does. Only one of the two can run at a time.
+# Reports go to e2e/playwright-report/, failure screenshots to e2e/test-results/.
+set -euo pipefail
+
+# shellcheck source=.agents/bin/_common
+source "$(dirname "${BASH_SOURCE[0]}")/_common"
+
+RUNNER_IMAGE=mathesar/mathesar-e2e
+
+usage() { sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+
+compose() {
+  without_dev_env docker compose -f docker-compose.yml -f e2e/docker-compose.yml "$@"
+}
+
+fail_if_another_stack_runs() {
+  if docker ps -a --format '{{.Names}} {{.Label "com.docker.compose.project"}}' \
+      | grep -E '^mathesar_(service|db) ' | grep -qv ' mathesar-e2e$'; then
+    die "another Mathesar stack uses the container names. Stop it first, for example: .agents/bin/prod down"
+  fi
+}
+
+# The images get the names that e2e/docker-compose.yml expects. Building them
+# here, not through compose, also works behind a proxy that re-signs TLS.
+build_stack_images() {
+  local context_tar="$RUN_DIR/e2e-context.tar"
+  mkdir -p "$RUN_DIR"
+  write_build_context "$context_tar"
+  log "Building the Mathesar images. Log: $RUN_DIR/e2e-build.log"
+  {
+    docker build "${DOCKER_BUILD_FLAGS[@]}" --build-arg "PYTHON_VERSION=$PYTHON_BASE_TAG" \
+      --target production -t mathesar/mathesar:e2e - <"$context_tar" \
+    && docker build "${DOCKER_BUILD_FLAGS[@]}" --build-arg "BASE_IMAGE=python:$PYTHON_BASE_TAG" \
+      -f Dockerfile.caddy -t mathesar/mathesar-caddy:e2e - <"$context_tar"
+  } >"$RUN_DIR/e2e-build.log" 2>&1 \
+    || { tail -n 40 "$RUN_DIR/e2e-build.log" >&2; die "the image build failed"; }
+  rm -f "$context_tar"
+}
+
+build_runner_image() {
+  local playwright_image
+  playwright_image=$(sed -n 's/^ARG PLAYWRIGHT_IMAGE=//p' e2e/Dockerfile)
+  if build_runs_behind_proxy; then
+    add_proxy_ca_to_image "$playwright_image" "$playwright_image-proxyca"
+    playwright_image="$playwright_image-proxyca"
+  fi
+  docker build -q "${DOCKER_BUILD_FLAGS[@]}" --build-arg "PLAYWRIGHT_IMAGE=$playwright_image" \
+    -t "$RUNNER_IMAGE" e2e >/dev/null || die "the test runner image build failed"
+}
+
+up() {
+  ensure_docker_running
+  fail_if_another_stack_runs
+  prepare_docker_build
+  build_stack_images
+  build_runner_image
+  log "Starting the stack"
+  compose up -d --wait --wait-timeout 300 \
+    || { compose logs --tail 40 service >&2; die "the stack did not become healthy"; }
+}
+
+stack_is_running() {
+  [ -n "$(compose ps -q service 2>/dev/null)" ]
+}
+
+run() {
+  ensure_docker_running
+  stack_is_running || up
+  compose run --rm e2e "$@"
+}
+
+# The runner joins the network of the host, where the dev servers and their
+# PostgreSQL listen. The second mount keeps the packages installed in the image.
+dev() {
+  ensure_docker_running
+  load_dev_env
+  curl -fsS -o /dev/null "$MATHESAR_URL/healthz/live/" \
+    || die "No dev servers at $MATHESAR_URL. Run .agents/bin/start first."
+  prepare_docker_build
+  build_runner_image
+  docker run --rm --ipc=host --network host \
+    -v "$REPO_ROOT/e2e:/e2e" -v /e2e/node_modules \
+    -e MATHESAR_URL -e MATHESAR_USER -e MATHESAR_PASSWORD \
+    -e "E2E_POSTGRES_HOST=$POSTGRES_HOST" -e "E2E_POSTGRES_PORT=$POSTGRES_PORT" \
+    -e "E2E_POSTGRES_USER=$POSTGRES_USER" -e "E2E_POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
+    -e "E2E_POSTGRES_HOST_FROM_MATHESAR=$POSTGRES_HOST" \
+    -e "E2E_POSTGRES_PORT_FROM_MATHESAR=$POSTGRES_PORT" \
+    -e E2E_VISUAL_TESTS= -e E2E_ALL_BROWSERS \
+    "$RUNNER_IMAGE" "$@"
+}
+
+command=${1:-}
+shift || true
+case "$command" in
+  up) up ;;
+  run) run "$@" ;;
+  dev) dev "$@" ;;
+  down) ensure_docker_running; compose down --volumes ;;
+  logs) compose logs --tail 200 "$@" ;;
+  -h|--help|help) usage ;;
+  *) usage >&2; exit 2 ;;
+esac

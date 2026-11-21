@@ -1,0 +1,100 @@
+## This workflow runs the end-to-end tests in e2e/ against the production
+## Docker Compose setup, with images built from the tested commit. See
+## e2e/README.md.
+##
+## It is not part of the required `checkpoint` job of the "Test and Lint Code"
+## workflow.
+
+name: End-to-end tests
+on: [pull_request, merge_group]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # The tests are needed when a change can affect the built product, which is
+  # the rule of the build jobs in test-and-lint-code.yml, or when it changes
+  # the tests themselves.
+  e2e_tests_required:
+    name: Check for file changes requiring end-to-end tests
+    runs-on: ubuntu-latest
+    outputs:
+      tests_should_run: ${{ steps.changed_files.outputs.tests_should_run }}
+      checks_should_run: ${{ steps.changed_files.outputs.checks_should_run }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        run: |
+          always=()
+          if [[ "${{ github.event_name }}" == "merge_group" ]]; then
+            always=(--always)
+          fi
+          product_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --build-skip-list .github/build-skip-paths.txt "${always[@]}")
+          tests_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --match 'e2e/.*')
+          if [[ "$product_changed" == "true" || "$tests_changed" == "true" ]]; then
+            echo "tests_should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tests_should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "checks_should_run=$tests_changed" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+
+  e2e_checks:
+    name: Check end-to-end test code
+    runs-on: ubuntu-latest
+    needs: e2e_tests_required
+    if: needs.e2e_tests_required.outputs.checks_should_run == 'true'
+    defaults:
+      run:
+        working-directory: ./e2e
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - run: npm ci --no-audit
+      - run: npm run check-format
+      - run: npm run lint
+      - run: npm run typecheck
+
+  e2e_tests:
+    name: Run end-to-end tests
+    runs-on: ubuntu-latest
+    needs: e2e_tests_required
+    if: needs.e2e_tests_required.outputs.tests_should_run == 'true'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    env:
+      COMPOSE: docker compose -f docker-compose.yml -f e2e/docker-compose.yml
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the images
+        run: $COMPOSE --profile e2e build
+      - name: Run the tests
+        run: $COMPOSE run --rm e2e --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        env:
+          CI: true
+      - name: Show the logs of the Mathesar service
+        if: failure()
+        run: $COMPOSE logs service
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-${{ matrix.shard }}
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 7
