@@ -213,7 +213,7 @@ Taken from maintainer comments on closed and revised PRs:
 
 ## AI-assisted work
 
-The project has no written policy on AI-generated contributions. Maintainers have stated the working rule in reviews: AI help is acceptable, and the author must understand, test, review and clean up the result. Unreviewed output gets the PR closed.
+The policy for contributors is "Using AI tools" in `CONTRIBUTING.md`: AI help is welcome, and the person must understand, test, review and clean up the result. Unreviewed output gets the PR closed.
 
 For an agent this means:
 
