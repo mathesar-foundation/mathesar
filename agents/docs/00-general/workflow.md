@@ -101,7 +101,11 @@ Driven by @<GitHub login of the person>, raised by <your name>.
 - **Human involvement:** <level> of 5. <one or two sentences of evidence>
 
 </details>
+
+---
 ```
+
+A horizontal rule (`---`) on its own line separates the header from the description. Anything a tool puts above the header, such as a "Requested by" line, stays above it, so the rule falls between all of that and the description.
 
 The **Human involvement** line is for external contributors only. Leave it out when the person you work for is a maintainer.
 
