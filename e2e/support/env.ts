@@ -20,4 +20,9 @@ export const env = {
     host: fromEnv('E2E_POSTGRES_HOST_FROM_MATHESAR', 'mathesar_db'),
     port: Number(fromEnv('E2E_POSTGRES_PORT_FROM_MATHESAR', '5432')),
   },
+  /**
+   * Names the roles of a run, so that its teardown drops them and no others.
+   * Set when the config loads this file. The workers inherit it.
+   */
+  runId: (process.env.E2E_RUN_ID ??= crypto.randomUUID().slice(0, 8)),
 };

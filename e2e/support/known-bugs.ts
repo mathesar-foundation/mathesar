@@ -1,10 +1,8 @@
 import type { TestDetails } from '@playwright/test';
 
 /**
- * Details for a test that asserts behaviour which is wrong today, so that a
- * rewrite of the front end does not change it unnoticed. The bug and the
- * correct behaviour are described under the same id in KNOWN_BUGS.md, next to
- * a `test.fixme` that asserts the correct behaviour.
+ * Marks a test that asserts behaviour which is wrong today. KNOWN_BUGS.md describes
+ * the bug under the same id; a `test.fixme` next to the test asserts the correct one.
  */
 export function pinsKnownBug(id: string): TestDetails {
   return {

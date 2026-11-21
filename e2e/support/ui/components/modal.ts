@@ -1,4 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
+import { expectStaysOpen } from './transitions';
 
 /** A modal window, found by its title. */
 export class Modal {
@@ -24,8 +25,9 @@ export class Modal {
     await this.root.locator('[data-window-area="title-bar"] button').click();
   }
 
+  /** A closing modal stays visible during its outro: this checks that it stays. */
   async expectOpen(): Promise<void> {
-    await expect(this.root).toBeVisible();
+    await expectStaysOpen(this.root);
   }
 
   async expectClosed(): Promise<void> {

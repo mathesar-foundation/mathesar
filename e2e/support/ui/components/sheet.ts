@@ -1,5 +1,7 @@
 import { type Locator, type Page, expect } from '@playwright/test';
 
+import { fillFormattedInput } from './formatted-input';
+
 function xpathString(text: string): string {
   if (!text.includes('"')) return `"${text}"`;
   return `concat(${text
@@ -9,10 +11,8 @@ function xpathString(text: string): string {
 }
 
 /**
- * The spreadsheet-like grid of the table page.
- *
- * Only the rows near the viewport are in the DOM. Use small tables, or scroll,
- * filter or sort, to bring a record into view.
+ * The spreadsheet-like grid of the table page. Only the rows near the viewport are in
+ * the DOM: use small tables, or scroll, filter or sort to bring a record into view.
  */
 export class Sheet {
   readonly columnHeaders: Locator;
@@ -34,6 +34,8 @@ export class Sheet {
   readonly originCell: Locator;
   readonly newColumnButton: Locator;
   readonly scroller: Locator;
+  /** The rows area of the sheet. It can take the focus, away from the cells. */
+  readonly body: Locator;
 
   constructor(
     private readonly page: Page,
@@ -68,6 +70,7 @@ export class Sheet {
     this.originCell = root.locator('[data-sheet-element="origin-cell"]');
     this.newColumnButton = root.getByRole('button', { name: 'New Column' });
     this.scroller = root.locator('[data-sheet-body-element="list"]');
+    this.body = root.locator('[data-sheet-element="body"]');
   }
 
   columnHeader(name: string): Locator {
@@ -146,6 +149,13 @@ export class Sheet {
       .dragTo(this.columnHeader(onto));
   }
 
+  /** A selected column dropped on the corner cell moves to the front. */
+  async dragColumnHeaderToCorner(columnName: string): Promise<void> {
+    await this.columnHeader(columnName)
+      .locator('.draggable')
+      .dragTo(this.originCell);
+  }
+
   errorIndicator(cell: Locator): Locator {
     return cell.locator('.error-indicator');
   }
@@ -158,6 +168,14 @@ export class Sheet {
     await this.page.keyboard.press('Enter');
   }
 
+  /** `editCell` for an editor that formats what the user types, such as a number or a date. */
+  async editFormattedCell(cell: Locator, value: string): Promise<void> {
+    await cell.click();
+    await this.page.keyboard.press('Enter');
+    await fillFormattedInput(this.editor, value);
+    await this.page.keyboard.press('Enter');
+  }
+
   async dragBetween(from: Locator, to: Locator): Promise<void> {
     await from.hover();
     await this.page.mouse.down();
@@ -165,9 +183,26 @@ export class Sheet {
     await this.page.mouse.up();
   }
 
+  /**
+   * Right-clicks where a cell is, also while an open context menu covers the
+   * sheet and takes the click.
+   */
+  async rightClickAt(cell: Locator): Promise<void> {
+    const box = await cell.boundingBox();
+    if (!box) throw new Error('The cell is not on the page');
+    await this.page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {
+      button: 'right',
+    });
+  }
+
   /** The frame drawn around the active cell. It is stronger while the cell has the focus. */
   activeCellIndicator(): Locator {
     return this.activeCell.locator('.active-indicator');
+  }
+
+  /** The moving frame of the active cell while "Select Cell Range" waits for the end of the range. */
+  cellRangeIndicator(): Locator {
+    return this.activeCell.locator('.active-indicator.is-selecting-cell-range');
   }
 
   /** The element of a cell that holds the keyboard focus while the cell is not edited. */
@@ -178,6 +213,11 @@ export class Sheet {
   /** Keyboard use of the sheet needs the focus to be on the active cell. */
   async expectFocusOnActiveCell(): Promise<void> {
     await expect(this.focusTarget(this.activeCell)).toBeFocused();
+  }
+
+  /** How far the records are scrolled down, in pixels. */
+  async scrollTop(): Promise<number> {
+    return this.scroller.evaluate((list) => list.scrollTop);
   }
 
   private resolveRow(row: number | Locator): Locator {

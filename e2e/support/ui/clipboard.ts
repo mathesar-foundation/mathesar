@@ -11,3 +11,26 @@ export async function writeClipboardText(
 ): Promise<void> {
   await page.evaluate((value) => navigator.clipboard.writeText(value), text);
 }
+
+/**
+ * Puts cells on the clipboard the way a copy in Mathesar does: the plain text,
+ * and an HTML table that carries the cells as JSON.
+ */
+export async function writeMathesarClipboard(
+  page: Page,
+  cells: unknown,
+  text: string,
+): Promise<void> {
+  const content = encodeURIComponent(JSON.stringify(cells));
+  const html = `<table data-mathesar-content="${content}"></table>`;
+  await page.evaluate(
+    ({ html, text }) =>
+      navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([text], { type: 'text/plain' }),
+        }),
+      ]),
+    { html, text },
+  );
+}
