@@ -130,11 +130,19 @@ Rules for the level:
 
 ### The description
 
-The description is for people. It tells a reader why the PR exists, and tells a reviewer what they need to know to review it.
+The description is for people. It says what the PR does and why. It is a public record that anyone may read now or years later.
 
-- Say what the PR does and why, in a few plain sentences. For a bug, say what was wrong and what caused it.
-- Then add only what a reviewer needs: what the PR does not do, decisions you want a second opinion on, where to look closely, how to test it locally. Leave out what the diff already shows.
+- Say what the PR does and why. For a bug, say what was wrong and what caused it.
+- Then add only what a reviewer needs: what the PR does not do, where to look closely, how to test it locally. Leave out what the diff already shows.
 - Length follows the change. A small fix gets one or two sentences.
+- Prefer short bullet points to paragraphs. One point per bullet, one or two lines each. Use a paragraph only for a sentence or two of context.
+- Use plain words. Name things as a user or maintainer would, not by internal ids or session terms.
+
+The description is not a message to the person you work for or to the team. Leave out:
+
+- Asides, offers and questions addressed to the reader: "Happy to change this if you prefer", "Let me know if ...", "I can also ...". Ask the person in your chat instead. If they want it in the PR, they will say so.
+- Justifications of choices written as a reply: "I left it as is to keep the diff small". If a reviewer needs to know about a choice, state it as a fact about the PR: "The check name keeps the existing pattern."
+- Anything from your chat with the person: what they asked for, what you discussed, what was tried and dropped, the order in which the work happened, their feedback on earlier drafts. That history is for the two of you. Readers need only the result.
 - Write in the style of the person you raise the PR for, as if they wrote it. Read their recent descriptions first and match how they open, how they structure, how long they write and which headings they use: `https://github.com/mathesar-foundation/mathesar/pulls?q=is:pr+author:<login>`. When they have none, follow the recent PRs of the maintainers.
 - What maintainers write here, as a baseline: an opening line such as "This PR adds ...", or "This PR:" followed by a short list. Bold labels on their own line for optional parts, such as `**Technical details**`, `**Notes to reviewers**`, `**Testing locally**` and `**Screenshots**`. A note on what the PR leaves out. No summary of every file, no headings for a one-paragraph change.
 
@@ -151,6 +159,7 @@ Put everything that is verbose or written for machines in a separate section at 
 
 - It holds what an agent that picks up the PR later can use: the exact commands you ran and their results, test counts, tool versions, what you could not verify, file by file notes.
 - A person must be able to skip it. Anything a reviewer needs to know goes in the part above, in plain words.
+- The same rules hold here: no notes to the person and no chat history. Keep to facts about the PR.
 - Leave the section out when you have nothing of that kind.
 
 Rules of the review process:
@@ -209,6 +218,7 @@ Taken from maintainer comments on closed and revised PRs:
 | SQL tests in a new style | Match `db/sql/test_sql_functions.sql`: shared `__setup_*` functions, one behavior per test, no manual `DROP`, assert full results. |
 | A description or reply that claims something the diff does not do | Verify each claim against the diff before posting. |
 | Long generated descriptions | Write a few sentences for people. Verbose details go in the "For agents" section. |
+| A description that talks to the reader ("Happy to fix this if you prefer") or retells the chat with the agent | Say only what the PR does and why. Ask the person questions in the chat. |
 | Red CI, merge conflicts, missing template or DCO | Fix before asking for review. |
 
 ## AI-assisted work
