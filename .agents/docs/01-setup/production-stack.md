@@ -78,7 +78,7 @@ export MATHESAR_URL=http://localhost
 .agents/bin/rpc databases.upgrade_sql '{"database_id": 1}'
 ```
 
-- After `upgrade_sql`, call the RPC method that uses the SQL you changed. For a changed signature, check in `psql` with `\df msar.<name>` that only the new one remains.
+- After `upgrade_sql`, call the RPC method that uses the SQL you changed. For a changed signature, check in `psql` with `\df msar.<name>` that the old signature is gone. Other overloads of the same name stay.
 - The second `up` runs your Django migrations on the old internal database at container start. A failure shows in `.agents/bin/prod logs service`.
 - `databases.upgrade_sql` reinstalls your SQL functions over the ones the release installed. This is the path that fails when an object is missing from `db/sql/00_msar_all_objects_table.sql`.
 - The UI asks an admin to upgrade only when the version string differs. On `develop` the version equals the last release, so call the method yourself.

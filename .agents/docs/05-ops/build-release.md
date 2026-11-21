@@ -58,7 +58,7 @@ ShellCheck runs on `build-scripts/` and `bin/` in CI (`.github/workflows/line-sh
 - Front end: `mathesar_ui/package.json` with `mathesar_ui/package-lock.json`. Use `npm ci`. Change the lock file only when you add or update a package on purpose.
 - Docs: `docs/requirements.txt`.
 - Some packages are pinned in more than one file: `requests` and `pytest` also in `api_tests/requirements.txt`, the mkdocs packages in both `requirements-dev.txt` and `docs/requirements.txt`. Search all four files when you change a pin.
-- `.agents/bin/check` uses what is installed. After a change to a requirements file or `mathesar_ui/package.json`, run `.agents/bin/setup` again before the checks.
+- `.agents/bin/check` uses what is installed. After a change to a requirements file or `mathesar_ui/package-lock.json`, run `.agents/bin/setup` again before the checks. It reinstalls the front end packages only when the lock file changed, and it does not uninstall a Python package that a requirements file no longer lists. After removing one, delete `.venv` and run setup again.
 - Dependabot opens update PRs. Maintainers often bundle them into one PR.
 - A change to a requirements file triggers the full backend CI matrix.
 

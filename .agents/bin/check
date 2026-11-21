@@ -196,7 +196,7 @@ git_suite() {
 if [ ${#suites[@]} -eq 0 ]; then
   # Without the base there is no diff to pick suites from, and the run would pass with nothing checked.
   git merge-base HEAD "$BASE_REF" >/dev/null 2>&1 \
-    || die "cannot compare with $BASE_REF. Fetch it (git fetch origin ${BASE_REF#origin/}; in a shallow clone add --unshallow), or set MATHESAR_BASE_REF, or name a suite."
+    || die "cannot compare with $BASE_REF. Fetch it (git fetch origin ${BASE_REF#origin/}:refs/remotes/origin/${BASE_REF#origin/}; in a shallow clone add --unshallow), or set MATHESAR_BASE_REF, or name a suite."
   mapfile -t suites < <(suites_for_changed_files)
   if [ ${#suites[@]} -eq 0 ]; then
     log "No changed files map to a suite. Name one, or use: .agents/bin/check all"

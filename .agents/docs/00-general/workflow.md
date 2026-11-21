@@ -45,7 +45,7 @@ Before your first commit:
 1. Set it for this clone: `git config user.name "<name>"` and `git config user.email "<email>"`.
 1. Sign commits only with a key that belongs to that person. If the sandbox signs with its own key, commit with `--no-gpg-sign`. A signature from another key shows as "Unverified" on GitHub.
 
-After committing, run `.agents/bin/check git`. It checks the branch name and every commit between `origin/develop` and `HEAD`, and lists the author, committer and message lines that break these rules. It runs as part of `.agents/bin/check` whenever the branch has commits. Its output gives the command that fixes each problem.
+After committing, run `.agents/bin/check git`. It checks the branch name and every commit between the base and `HEAD`, and lists the author, committer and message lines that break these rules. The base is `origin/develop` unless `MATHESAR_BASE_REF` names another. It runs as part of `.agents/bin/check` whenever the branch has commits. Its output gives the command that fixes each problem.
 
 ## Issues
 
