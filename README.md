@@ -183,3 +183,4 @@ If you run into problems, refer to our [troubleshooting guide](./TROUBLESHOOTING
 ## License
 
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
+
