@@ -21,7 +21,7 @@ export class ExtractColumnsModal extends Modal {
   constructor(page: Page) {
     super(
       page,
-      /^(Extract Columns? Into a New Table|Move Columns? To Linked Table)$/,
+      /(Extract Columns? Into a New Table|Move Columns? To Linked Table)/,
     );
     this.newTableName = this.body.getByRole('textbox', {
       name: 'Name of New Table',

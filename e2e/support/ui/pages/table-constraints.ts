@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 
 import { ConstraintsModal } from '../components/constraints-modal';
 import { MultiSelect } from '../components/multi-select';
+import { TableInspector } from './table-page';
 
 type ConstraintKind = 'Primary Keys' | 'Foreign Keys' | 'Unique';
 
@@ -19,6 +20,10 @@ export class ConstraintSection {
   readonly referencingColumn: Locator;
   readonly targetTable: Locator;
   readonly targetColumn: Locator;
+  /** The radios "Automatically" and "Manually", under the label "Set Constraint Name". */
+  readonly namingGroup: Locator;
+  /** The help icon in the label of `namingGroup`. */
+  readonly namingHelp: Locator;
   /** Shows once "Manually" is chosen. */
   readonly constraintName: Locator;
   readonly submitButton: Locator;
@@ -30,7 +35,7 @@ export class ConstraintSection {
   ) {
     this.addButton = root.getByRole('button', { name: 'Add', exact: true });
     this.constraints = root.locator('.collapsible');
-    this.emptyNote = root.getByText(/^No .* Constraints$/);
+    this.emptyNote = root.getByText(/^No \w+ Constraints/);
     this.form = root.locator('.add-constraint');
     this.columns = new MultiSelect(this.form.locator('.multi-select-trigger'));
     this.referencingColumn = this.form.getByRole('button', {
@@ -40,6 +45,10 @@ export class ConstraintSection {
     this.targetColumn = this.form.getByRole('button', {
       name: /^Table Column in /,
     });
+    this.namingGroup = this.form.getByRole('group', {
+      name: /^Set Constraint Name/,
+    });
+    this.namingHelp = this.namingGroup.getByLabel('Help');
     this.constraintName = this.form.getByRole('textbox', {
       name: 'Constraint Name',
     });
@@ -81,6 +90,13 @@ export class TableConstraints {
 
   constructor(private readonly page: Page) {
     this.modal = new ConstraintsModal(page);
+  }
+
+  /** Opens the modal from "Advanced" in the Table tab of the inspector. */
+  async open(): Promise<void> {
+    const inspector = new TableInspector(this.page);
+    await inspector.button('Advanced').click();
+    await inspector.button(/^Constraints/).click();
   }
 
   section(kind: ConstraintKind): ConstraintSection {
