@@ -1,0 +1,122 @@
+---
+# Extends the production setup in ../docker-compose.yml for end-to-end tests.
+# It builds the Mathesar images from the working tree, keeps all data in
+# volumes that `down --volumes` removes, and adds the Playwright runner.
+#
+# Run from the repo root. See README.md in this folder.
+#
+#   docker compose -f docker-compose.yml -f e2e/docker-compose.yml run --rm e2e
+#   docker compose -f docker-compose.yml -f e2e/docker-compose.yml down --volumes
+#
+name: mathesar-e2e
+
+services:
+  service:
+    image: mathesar/mathesar:e2e
+    build:
+      context: .
+      target: production
+    # Keeps a test stack from reporting to the project's analytics server.
+    extra_hosts:
+      - 'analytics.mathesar.dev:127.0.0.1'
+    # File attachments go to the object-store service below.
+    environment:
+      FILE_STORAGE_DICT: |
+        {
+          "default": {
+            "protocol": "s3",
+            "nickname": "End-to-end test storage",
+            "prefix": "mathesar-e2e",
+            "kwargs": {
+              "client_kwargs": {
+                "endpoint_url": "http://object-store:9000",
+                "region_name": "us-east-1",
+                "aws_access_key_id": "mathesar",
+                "aws_secret_access_key": "mathesar-e2e"
+              }
+            },
+            "public_form_access": { "enabled": true, "max_upload_size": 1048576 }
+          }
+        }
+    volumes: !override
+      - static:/code/static
+      - media:/code/.media
+      - secrets:/code/.secrets
+    depends_on:
+      object-store:
+        condition: service_healthy
+
+  # S3-compatible storage for file attachments, see FILE_STORAGE_DICT above.
+  object-store:
+    image: rustfs/rustfs:1.0.6
+    environment:
+      RUSTFS_ACCESS_KEY: mathesar
+      RUSTFS_SECRET_KEY: mathesar-e2e
+    # Creates the bucket that FILE_STORAGE_DICT names before the server starts.
+    entrypoint:
+      [sh, -c, 'mkdir -p /data/mathesar-e2e && exec /etc/rustfs/entrypoint.sh']
+    volumes:
+      - object-store:/data
+    healthcheck:
+      test: curl -f http://localhost:9000/health
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  db:
+    # Lets tests that run on the host seed and inspect the databases.
+    ports:
+      - '127.0.0.1:5433:5432'
+    volumes: !override
+      - pgdata:/var/lib/postgresql/data
+
+  caddy-reverse-proxy:
+    image: mathesar/mathesar-caddy:e2e
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    # The stack has known credentials, so it is published on loopback only.
+    ports: !override
+      - '127.0.0.1:80:80'
+    volumes: !override
+      - media:/code/.media
+      - static:/code/static
+      - caddy:/data
+    healthcheck:
+      test: curl -f http://localhost/caddy-health-check
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  # The runner shares the network of the reverse proxy. Mathesar is then at
+  # http://localhost for the browser, which the clipboard API requires and
+  # which matches the default DOMAIN_NAME.
+  e2e:
+    profiles: [e2e]
+    image: mathesar/mathesar-e2e
+    build:
+      context: ./e2e
+    network_mode: service:caddy-reverse-proxy
+    environment:
+      CI: ${CI:-}
+      E2E_ALL_BROWSERS: ${E2E_ALL_BROWSERS:-}
+      E2E_POSTGRES_HOST: mathesar_db
+      E2E_POSTGRES_PORT: 5432
+    # The working tree is mounted so that reports and screenshot baselines
+    # land in it. The second entry keeps the packages installed in the image.
+    volumes:
+      - ./e2e:/e2e
+      - /e2e/node_modules
+    depends_on:
+      service:
+        condition: service_healthy
+      caddy-reverse-proxy:
+        condition: service_healthy
+
+volumes:
+  static:
+  media:
+  secrets:
+  pgdata:
+  caddy:
+  object-store:
