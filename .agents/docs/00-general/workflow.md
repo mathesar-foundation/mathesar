@@ -1,6 +1,6 @@
 # Contribution workflow
 
-How work moves from issue to merged PR in this repo, and what maintainers expect from a PR. Read this before opening an issue, a branch or a PR. `CONTRIBUTING.md` is the human-facing version, and its "Using AI tools" section is the policy on AI-assisted work. `AGENTS.md` states the rules on branches, commits, PR attribution, comments and drafts. This file gives the detail behind them and does not repeat them.
+How work moves from issue to merged PR in this repo, and what maintainers expect from a PR. Read this before your first commit, before opening an issue or a PR, and before acting on a review comment. `CONTRIBUTING.md` is the human-facing version, and its "Using AI tools" section is the policy on AI-assisted work. `AGENTS.md` states the rules on branches, commits, PR attribution, comments and drafts. This file gives the detail behind them.
 
 ## Branches
 
@@ -18,17 +18,17 @@ How work moves from issue to merged PR in this repo, and what maintainers expect
 
 The branch name ends up in the merge commit on `develop` (`Merge pull request #123 from <owner>/<branch>`), so it is part of the history.
 
-- Name it `<type>/<short-description>`: `fix/column-reorder-on-refresh`, `feat/record-summary-templates`, `chore/agent-docs`.
-- The type is one of `fix`, `feat`, `chore`, `docs`, `refactor`, `test`, `perf`, `build`, `ci`. Use `docs` for the user docs in `docs/`.
+- The format and the allowed types are in `AGENTS.md`, and `.agents/bin/check git` verifies them. Examples: `fix/column-reorder-on-refresh`, `feat/record-summary-templates`, `chore/bump-node-version`.
+- Use `docs` for documentation anywhere in the repo, including `.agents/`.
 - The description is two to five lowercase words joined by hyphens that say what the work is. A reader of the branch list should know what the branch is for.
-- No agent name and no agent prefix (`claude/`, `copilot/`, `codex/`, `cursor/`). No generated id, random suffix or session name.
+- An agent prefix is, for example, `claude/`, `copilot/`, `codex/` or `cursor/`. A random suffix or a session name counts as a generated id.
 - Your harness may create or assign a branch with such a name. Do not push it. Create a branch that follows these rules and push that one. If the harness only allows its own branch, stop and ask the person.
-- Branch from an up to date `develop`.
+- Branch from the up to date target branch, which is `develop` unless a case above applies. For another target, run the checks with `MATHESAR_BASE_REF=origin/<branch> .agents/bin/check`.
 
 ## Commits
 
 - One logical change per commit. Short imperative subject, no prefix, no emoji: `Fix indeterministic column ordering`.
-- Do not rewrite history on a branch that has a PR under review.
+- Before a person has reviewed the PR, you may amend and rebase your own commits. After that, do not rewrite pushed commits: add commits, and bring the branch up to date by merging the target branch into it. If `.agents/bin/check git` fails on commits that a person has already reviewed, ask the person, because the fix needs a force-push.
 
 ### Commit as the person you work for
 
@@ -45,7 +45,7 @@ Before your first commit:
 1. Set it for this clone: `git config user.name "<name>"` and `git config user.email "<email>"`.
 1. Sign commits only with a key that belongs to that person. If the sandbox signs with its own key, commit with `--no-gpg-sign`. A signature from another key shows as "Unverified" on GitHub.
 
-After committing, run `.agents/bin/check git`. It checks the branch name and every commit between `origin/develop` and `HEAD`, and lists the author, committer and message lines that break these rules. It runs as part of `.agents/bin/check` whenever the branch has commits. To fix the last commit when it is not under review yet, amend it: `git commit --amend --reset-author --no-edit` fixes the identity, and editing the message removes a trailer. To fix the identity of every commit on the branch: `git rebase origin/develop --exec 'git commit --amend --reset-author --no-edit'`.
+After committing, run `.agents/bin/check git`. It checks the branch name and every commit between the base and `HEAD`, and lists the author, committer and message lines that break these rules. The base is `origin/develop` unless `MATHESAR_BASE_REF` names another. It runs as part of `.agents/bin/check` whenever the branch has commits. Its output gives the command that fixes each problem.
 
 ## Issues
 
@@ -60,7 +60,7 @@ Labels carry the state of an issue:
 | `help wanted`, `good first issue` | | Open to community contributors. |
 | `restricted: maintainers` | | Only maintainers work on it. |
 
-- Community contributors may work only on issues labeled `help wanted`. PRs for other issues are closed. Check for existing PRs on the issue first.
+- Community contributors may work only on issues labeled `help wanted`. PRs for other issues are closed. Check for existing PRs on the issue first. If the issue does not qualify, tell the person before you write code.
 - An issue with a `needs:` label is not ready. Do not implement it. Help by drafting the missing information for the person to post.
 - Milestones are priority buckets (`High priority`, `Backlog`, `Icebox`), not release plans.
 - New issues use the templates in `.github/ISSUE_TEMPLATE/`. Blank issues are disabled. Search for duplicates first.
@@ -70,8 +70,8 @@ Labels carry the state of an issue:
 
 1. The change is limited to what the issue asks. No drive-by refactors, reformatting or renames.
 1. `.agents/bin/check` passes. It runs the suites CI would run for your diff.
-1. You ran the change in the real app (`.agents/docs/01-setup/drive-the-app.md`). For UI changes you have a screenshot or short recording, and you checked long names and narrow widths.
-1. For a change to the build, packaging, settings, dependencies, static files, the reverse proxy, migrations or installed SQL, you also ran it on the production Docker Compose setup (`.agents/docs/01-setup/production-stack.md`).
+1. Unless the change cannot alter what the app does (docs only), you ran the change in the real app (`.agents/docs/01-setup/drive-the-app.md`). For UI changes you have a screenshot or short recording, and you checked long names and narrow widths.
+1. When the "Verify on the production stack" step of "How to work on a task" in `AGENTS.md` applies, you also ran the change on the production Docker Compose setup (`.agents/docs/01-setup/production-stack.md`).
 1. New behavior has tests where the suite can express it: pgTAP for SQL, pytest for RPC and wrappers, vitest for pure front end logic.
 1. User-visible changes update the user docs in `docs/docs/` in the same PR.
 1. New UI strings are in the English dictionary only. Other languages come from Transifex.
@@ -81,11 +81,11 @@ Labels carry the state of an issue:
 
 Use `.github/PULL_REQUEST_TEMPLATE` as it is:
 
-- Start with `Fixes #123`, or `Related to #123` when the PR does not fully resolve the issue.
+- After the header, start with `Fixes #123`, or `Related to #123` when the PR does not fully resolve the issue. When there is no issue, ask the person whether to draft one for their approval or to leave the line out. Do not write a placeholder number.
 - Write the description as set out in "The description" below.
 - Add screenshots for UI changes.
 - Keep the checklist and tick boxes with `[x]` exactly. Leave a box unticked and say why if it does not hold.
-- Keep the Developer Certificate of Origin block. PRs without it are not merged.
+- Keep the Developer Certificate of Origin block unchanged. PRs without it are not merged. It is the certification of the person you work for, not yours.
 
 ### The header
 
@@ -111,7 +111,7 @@ The **Human involvement** line is for external contributors only. Leave it out w
 
 - The first line names the person you work for by their GitHub login, and you by the name of your product, for example Claude, Copilot or Codex. Use your own name, not the one in this example.
 - **Agent** gives the model as exactly as you know it. Add anything else a maintainer would want to know about how the PR was produced, one item per line, for example that several agents worked on it.
-- A maintainer is a member of the `mathesar-foundation` organization on GitHub or someone with write access to this repo. Everyone else is an external contributor, including the owner of a fork. When you cannot tell, treat the person as external and add the line.
+- `AGENTS.md` says who counts as a maintainer. Everyone else is an external contributor, including the owner of a fork. When you cannot tell, add the line.
 - **Human involvement** is a level from 0 to 5 that you work out yourself from what happened in the session. It exists so that maintainers can spot PRs from outside that no person looked at.
 
 | Level | What the person did |
@@ -172,14 +172,12 @@ Rules of the review process:
 - To check the description before you submit it, save it to a file and run `.agents/bin/check-git --text <file>`.
 - A tool footer can be "_Generated by Claude Code_", a signature, a session link or a robot emoji. After you create or edit the description, read it back from GitHub. If anything was added, edit the description to remove it.
 - Comments and replies (`AGENTS.md` says when you may post one): show the person the exact text in the chat first, and post it as approved. A note on why CI fails is a comment too. Keep a reply to a bot short: state what changed and point to the commit. Replies carry no agent attribution. Some tools append a footer to every comment and add it back on edit. Tell the person when that happens, so that they can remove it.
-- On a draft for an external contributor: the person reviews the PR, rewrites the description in their own words as needed, and marks it ready for review themselves. Do not mark it ready for them. The header stays yours: if you see the person review the work before they mark it ready, update the **Human involvement** level and evidence.
+- On a draft for an external contributor: the person reviews the PR, rewrites the description in their own words as needed, and marks it ready for review themselves. The header stays yours: if you see the person review the work before they mark it ready, update the **Human involvement** level and evidence.
 - Maintainers may close a draft PR that stays open for a while with no visible progress. They decide case by case.
 - CI must be green and the branch up to date with `develop` before a maintainer reviews.
-- A maintainer assigns the reviewer. Do not request reviewers yourself.
-- Do not resolve review threads that a reviewer opened.
+- A maintainer assigns the reviewer.
 - Maintainers may push fixes to your branch. Allow edits from maintainers on a fork.
 - Release notes are written by maintainers at release time. Do not add entries.
-- The person who submits certifies the Developer Certificate of Origin. Do not tick that for them.
 - In your report to the person, say what you verified and how, and what you could not verify.
 
 ### Comments from review bots

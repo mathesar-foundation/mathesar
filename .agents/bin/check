@@ -40,7 +40,7 @@ BASE_REF="${MATHESAR_BASE_REF:-origin/develop}"
 
 changed_files() {
   local base
-  base=$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo HEAD)
+  base=$(git merge-base HEAD "$BASE_REF")
   { git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u
 }
 
@@ -194,6 +194,13 @@ git_suite() {
 }
 
 if [ ${#suites[@]} -eq 0 ]; then
+  # Without the base there is no diff to pick suites from, and the run would pass with nothing checked.
+  case "$BASE_REF" in
+    origin/*) fetch_hint="git fetch origin ${BASE_REF#origin/}:refs/remotes/$BASE_REF" ;;
+    *) fetch_hint="from the remote it lives on" ;;
+  esac
+  git merge-base HEAD "$BASE_REF" >/dev/null 2>&1 \
+    || die "cannot compare with $BASE_REF. Fetch it ($fetch_hint; in a shallow clone add --unshallow), or set MATHESAR_BASE_REF, or name a suite."
   mapfile -t suites < <(suites_for_changed_files)
   if [ ${#suites[@]} -eq 0 ]; then
     log "No changed files map to a suite. Name one, or use: .agents/bin/check all"

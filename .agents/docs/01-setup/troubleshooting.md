@@ -7,7 +7,7 @@ Known failures when installing, running and testing Mathesar from source, with t
 | Symptom | Cause | Fix |
 |---|---|---|
 | `PostgreSQL is not accepting connections` | Local cluster is down or the port differs. | `pg_lsclusters`, then `pg_ctlcluster <version> main start`. Set `POSTGRES_PORT` if it is not 5432. |
-| Page is blank or unstyled | Vite is not running, or the browser cannot reach port 3000. | `.agents/bin/start`, then read `/tmp/mathesar-dev/vite.log`. |
+| Page is blank or unstyled | Vite is not running, or the browser cannot reach port 3000. | `.agents/bin/start`, then read `/tmp/mathesar-dev/vite.log`. If Vite runs, the browser cannot reach it: see the note on port 3000 under "Sandbox notes" in `.agents/docs/01-setup/install-sandbox.md`. |
 | First page shows "Complete installation" | No Mathesar superuser exists. | `.agents/bin/setup`. |
 | Login redirects to a password change form | New users must change their password at first UI login. | Submit the form, or use RPC with basic auth, which is not affected. |
 | `django did not start` | Port 8000 is taken, or a migration is missing. | Read `/tmp/mathesar-dev/django.log`. Export `MATHESAR_PORT` to use another port. |

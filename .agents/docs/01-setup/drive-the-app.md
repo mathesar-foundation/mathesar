@@ -19,7 +19,7 @@ Everything below works the same against the production stack (`.agents/bin/prod 
 MATHESAR_SEED_DB=perf .agents/bin/seed library_management   # another database
 ```
 
-The command prints the Mathesar database id. The datasets are SQL files in `mathesar/examples/resources/`. Library Management is the largest and the one to use for performance checks.
+The command prints the Mathesar database id. The datasets are SQL files in `mathesar/examples/resources/`. `movie_rentals` is the largest by far and the one to use for performance checks. `library_management` is the default.
 
 ## Call the RPC API
 
@@ -64,7 +64,7 @@ Take a screenshot of any page as the admin user:
 .agents/bin/screenshot /db/1/schemas/44097/tables/44116/ /tmp/table.png --wait-for '[data-sheet-element="data-cell"]'
 ```
 
-For interactions, write a short script that starts from a logged-in page:
+For interactions, write a short script that starts from a logged-in page. Node resolves the `require` path against the folder of the script, so save the script in the repo root and do not commit it:
 
 ```js
 const { openMathesar } = require('./.agents/playwright/session.cjs');

@@ -90,7 +90,7 @@ docker compose -f docker-compose.dev.yml up -d dev-service
 
 - `sudo` or root is needed only to install or start PostgreSQL and to create the first role. Everything else runs unprivileged.
 - Ephemeral sandboxes stop PostgreSQL when the container restarts. `.agents/bin/start` starts it again.
-- Port 3000 must be reachable by the browser that loads port 8000. In development mode Django serves HTML that loads scripts from `http://<same host>:3000`. A browser inside the sandbox (Playwright) needs no extra setup.
+- The browser that loads port 8000 must also reach the Vite port (3000, or `MATHESAR_CLIENT_DEV_PORT`) on the same host name over plain HTTP. In development mode Django serves HTML that loads scripts from `http://<same host>:<Vite port>`. A browser inside the sandbox (Playwright, `.agents/bin/screenshot`) needs no setup. For a browser outside, forward both ports over plain HTTP. An HTTPS proxy in front of port 8000 does not work: Django sees plain HTTP, and the browser blocks the `http://` script on the HTTPS page. Vite listens on all interfaces.
 - If the first run of the app shows "Complete installation", no superuser exists. Run `.agents/bin/setup` again.
 
 Problems: see [troubleshooting.md](./troubleshooting.md).

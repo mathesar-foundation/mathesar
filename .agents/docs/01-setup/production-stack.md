@@ -78,6 +78,7 @@ export MATHESAR_URL=http://localhost
 .agents/bin/rpc databases.upgrade_sql '{"database_id": 1}'
 ```
 
+- After `upgrade_sql`, call the RPC method that uses the SQL you changed. For a changed signature, check in `psql` with `\df msar.<name>` that the old signature is gone. Other overloads of the same name stay.
 - The second `up` runs your Django migrations on the old internal database at container start. A failure shows in `.agents/bin/prod logs service`.
 - `databases.upgrade_sql` reinstalls your SQL functions over the ones the release installed. This is the path that fails when an object is missing from `db/sql/00_msar_all_objects_table.sql`.
 - The UI asks an admin to upgrade only when the version string differs. On `develop` the version equals the last release, so call the method yourself.
@@ -132,4 +133,4 @@ The images then contain that CA and five variables that point at the system CA s
 | `docker compose` rejects `!override` | Docker Compose is older than 2.24. | Upgrade it. The script uses `!override` to publish the ports on `127.0.0.1` only, because the stack has a known admin password. |
 | Changes do not show up | The stack runs the image, not the working tree. | `.agents/bin/prod up` again. |
 | Console shows a 403 from `api.github.com` | The admin pages look up the latest release. Sandboxes often block or rate limit that. | Ignore. |
-| `cannot connect to the Docker daemon` and no `dockerd` | Docker is not installed in this sandbox. | Use the native setup. Say in your report that the production stack was not run. |
+| `docker is not installed`, or `The Docker daemon is not running and dockerd is not installed` | Docker is not installed in this sandbox. | Use the native setup. Say in your report that the production stack was not run. |

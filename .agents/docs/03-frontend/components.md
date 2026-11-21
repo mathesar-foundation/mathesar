@@ -128,7 +128,7 @@ Labels in the type config forms are plain English strings in `.ts` files. They a
 
 Rules on units, spacing, margins and z-index are in `mathesar_ui/STANDARDS.md`. Facts about the implementation:
 
-- Components use `<style lang="scss">` or plain `<style>`. Svelte scopes these styles. Use `:global(...)` to reach into child components.
+- Components use `<style lang="scss">` or plain `<style>`. Svelte scopes these styles. Keep them scoped. To adjust a child component, set its `--ComponentName__property` variable or wrap it in an element that you style. Use `:global(...)` only when neither works.
 - Global styles and app-level CSS variables are in the `<style global>` block of `mathesar_ui/src/App.svelte` (page padding, layout widths, cell colors, z-index layers, headings).
 - Design tokens are CSS variables on `body`:
 
@@ -144,6 +144,18 @@ Rules on units, spacing, margins and z-index are in `mathesar_ui/STANDARDS.md`. 
 - Theming: `mathesar_ui/src/component-library/common/styles/themes/main.scss` emits light tokens on `body` and dark tokens on `body.theme-dark`. `initUiTheme()` in `mathesar_ui/src/utils/uiThemePreference.ts` sets the `theme-light` or `theme-dark` class from the `uiThemePreference` localStorage store (`light`, `dark` or `system`). The switch is `mathesar_ui/src/components/UiThemeSelect.svelte`.
 - Use color tokens, never literal colors, so both themes work. Mix with `color-mix(in srgb, var(--token), transparent N%)` as existing code does.
 - The server-rendered login pages share the tokens. `mathesar/templates/mathesar/app_styled_base.html` loads the library stylesheet.
+
+## What reviewers ask for
+
+Taken from maintainer reviews of front end PRs, beyond the rules in `mathesar_ui/STANDARDS.md`:
+
+- Use the `Tooltip` component, not the `title` attribute.
+- Do not call `.subscribe()` on a store in a component. A subscriber must be unsubscribed. Use `$store`, or do the work in the function that the user action triggers.
+- No `as` type assertion where the type already narrows.
+- No UI that the user cannot reach, such as a menu entry for a state in which the menu cannot open.
+- Do not remove items from a collection that other code looks things up in. Add a derived collection for the filtered view.
+- Before you reuse a shared utility such as `confirm`, check what it does on every path, including cancel and close.
+- For debounced input, use `Debounce` or `createDebounce` from the component library.
 
 ## Modals, toasts, confirmations, menus
 

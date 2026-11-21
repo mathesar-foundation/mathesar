@@ -148,6 +148,19 @@ Privilege rules beyond these wrappers are in `.agents/docs/02-backend/auth-permi
 
 Feature-level context for these namespaces is in `.agents/docs/04-features/index.md`.
 
+## What reviewers ask for
+
+Taken from maintainer reviews of backend PRs. The standard is the code in `mathesar/rpc/records.py`.
+
+- A helper returns a value. It does not change its arguments in place. Merge the result into the response in the body of the RPC function, where a reader can see it, as `records.list` does with `download_links`.
+- Fetch a Django object once per RPC call, in the RPC function, and pass it down. Two helpers must not each query the same metadata.
+- Logic beyond a call to a wrapper goes in a module under `mathesar/utils/`, not in the RPC module.
+- A helper does not decide for its caller which columns or attributes matter. Pass it the whole object and let it select.
+- No check for a case that cannot happen. For each guard, be able to name the input that needs it.
+- One representation per fact. No flag that another field already implies, and no second structure that holds the same data. Enforce an invariant of a model with a constraint in the migration.
+- Before you add a field or a setting, decide which object it describes (table, column, type, user) from what the user wants to achieve. Ask the person when the issue does not say.
+- Do not mix reformatting with logic changes. Wrap a long signature the way the file you edit does. Most of `mathesar/rpc/` puts one parameter per line with a double indent.
+
 ## Recipe: add or change an RPC method
 
 1. SQL. Add or edit the function in `db/sql/05_msar.sql` (or the more specific file, see `.agents/docs/02-backend/sql.md`). Write the docstring comment. Return `jsonb`.

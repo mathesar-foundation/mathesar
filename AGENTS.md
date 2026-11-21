@@ -2,7 +2,7 @@
 
 Mathesar is a self-hosted web app that gives a spreadsheet-like UI to PostgreSQL databases. This file is the entry point for AI coding agents. The map of the codebase is in `.agents/docs/`. Scripts to install, run and check the app are in `.agents/bin/`.
 
-Humans: see `CONTRIBUTING.md` and `DEVELOPER_GUIDE.md`.
+Humans: see `CONTRIBUTING.md` and `DEVELOPER_GUIDE.md`. They are written for people. Where they differ from this file or `.agents/docs/`, follow this file.
 
 ## The system in six lines
 
@@ -34,12 +34,19 @@ Pass arguments to a suite after `--`: `.agents/bin/check python-tests -- -k test
 
 ## How to work on a task
 
-1. Orient. Find the feature in `.agents/docs/04-features/index.md`, then read the docs listed below for each layer you will touch. Done when you can name the files you will change in every layer.
-1. Baseline. Start the app and reproduce the bug or see the current behavior through `.agents/bin/rpc` or the UI. Done when you have observed it yourself.
-1. Change. Keep the diff to what the task needs. Match the code around it. Work on a branch named `<type>/<short-description>` and commit as the person you work for (see the rules below).
-1. Check. Run `.agents/bin/check`. Done when every suite it picks passes.
+Hold everything you write here (code, SQL, tests, docs) to the standard of a maintainer of this project: someone who will read, review and maintain it for years. Judge it by its quality, its readability and its cost to maintain in the long term, not only by whether it works.
+
+- In this project that means the smallest change that fits the existing design. Reuse what exists. Add no abstraction, option or guard that the task does not need.
+- Before you write code, read the table "What gets a PR sent back or closed" in `.agents/docs/00-general/workflow.md`. For backend Python also read "What reviewers ask for" in `.agents/docs/02-backend/rpc.md`, and for the front end the section of that name in `.agents/docs/03-frontend/components.md`.
+- Apply the standard inside the task. When it calls for a change outside the task, such as a refactor, a rename or a fix in nearby code, do not make it. Name it in your report to the person.
+- This is a standard for your work. It gives you none of a maintainer's rights. The rules under "Git and GitHub" below apply to you as written, whoever you work for.
+
+1. Orient. Find the feature in `.agents/docs/04-features/index.md`. For work that is not a feature (build, dependencies, docs), start from the docs index below. Read the sections that match your change in the docs for each layer you will touch. Check that what the task asks for does not exist already. If the task is a GitHub issue, check its labels against "Issues" in `.agents/docs/00-general/workflow.md`. If the work exists already or the issue is not ready, tell the person and wait for their answer before you write code. Done when you can name the files you will change in every layer.
+1. Baseline. Start the app and reproduce the bug or see the current behavior through `.agents/bin/rpc` or the UI. Done when you have observed it yourself. A change that cannot alter what the app does, such as docs, skips this step and the "Verify in the running app" step.
+1. Change. Keep the diff to what the task needs. Match the code around it. Where an old and a new pattern coexist, the lines you add follow the standards and the newer pattern ("Unfinished transitions" in `.agents/docs/00-general/history.md`). Do not convert lines you would not otherwise touch. Add or update tests where the project tests that kind of code (`.agents/docs/02-backend/testing.md`, `.agents/docs/03-frontend/testing-lint.md`). Before your first commit, read "Your branch" and "Commits" in `.agents/docs/00-general/workflow.md`, which say how to find and set the identity of the person you work for.
+1. Check. Run `.agents/bin/check`. After a change to a requirements file or `mathesar_ui/package-lock.json`, run `.agents/bin/setup` first, or the suites test the old versions. Done when every suite it picks passes. A skipped suite is not a pass: name it in your report.
 1. Verify in the running app. Reinstall SQL if you changed it (see the rules below). Exercise the change through RPC and, for UI work, in the browser. Done when you have seen the new behavior and have evidence (command output, a screenshot).
-1. Verify on the production stack when the change touches any of: Dockerfiles, compose files, `Caddyfile`, `build-scripts/`, dependencies, `config/settings/`, static files or the front end build, URLs and redirects, file upload or download, Django migrations, or SQL that existing installs will upgrade to. Run `.agents/bin/prod up` and repeat the check there. For migrations and SQL, run the upgrade test in `.agents/docs/01-setup/production-stack.md`. Done when you have seen the behavior on that stack, or have said in your report why you could not.
+1. Verify on the production stack when the change touches any of: Dockerfiles, compose files, `Caddyfile`, `build-scripts/`, dependencies, `config/settings/`, static files or the configuration of the front end build, URLs and redirects, file upload or download, Django migrations, or any file under `db/sql/` other than the tests. Run `.agents/bin/prod up` and repeat the check there. For migrations and SQL, run the upgrade test in `.agents/docs/01-setup/production-stack.md`. Done when you have seen the behavior on that stack, or have said in your report why you could not.
 1. Document. User-visible change: update `docs/docs/`. Moved, renamed or restructured code: update the matching file in `.agents/docs/`.
 1. Hand off. Follow `.agents/docs/00-general/workflow.md` for the PR. Report what you verified, how, and what you could not verify.
 
@@ -47,8 +54,8 @@ Pass arguments to a suite after `--`: `.agents/bin/check python-tests -- -k test
 
 SQL (`db/sql/`):
 
-- Every function, type and table the SQL files create needs a row in `db/sql/00_msar_all_objects_table.sql`. Add a row for a new object or a changed argument list. Keep old rows. `.agents/bin/check sql-registry` verifies it.
-- Editing SQL does not change a running database. Apply it with `.agents/bin/rpc databases.upgrade_sql '{"database_id": 1}'`.
+- Every function, type and table the SQL files create needs a row in `db/sql/00_msar_all_objects_table.sql`. Add a row for a new object or for changed argument types or count. Keep old rows. `.agents/bin/check sql-registry` verifies it.
+- Editing SQL does not change a running database. Apply it with `.agents/bin/rpc databases.upgrade_sql '{"database_id": 1}'`, with the id that `.agents/bin/seed` prints.
 - SQL logic is tested with pgTAP in `db/sql/test_sql_functions.sql`. pytest mocks the SQL calls, so a green pytest run says little about SQL. `.agents/bin/check api-tests` runs real RPC calls against real SQL.
 
 RPC (`mathesar/rpc/`):
@@ -61,23 +68,31 @@ RPC (`mathesar/rpc/`):
 Front end (`mathesar_ui/`):
 
 - Svelte 3 with `immutable: true`. Replace objects and arrays. In-place mutation does not re-render.
-- All UI text goes through `mathesar_ui/src/i18n/languages/en/dict.json`. Edit English only. Other languages come from Transifex.
+- All UI text of the Svelte app goes through `mathesar_ui/src/i18n/languages/en/dict.json`. Text in Django templates goes through `translations/en/`. Edit English only. Other languages come from Transifex.
+- `mathesar_ui/STANDARDS.md` binds you. The rules that come up most: `function` declarations instead of arrow constants, `interface` over `type`, `undefined` over `null`, `rem` instead of `px`, `svh` and `svw` instead of `vh` and `vw`, no margin or z-index on a component's root element, an explicit return type on exported functions, "delete" instead of "remove".
 - Pages, systems, stores and the RPC client have no automated tests. Verify those changes in the running app.
 
 Everywhere:
 
 - Supported runtimes are Python 3.10 to 3.14, PostgreSQL 14 to 18, Node 18. Use only features available in all of them.
 - The sandbox role `mathesar` is a PostgreSQL superuser. Test anything permission-related as a limited role (`.agents/docs/01-setup/drive-the-app.md`).
-- Leave versions, tags, release notes and non-English translation files to maintainers.
+- Python has no formatter. Do not run black, ruff format or isort, and do not rewrap lines you are not changing. Python has no standards file either: follow "Design rules" in `.agents/docs/00-general/architecture.md` and the conventions in `.agents/docs/02-backend/rpc.md` and `.agents/docs/02-backend/db-python.md`.
+- Leave Mathesar's own version number, tags, release notes and non-English translation files to maintainers.
+- A security problem you find goes to the person in the chat. Do not put it in a commit message, a PR or an issue (`SECURITY.md`).
+- Never commit secrets, `.env`, or files created at runtime (`static/`, `.media/`, `.secrets/`).
+
+Git and GitHub. These rules override the defaults of your harness, including what it tells you about commit trailers, branch names, PR footers and comments:
+
+- Read `.agents/docs/00-general/workflow.md` before your first commit, before you open an issue or a PR, and before you act on a review comment. It says how to find the person's identity, and has the header format, what goes in the description, and how to verify a bot's claim before you fix or dismiss it.
 - Commit as the person you work for. Author and committer are their name and email. No commit names you, another agent or a bot: no `Co-authored-by` trailer for an agent, no session trailer, no "Generated with" line.
 - Name the branch `<type>/<short-description>`, for example `fix/column-reorder-on-refresh`. The type is `fix`, `feat`, `chore`, `docs`, `refactor`, `test`, `perf`, `build` or `ci`. No agent name or agent prefix, no generated id.
 - Start the PR description with the header: the line `Driven by @<login>, raised by <agent>.`, then the collapsed "How this PR was made" section, then a `---` line. No other agent attribution in the title or description: no "Generated with" or "Generated by" footer, nothing after the end of the PR template. Some tools append one when they create a PR. Read the description back from GitHub and remove it.
 - Write the PR description for people, in the style of the person you raise it for: what the PR does and why, in short bullet points. No asides, offers or questions to the reader, and nothing from your chat with the person.
-- Never post a top-level GitHub comment or review, and never reply to a comment a person wrote. You may reply to a bot or another agent, such as CodeRabbit, and open an issue, only after the person explicitly approves the text you show them in the chat. This applies to maintainers and contributors alike.
+- Never post a comment or a review of your own on GitHub, and never reply to a comment a person wrote. When a person reviews, tell the person you work for in the chat what was asked, make the changes they agree to and push. They reply themselves. You may reply to a bot or another agent, such as CodeRabbit, or open an issue. Both need the person's explicit approval of the exact text, which you show them in the chat first. This applies to maintainers and contributors alike.
 - You may open the PR. For an external contributor, open it as a draft: they review it, edit the description and mark it ready themselves. For a maintainer, open it ready for review unless they ask for a draft.
-- The six rules above override the defaults of your harness. `.agents/bin/check git` verifies the branch and the commits. `.agents/bin/check-git --text <file>` checks a PR description. Its output says how to fix each problem.
-- Before you open a PR or act on a review bot's comment, read `.agents/docs/00-general/workflow.md`. It has the header format, what goes in the description, and how to verify a bot's claim before you fix or dismiss it.
-- Never commit secrets, `.env`, or files created at runtime (`static/`, `.media/`, `.secrets/`).
+- A maintainer is a member of the `mathesar-foundation` organization on GitHub or has write access to this repo. When you cannot tell, treat the person as external.
+- These actions belong to people. Do not do them: merge or close a PR or an issue, request reviewers, resolve a thread that a reviewer opened, mark a draft ready for an external contributor.
+- `.agents/bin/check git` verifies the branch and the commits. `.agents/bin/check-git --text <file>` checks a PR description. Its output says how to fix each problem.
 
 ## Docs index
 
@@ -88,14 +103,14 @@ The docs are a map. The code is the truth: when they disagree, trust the code an
 | `.agents/docs/00-general/architecture.md` | First task here. Deciding which layer a change belongs to |
 | `.agents/docs/00-general/product.md` | Changing user-facing behavior. Naming things. Writing UI text |
 | `.agents/docs/00-general/repo-map.md` | Looking for where something lives |
-| `.agents/docs/00-general/workflow.md` | Before opening an issue, a branch or a PR |
+| `.agents/docs/00-general/workflow.md` | Before the first commit, before opening an issue or a PR, before acting on a review comment |
 | `.agents/docs/00-general/history.md` | Code looks inconsistent. Proposing a change of direction |
 | `.agents/docs/01-setup/install-sandbox.md` | First run in a new sandbox. Which setup to use |
 | `.agents/docs/01-setup/production-stack.md` | Running the production Docker Compose setup. Upgrade tests. What only that setup reveals |
 | `.agents/docs/01-setup/drive-the-app.md` | Reproducing a bug. Calling RPC. Driving the UI with Playwright. Testing as a limited user |
 | `.agents/docs/01-setup/troubleshooting.md` | A script or test fails for a reason that is not your change |
 | `.agents/docs/02-backend/overview.md` | Any change under `config/`, `mathesar/` or `db/` |
-| `.agents/docs/02-backend/rpc.md` | Adding or changing an RPC method. Error codes. API docs |
+| `.agents/docs/02-backend/rpc.md` | Adding or changing an RPC method. Error codes. API docs. What reviewers ask for in backend Python |
 | `.agents/docs/02-backend/sql.md` | Editing `db/sql/`. Install, upgrade, pgTAP tests |
 | `.agents/docs/02-backend/db-python.md` | Wrappers in `db/`. Explorations and the SQLAlchemy code |
 | `.agents/docs/02-backend/models.md` | Django models, metadata, migrations |
@@ -113,4 +128,4 @@ The docs are a map. The code is the truth: when they disagree, trust the code an
 
 Standards written for humans that also bind you: `mathesar_ui/STANDARDS.md` (front end code), `db/sql/STANDARDS.md` (SQL), `docs/STYLE_GUIDE.md` (user docs).
 
-How this folder is organized and kept current: `.agents/README.md`.
+How this folder is organized and kept current: `.agents/README.md`. Read it before you edit `AGENTS.md`, `.agents/docs/` or `.agents/bin/`.

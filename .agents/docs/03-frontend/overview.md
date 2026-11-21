@@ -45,6 +45,7 @@ Versions are the ones locked in `mathesar_ui/package-lock.json`.
 Consequences of Svelte 3:
 
 - There are no runes. Components use `export let`, `$:` statements, slots, and `$store` subscriptions.
+- The code does not follow one rule of `mathesar_ui/STANDARDS.md`: type-only files are plain `.ts` files named `types.ts`, not `.d.ts`. Follow the code for that rule. For every other rule, the lines you add follow the standard, and you do not convert old code.
 - Component generics use `$$Generic`. Prop forwarding uses `$$Props` (see `mathesar_ui/STANDARDS.md`).
 - `mathesar_ui/svelte.config.cjs` sets `compilerOptions.immutable: true`. A component does not update when an object or array it holds is mutated in place. Assign a new reference. Use `ImmutableMap`, `ImmutableSet` and the `with...` methods from `mathesar_ui/src/component-library/common/utils/`.
 
@@ -77,7 +78,7 @@ Production:
 1. `npm run build` writes to the `mathesar` folder under `mathesar/static/` (git-ignored, absent until the first build, emptied on each build) and creates a Vite manifest file there. The settings `MATHESAR_UI_BUILD_LOCATION` and `MATHESAR_MANIFEST_LOCATION` point to them.
 2. `get_manifest_data` in `mathesar/utils/frontend.py` reads the manifest entries for the main module, its legacy variant, the legacy polyfills, and the modern and legacy language modules for each entry of `LANGUAGES`. It caches the result for one hour.
 3. The template emits the module script, CSS links, and `nomodule` legacy scripts.
-4. `collectstatic` runs in `Dockerfile`. WhiteNoise serves the files (`STORAGES["staticfiles"]`).
+4. `collectstatic` runs at build time in the `minimal` target of `Dockerfile`. WhiteNoise serves the files (`STORAGES["staticfiles"]`).
 5. `build-scripts/package/package.py` runs `npm ci` and `npm run build` for packaged installs.
 
 Gotchas:
