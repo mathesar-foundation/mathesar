@@ -213,7 +213,7 @@ Taken from maintainer comments on closed and revised PRs:
 
 ## AI-assisted work
 
-The policy for contributors is "Using AI tools" in `CONTRIBUTING.md`: AI help is welcome, and the person must understand, test, review and clean up the result. Unreviewed output gets the PR closed.
+The policy for contributors is "Using AI tools" in `CONTRIBUTING.md`. Read it before you open a PR.
 
 For an agent this means:
 
