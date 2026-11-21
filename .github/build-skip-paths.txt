@@ -12,7 +12,7 @@
 # folder named "locale", which compilemessages would compile.
 
 docs/
-agents/
+.agents/
 .github/ISSUE_TEMPLATE/
 .github/PULL_REQUEST_TEMPLATE/
 AGENTS.md

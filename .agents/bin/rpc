@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Call a Mathesar JSON-RPC method on a running instance and print the result as JSON.
+#
+# Usage: .agents/bin/rpc <method> [json-params]
+#   .agents/bin/rpc databases.configured.list
+#   .agents/bin/rpc tables.list '{"database_id": 1, "schema_oid": 2200}'
+#
+# Exits 1 and prints the error object to stderr when the call fails.
+# Target and credentials come from MATHESAR_URL, MATHESAR_USER, MATHESAR_PASSWORD.
+set -euo pipefail
+
+# shellcheck source=.agents/bin/_common
+source "$(dirname "${BASH_SOURCE[0]}")/_common"
+load_dev_env
+
+[ $# -ge 1 ] || { sed -n '2,9p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 2; }
+method=$1
+params='{}'
+if [ $# -ge 2 ]; then params=$2; fi
+
+curl -sS -u "$MATHESAR_USER:$MATHESAR_PASSWORD" \
+  -H 'Content-Type: application/json' \
+  -d "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"$method\", \"params\": $params}" \
+  "$MATHESAR_URL/api/rpc/v0/" \
+| python3 -c '
+import json
+import sys
+
+raw = sys.stdin.read()
+try:
+    response = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit("Response was not JSON:\n" + raw[:2000])
+if "error" in response:
+    print(json.dumps(response["error"], indent=2), file=sys.stderr)
+    sys.exit(1)
+print(json.dumps(response.get("result"), indent=2))
+'

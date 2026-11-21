@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Create a database with sample data on a running instance and print its Mathesar
+# database id. Prints the existing id when the database is already there.
+#
+# Usage: .agents/bin/seed [dataset ...]
+#   Default dataset: library_management
+#   Datasets: bike_shop hardware_store ice_cream_employees library_management
+#             library_makerspace movie_rentals museum_exhibits nonprofit_grants
+#   The database name comes from MATHESAR_SEED_DB (default: sandbox).
+set -euo pipefail
+
+# shellcheck source=.agents/bin/_common
+source "$(dirname "${BASH_SOURCE[0]}")/_common"
+load_dev_env
+
+database_name="${MATHESAR_SEED_DB:-sandbox}"
+if [ $# -eq 0 ]; then set -- library_management; fi
+
+configured_databases=$(.agents/bin/rpc databases.configured.list)
+existing_id=$(python3 -c '
+import json
+import sys
+
+matches = [d["id"] for d in json.loads(sys.argv[2]) if d["name"] == sys.argv[1]]
+print(matches[0] if matches else "")
+' "$database_name" "$configured_databases")
+if [ -n "$existing_id" ]; then
+  echo "$existing_id"
+  exit 0
+fi
+
+datasets_json=$(python3 -c 'import json, sys; print(json.dumps(sys.argv[1:]))' "$@")
+created=$(.agents/bin/rpc databases.setup.create_new \
+  "{\"database\": \"$database_name\", \"sample_data\": $datasets_json}")
+python3 -c 'import json, sys; print(json.loads(sys.argv[1])["database"]["id"])' "$created"

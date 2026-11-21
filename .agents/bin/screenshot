@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+// Log in to a running Mathesar instance, open a path, and save a screenshot.
+//
+// Usage: .agents/bin/screenshot <path> <output.png> [options]
+//   --wait-for <selector>  Wait for this selector before the screenshot.
+//   --full-page            Capture the full scrollable page.
+//   --width <px>           Viewport width (default 1440).
+//   --height <px>          Viewport height (default 900).
+//
+// Example: .agents/bin/screenshot /db/1/schemas/ /tmp/schemas.png
+// Prints the final URL, the page title, and any page or console errors.
+
+const path = require('path');
+const { openMathesar } = require('../playwright/session.cjs');
+
+function parseArgs(argv) {
+  const positional = [];
+  const options = { fullPage: false, width: 1440, height: 900, waitFor: undefined };
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--full-page') options.fullPage = true;
+    else if (arg === '--wait-for') options.waitFor = argv[(i += 1)];
+    else if (arg === '--width') options.width = Number(argv[(i += 1)]);
+    else if (arg === '--height') options.height = Number(argv[(i += 1)]);
+    else positional.push(arg);
+  }
+  return { positional, options };
+}
+
+async function main() {
+  const { positional, options } = parseArgs(process.argv.slice(2));
+  if (positional.length !== 2) {
+    console.error('Usage: .agents/bin/screenshot <path> <output.png> [--wait-for <selector>] [--full-page] [--width <px>] [--height <px>]');
+    process.exit(2);
+  }
+  const [urlPath, outputFile] = positional;
+
+  const { browser, page, problems } = await openMathesar({
+    viewport: { width: options.width, height: options.height },
+  });
+  try {
+    await page.goto(urlPath);
+    await page.waitForLoadState('networkidle');
+    if (options.waitFor) await page.waitForSelector(options.waitFor);
+    await page.screenshot({ path: path.resolve(outputFile), fullPage: options.fullPage });
+    console.log(`url: ${page.url()}`);
+    console.log(`title: ${await page.title()}`);
+    console.log(`saved: ${path.resolve(outputFile)}`);
+    problems.forEach((problem) => console.error(problem));
+  } finally {
+    await browser.close();
+  }
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});
