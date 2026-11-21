@@ -110,3 +110,4 @@ Listed in `agents/docs/00-general/repo-map.md`. Two rules:
 
 - A new test or lint job in `.github/workflows/test-and-lint-code.yml` must be added to the `needs` list and the checks of the `checkpoint` job. Otherwise branch protection does not require it.
 - Any `.yml` or `.sh` change triggers every backend job. Expect about 100 matrix jobs.
+- The build, packaging and install jobs are skipped on a pull request that changes only paths in `.github/build-skip-paths.txt`. That list holds folders and exact file names, never file types. CI fails if an entry overlaps a path that `build-scripts/package/package.py` packages or a Dockerfile copies. When the package starts to include a file or folder from the list, remove it from the list in the same PR.

@@ -248,7 +248,7 @@ For an agent this means:
 
 ## CI
 
-All jobs are in `.github/workflows/test-and-lint-code.yml`. Path filters decide which jobs run. The required check is the single job `checkpoint`.
+All jobs are in `.github/workflows/test-and-lint-code.yml`. Path filters decide which jobs run, through `.github/scripts/changed_files.py`. The required check is the single job `checkpoint`. In the merge queue, the build, packaging and install jobs always run.
 
 | Changed files | Jobs |
 |---|---|
@@ -258,7 +258,7 @@ All jobs are in `.github/workflows/test-and-lint-code.yml`. Path filters decide 
 | `mathesar_ui/` | Prettier, ESLint, svelte-check, vitest, npm audit |
 | `docs/` | `mkdocs build --strict` (separate workflow) |
 | Any `.yml`, `.sh`, `Dockerfile*` | All backend jobs |
-| Every PR | Docker build (development and production), packaging, install script test on Ubuntu and macOS |
+| Anything not listed in `.github/build-skip-paths.txt` | Docker build (development and production), packaging, install script test on Ubuntu and macOS |
 
 Gaps to cover by hand:
 
