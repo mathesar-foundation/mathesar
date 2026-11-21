@@ -84,6 +84,8 @@ BASE = "origin/develop"  # main() sets it to the base that was checked
 FIX_IDENTITY = (
     "Fix: set the identity of the person you work for with `git config user.name` and "
     "`git config user.email`. Last commit: `git commit --amend --reset-author --no-edit`. "
+    "An earlier commit: `git rebase -i {base}`, mark that commit `edit`, amend it the same "
+    "way, then `git rebase --continue`. "
     "Every commit since the base, only when all of them are that person's: "
     "`git rebase {base} --exec 'git commit --amend --reset-author --no-edit'`."
 )
