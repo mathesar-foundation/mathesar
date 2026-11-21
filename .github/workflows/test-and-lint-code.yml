@@ -462,15 +462,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-14]
+        os: [ubuntu-22.04, macos-15]
         arch: [x64] # TODO: Include self-hosted arm runners
         include:
           - os: ubuntu-22.04
             arch: x64
             runner: ubuntu-22.04
-          - os: macos-14
+          - os: macos-15
             arch: x64
-            runner: macos-14
+            runner: macos-15
 
     runs-on: ${{ matrix.runner }}
 
