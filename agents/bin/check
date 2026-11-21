@@ -14,6 +14,7 @@
 #   frontend       prettier check, eslint, svelte-check, vitest
 #   docs           mkdocs build --strict for the user docs in docs/
 #   agents-docs    path and link check for AGENTS.md and agents/
+#   git            branch name, and no commit names a coding agent as author, committer or co-author
 #   all            every suite above
 set -uo pipefail
 
@@ -21,23 +22,25 @@ set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/_common"
 load_dev_env
 
-ALL_SUITES=(python-lint python-tests sql-tests sql-registry api-tests frontend docs agents-docs)
+ALL_SUITES=(python-lint python-tests sql-tests sql-registry api-tests frontend docs agents-docs git)
 SKIPPED=75
 suites=()
 extra_args=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --) shift; extra_args=("$@"); break ;;
-    -h|--help) sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     all) suites=("${ALL_SUITES[@]}") ;;
     *) suites+=("$1") ;;
   esac
   shift
 done
 
+BASE_REF="${MATHESAR_BASE_REF:-origin/develop}"
+
 changed_files() {
   local base
-  base=$(git merge-base HEAD "${MATHESAR_BASE_REF:-origin/develop}" 2>/dev/null || echo HEAD)
+  base=$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo HEAD)
   { git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u
 }
 
@@ -57,6 +60,7 @@ suites_for_changed_files() {
   if any_match '^mathesar_ui/'; then echo frontend; fi
   if any_match '^docs/'; then echo docs; fi
   if any_match '^AGENTS\.md$|^CLAUDE\.md$|^agents/'; then echo agents-docs; fi
+  if [ -n "$(git rev-list -n 1 "$BASE_REF..HEAD" 2>/dev/null)" ]; then echo git; fi
 }
 
 python_lint() {
@@ -180,6 +184,10 @@ agents_docs() {
   agents/bin/check-docs
 }
 
+git_suite() {
+  agents/bin/check-git --base "$BASE_REF"
+}
+
 if [ ${#suites[@]} -eq 0 ]; then
   mapfile -t suites < <(suites_for_changed_files)
   if [ ${#suites[@]} -eq 0 ]; then
@@ -196,11 +204,13 @@ skipped=()
 failed=()
 for suite in "${suites[@]}"; do
   case "$suite" in
-    python-lint|python-tests|sql-tests|sql-registry|api-tests|frontend|docs|agents-docs) ;;
+    python-lint|python-tests|sql-tests|sql-registry|api-tests|frontend|docs|agents-docs|git) ;;
     *) die "unknown suite: $suite" ;;
   esac
   log "Running $suite"
-  "${suite//-/_}" "${extra_args[@]}"
+  suite_function="${suite//-/_}"
+  if [ "$suite" = git ]; then suite_function=git_suite; fi
+  "$suite_function" "${extra_args[@]}"
   case $? in
     0) passed+=("$suite") ;;
     "$SKIPPED") skipped+=("$suite") ;;

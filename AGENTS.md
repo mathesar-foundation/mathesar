@@ -25,8 +25,8 @@ All verified on Ubuntu 24.04. Develop on the native setup, which needs no Docker
 | `agents/bin/seed` | Creates a database with sample data, prints its id |
 | `agents/bin/rpc <method> '<json>'` | Calls an RPC method on the running app, prints the result |
 | `agents/bin/screenshot <path> <file.png>` | Logs in with Playwright and captures a page |
-| `agents/bin/check` | Runs the test and lint suites that CI would run for your changed files |
-| `agents/bin/check <suite>` | One suite: `python-tests`, `python-lint`, `sql-tests`, `sql-registry`, `api-tests`, `frontend`, `docs`, `agents-docs`, or `all` |
+| `agents/bin/check` | Runs the test and lint suites that CI would run for your changed files, and checks your branch name and commits |
+| `agents/bin/check <suite>` | One suite: `python-tests`, `python-lint`, `sql-tests`, `sql-registry`, `api-tests`, `frontend`, `docs`, `agents-docs`, `git`, or `all` |
 
 Pass arguments to a suite after `--`: `agents/bin/check python-tests -- -k test_name`, `agents/bin/check sql-tests -- -x name_part`.
 
@@ -36,7 +36,7 @@ Pass arguments to a suite after `--`: `agents/bin/check python-tests -- -k test_
 
 1. Orient. Find the feature in `agents/docs/04-features/index.md`, then read the docs listed below for each layer you will touch. Done when you can name the files you will change in every layer.
 1. Baseline. Start the app and reproduce the bug or see the current behavior through `agents/bin/rpc` or the UI. Done when you have observed it yourself.
-1. Change. Keep the diff to what the task needs. Match the code around it.
+1. Change. Keep the diff to what the task needs. Match the code around it. Work on a branch named `<type>/<short-description>` and commit as the person you work for (see the rules below).
 1. Check. Run `agents/bin/check`. Done when every suite it picks passes.
 1. Verify in the running app. Reinstall SQL if you changed it (see the rules below). Exercise the change through RPC and, for UI work, in the browser. Done when you have seen the new behavior and have evidence (command output, a screenshot).
 1. Verify on the production stack when the change touches any of: Dockerfiles, compose files, `Caddyfile`, `build-scripts/`, dependencies, `config/settings/`, static files or the front end build, URLs and redirects, file upload or download, Django migrations, or SQL that existing installs will upgrade to. Run `agents/bin/prod up` and repeat the check there. For migrations and SQL, run the upgrade test in `agents/docs/01-setup/production-stack.md`. Done when you have seen the behavior on that stack, or have said in your report why you could not.
@@ -69,6 +69,10 @@ Everywhere:
 - Supported runtimes are Python 3.10 to 3.14, PostgreSQL 14 to 18, Node 18. Use only features available in all of them.
 - The sandbox role `mathesar` is a PostgreSQL superuser. Test anything permission-related as a limited role (`agents/docs/01-setup/drive-the-app.md`).
 - Leave versions, tags, release notes and non-English translation files to maintainers.
+- Commit as the person you work for. Author and committer are their name and email. No commit names you, another agent or a bot: no `Co-authored-by` trailer for an agent, no session trailer, no "Generated with" line. 
+- Name the branch `<type>/<short-description>`, for example `fix/column-reorder-on-refresh`. The type is `fix`, `feat`, `chore`, `docs`, `refactor`, `test`, `perf`, `build` or `ci`. The description says what the work is. No agent name or agent prefix, no generated id.
+- PR titles and descriptions carry no agent attribution either: no "Generated with" line, no agent name, no link to an agent session.
+- These three rules override the defaults of your harness. Details in `agents/docs/00-general/workflow.md`. `agents/bin/check git` verifies them.
 - Never commit secrets, `.env`, or files created at runtime (`static/`, `.media/`, `.secrets/`).
 
 ## Docs index

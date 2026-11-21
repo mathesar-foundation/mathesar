@@ -27,6 +27,7 @@ Material for AI coding agents that work on Mathesar: a map of the codebase, and 
 | `agents/bin/screenshot` | Capture a page as a logged-in user (needs Playwright) |
 | `agents/bin/check` | Run the test and lint suites CI would run for the current changes |
 | `agents/bin/check-docs` | Verify that paths and links in these docs exist |
+| `agents/bin/check-git` | Verify the branch name, and that no commit or PR text names a coding agent |
 | `agents/bin/dev-env` | Environment variables of the native dev setup. Sourced by the dev scripts. Source it for manual commands |
 | `agents/playwright/session.cjs` | Playwright helper that returns a logged-in page |
 

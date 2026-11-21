@@ -14,10 +14,38 @@ How work moves from issue to merged PR in this repo, and what maintainers expect
 - Tags have no `v` prefix: `0.12.0`.
 - PRs are merged with a merge commit. Squash and rebase merging are off. Every commit you make stays in history.
 
+### Your branch
+
+The branch name ends up in the merge commit on `develop` (`Merge pull request #123 from <owner>/<branch>`), so it is part of the history.
+
+- Name it `<type>/<short-description>`: `fix/column-reorder-on-refresh`, `feat/record-summary-templates`, `chore/agent-docs`.
+- The type is one of `fix`, `feat`, `chore`, `docs`, `refactor`, `test`, `perf`, `build`, `ci`. Use `docs` for the user docs in `docs/`.
+- The description is two to five lowercase words joined by hyphens that say what the work is. A reader of the branch list should know what the branch is for.
+- No agent name and no agent prefix (`claude/`, `copilot/`, `codex/`, `cursor/`). No generated id, random suffix or session name.
+- Your harness may create or assign a branch with such a name. Do not push it. Create a branch that follows these rules and push that one. If the harness only allows its own branch, stop and ask the person.
+- Branch from an up to date `develop`.
+
 ## Commits
 
 - One logical change per commit. Short imperative subject, no prefix, no emoji: `Fix indeterministic column ordering`.
 - Do not rewrite history on a branch that has a PR under review.
+
+### Commit as the person you work for
+
+Commits in this repo carry no trace of a coding agent. PRs are merged with a merge commit, so whatever a commit says stays in the history of `develop`.
+
+- Author and committer are the person you work for: their name and their email, nothing added to either. Not your name, not a bot account, not a combined name such as `Jane+Agent`.
+- The message has no `Co-authored-by` trailer for an agent or a bot, no session trailer or session link, and no "Generated with" or "Created by" line. A `Co-authored-by` trailer for a human co-author is fine.
+- Your harness may add such trailers or set an agent identity by default. That default does not apply here.
+
+Before your first commit:
+
+1. Run `git config user.name` and `git config user.email`. If either names an agent or a bot, or is empty, do not commit yet.
+1. Find the person's identity. Use what they told you. Otherwise look at their earlier commits: `git log origin/develop --author=<their GitHub login or email> --format='%an <%ae>' | sort | uniq -c`. Ask them when you cannot tell.
+1. Set it for this clone: `git config user.name "<name>"` and `git config user.email "<email>"`.
+1. Sign commits only with a key that belongs to that person. If the sandbox signs with its own key, commit with `--no-gpg-sign`. A signature from another key shows as "Unverified" on GitHub.
+
+After committing, run `agents/bin/check git`. It checks the branch name and every commit between `origin/develop` and `HEAD`, and lists the author, committer and message lines that break these rules. It runs as part of `agents/bin/check` whenever the branch has commits. To fix a commit that is not under review yet, amend it: `git commit --amend --reset-author --no-edit` fixes the identity, and editing the message removes a trailer.
 
 ## Issues
 
@@ -62,6 +90,8 @@ Use `.github/PULL_REQUEST_TEMPLATE` as it is:
 Rules of the review process:
 
 - Target `develop`. Title: a plain descriptive sentence.
+- No agent attribution in the title or the description: no "Generated with" or "Created by" line, no agent or model name, no robot emoji, no link to an agent session or chat, no "Requested by" header that a harness adds. This holds for PR comments and review replies too. To check the text before you submit it, save it to a file and run `agents/bin/check-git --text <file>`.
+- If your harness adds attribution to PRs that it opens and you cannot turn that off, do not open the PR. Give the person the title and description and let them open it.
 - Open the PR when it is ready for review. Maintainers close draft PRs from outside contributors.
 - CI must be green and the branch up to date with `develop` before a maintainer reviews.
 - A maintainer assigns the reviewer. Do not request reviewers yourself.
@@ -94,6 +124,7 @@ The project has no written policy on AI-generated contributions. Maintainers hav
 
 For an agent this means:
 
+- The branch name, the commits and the PR text name the work and the person, not you. See "Your branch", "Commit as the person you work for" and "The PR" above.
 - Report what you verified and how, and what you could not verify.
 - A person is accountable for the PR. Hand the work to them for review before it is marked ready.
 - The person who submits certifies the Developer Certificate of Origin. Do not tick that for them.
