@@ -1,0 +1,126 @@
+# Shared helpers for the scripts in agents/bin. Sourced, not executed.
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT" || exit 1
+
+# shellcheck disable=SC2034  # used by the scripts that source this file
+{
+  RUN_DIR="${MATHESAR_RUN_DIR:-${TMPDIR:-/tmp}/mathesar-dev}"
+  DJANGO_PORT="${MATHESAR_PORT:-8000}"
+  VITE_PORT="${MATHESAR_CLIENT_DEV_PORT:-3000}"
+}
+
+# Exports the settings of the native dev servers. agents/bin/prod must not call it:
+# docker compose would substitute these values into docker-compose.yml.
+load_dev_env() {
+  # shellcheck source=agents/bin/dev-env
+  source "$REPO_ROOT/agents/bin/dev-env"
+}
+
+log() { printf '==> %s\n' "$*"; }
+die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+
+as_root() {
+  if [ "$(id -u)" -eq 0 ]; then "$@"; else sudo -n "$@"; fi
+}
+
+# Reads SQL from stdin and runs it as the `postgres` OS user over the local socket
+# of the cluster on $POSTGRES_PORT, so that it never reaches another local cluster.
+psql_as_postgres_os_user() {
+  if [ "$(id -u)" -eq 0 ]; then
+    su postgres -c "psql -q -v ON_ERROR_STOP=1 -p '$POSTGRES_PORT' -d postgres"
+  else
+    sudo -n -u postgres psql -q -v ON_ERROR_STOP=1 -p "$POSTGRES_PORT" -d postgres
+  fi
+}
+
+postgres_accepts_connections() {
+  pg_isready -q -h "$POSTGRES_HOST" -p "$POSTGRES_PORT"
+}
+
+can_log_in_to() {
+  PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" \
+    -U "$POSTGRES_USER" -d "$1" -Atqc 'select 1' >/dev/null 2>&1
+}
+
+start_local_postgres() {
+  if command -v pg_lsclusters >/dev/null; then
+    pg_lsclusters -h | while read -r version cluster _; do
+      as_root pg_ctlcluster "$version" "$cluster" start 2>/dev/null || true
+    done
+  else
+    as_root service postgresql start || true
+  fi
+}
+
+ensure_postgres_running() {
+  postgres_accepts_connections && return
+  log "Starting PostgreSQL"
+  start_local_postgres
+  for _ in $(seq 1 30); do
+    postgres_accepts_connections && return
+    sleep 1
+  done
+  die "PostgreSQL is not accepting connections on $POSTGRES_HOST:$POSTGRES_PORT"
+}
+
+# docker compose substitutes shell variables into compose files. The settings of
+# the native dev setup (agents/bin/dev-env) must not reach it.
+without_dev_env() {
+  env -u MODE -u DEBUG -u DJANGO_SETTINGS_MODULE -u ALLOWED_HOSTS -u SKIP_STATIC_COLLECTION \
+    -u POSTGRES_DB -u POSTGRES_USER -u POSTGRES_PASSWORD -u POSTGRES_HOST -u POSTGRES_PORT "$@"
+}
+
+docker_is_available() {
+  command -v docker >/dev/null && { docker info >/dev/null 2>&1 || command -v dockerd >/dev/null; }
+}
+
+ensure_docker_running() {
+  command -v docker >/dev/null || die "docker is not installed"
+  docker info >/dev/null 2>&1 && return
+  command -v dockerd >/dev/null || die "The Docker daemon is not running and dockerd is not installed"
+  log "Starting the Docker daemon"
+  mkdir -p "$RUN_DIR"
+  as_root sh -c "nohup dockerd >'$RUN_DIR/dockerd.log' 2>&1 &"
+  for _ in $(seq 1 30); do
+    docker info >/dev/null 2>&1 && return
+    sleep 1
+  done
+  die "The Docker daemon did not start. Log: $RUN_DIR/dockerd.log"
+}
+
+# Writes a tar with what git would commit: tracked files plus new files that are
+# not ignored. Local artifacts such as .venv stay out of image builds.
+write_build_context() {
+  comm -z -23 \
+    <(git ls-files -z --cached --others --exclude-standard | sort -zu) \
+    <(git ls-files -z --deleted | sort -zu) \
+  | tar --null --no-recursion -T - -cf "$1"
+}
+
+# Sets PYTHON_BASE_TAG and DOCKER_BUILD_FLAGS for building the repo's Dockerfiles.
+# Behind a proxy that re-signs TLS, build steps fail certificate checks. In that
+# case this makes a local base image that trusts the proxy CA. The Dockerfiles stay
+# untouched: pass the tag through their PYTHON_VERSION or BASE_IMAGE argument.
+# shellcheck disable=SC2034  # both variables are read by the calling scripts
+prepare_docker_build() {
+  PYTHON_BASE_TAG="${PYTHON_VERSION:-3.14-bookworm}"
+  DOCKER_BUILD_FLAGS=()
+  local ca_bundle="${MATHESAR_BUILD_CA_BUNDLE:-${SSL_CERT_FILE:-}}" context ca_store
+  if [ -z "${HTTPS_PROXY:-}" ] || [ ! -f "$ca_bundle" ]; then return; fi
+  log "Proxy detected: building with a base image that trusts $ca_bundle"
+  context=$(mktemp -d)
+  ca_store=/etc/ssl/certs/ca-certificates.crt
+  cp "$ca_bundle" "$context/proxy-ca.crt"
+  {
+    echo "FROM python:$PYTHON_BASE_TAG"
+    echo "COPY proxy-ca.crt /usr/local/share/ca-certificates/build-proxy-ca.crt"
+    echo "RUN update-ca-certificates"
+    echo "ENV SSL_CERT_FILE=$ca_store REQUESTS_CA_BUNDLE=$ca_store PIP_CERT=$ca_store"
+    echo "ENV NODE_EXTRA_CA_CERTS=$ca_store CURL_CA_BUNDLE=$ca_store"
+  } >"$context/Dockerfile"
+  PYTHON_BASE_TAG="$PYTHON_BASE_TAG-proxyca"
+  docker build -q -t "python:$PYTHON_BASE_TAG" "$context" >/dev/null
+  rm -rf "$context"
+  DOCKER_BUILD_FLAGS=(--network host --build-arg "HTTPS_PROXY=$HTTPS_PROXY" --build-arg "https_proxy=$HTTPS_PROXY")
+}
