@@ -71,6 +71,7 @@ PR_TEXT_RULES = [rule for rule in MESSAGE_RULES if rule[1] == "line credits an a
 PR_HEADER_MAX_LINE = 6
 PR_DRIVEN_BY = re.compile(r"^Driven by @[A-Za-z0-9-]+, raised by \S.*$", re.MULTILINE)
 PR_AGENT = re.compile(r"^- \*\*Agent:\*\* \S", re.MULTILINE)
+PR_HEADER_RULE = re.compile(r"How this PR was made</summary>(?:(?!</details>).)*</details>\s*\n---[ \t]*$", re.DOTALL | re.MULTILINE)
 PR_HUMAN_INVOLVEMENT_LABEL = re.compile(r"^\W*human involvement\W*:", re.IGNORECASE)
 PR_HUMAN_INVOLVEMENT = re.compile(r"^- \*\*Human involvement:\*\* [0-5] of 5\. \S", re.MULTILINE)
 
@@ -127,6 +128,8 @@ def problems_in_pr_description(text):
         )
     if not PR_AGENT.search(text):
         yield "no '**Agent:**' line that gives the product and model"
+    if not PR_HEADER_RULE.search(text):
+        yield "no '---' line after the 'How this PR was made' section"
     for line in text.splitlines():
         if PR_HUMAN_INVOLVEMENT_LABEL.search(line) and not PR_HUMAN_INVOLVEMENT.search(line):
             yield f"expected '- **Human involvement:** <0 to 5> of 5. <evidence>': {line.strip()}"
