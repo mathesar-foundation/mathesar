@@ -225,7 +225,7 @@ Taken from maintainer comments on closed and revised PRs:
 | SQL functions that fail silently | Raise an error. |
 | SQL tests in a new style | Match `db/sql/test_sql_functions.sql`: shared `__setup_*` functions, one behavior per test, no manual `DROP`, assert full results. |
 | A description or reply that claims something the diff does not do | Verify each claim against the diff before posting. |
-| Long generated descriptions | Write a few sentences for people. Verbose details go in the "For agents" section. |
+| Long generated descriptions | Keep it short, in bullet points, for people. Verbose details go in the "For agents" section. |
 | A description that talks to the reader ("Happy to fix this if you prefer") or retells the chat with the agent | Say only what the PR does and why. Ask the person questions in the chat. |
 | Red CI, merge conflicts, missing template or DCO | Fix before asking for review. |
 
