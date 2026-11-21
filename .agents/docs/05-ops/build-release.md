@@ -26,6 +26,7 @@ How Mathesar is built into images and install packages, how a release is cut, an
 | `docker-compose.yml` | Production example for users: `service`, `db`, `caddy-reverse-proxy` | Published with each release and referenced from the install docs. Treat changes as user-facing |
 | `docker-compose.dev.yml` | Development: `dev-db`, `dev-service`, `obj-store` (MinIO), `test-service` | CI builds `test-service` and `dev-db` from it |
 | `docker-compose.test.yml` | Scenario tests: `test-db`, `test-user-db`, `api-test-service`, `test-runner` | Run by `run_api_tests.sh` |
+| `e2e/docker-compose.yml` | End-to-end tests: an override for `docker-compose.yml` that builds `service` and `caddy-reverse-proxy` from the working tree and adds an S3 store for file attachments (`object-store`, RustFS) and the runner `e2e` | Run by `.agents/bin/e2e` and `.github/workflows/test-e2e.yml`. A change to `docker-compose.yml` can break it |
 
 Run the production file with images built from your working tree: `.agents/bin/prod up` (`.agents/docs/01-setup/production-stack.md`). Do this after any change to the files in this section and the next one.
 

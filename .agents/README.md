@@ -6,7 +6,7 @@ Material for AI coding agents that work on Mathesar: a map of the codebase, and 
 
 - `.agents/docs/` is the map of the codebase. The "Docs index" table in `AGENTS.md` lists every file and when to read it.
 - `.agents/bin/` holds executable scripts. Each starts with a usage comment. The "Commands" table in `AGENTS.md` lists the ones an agent runs during a task.
-- `.agents/playwright/session.cjs` is a Playwright helper that returns a logged-in page. `.agents/bin/screenshot` uses it, and so can your own browser scripts.
+- `.agents/playwright/session.cjs` is a Playwright helper that returns a logged-in page. `.agents/bin/screenshot` uses it, and so can your own browser scripts. It serves one-off checks. The tests that stay are in `e2e/`.
 
 ## Scripts
 

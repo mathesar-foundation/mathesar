@@ -97,6 +97,17 @@ We use [pytest](https://docs.pytest.org) for our backend tests.
 - All the front end code is in the `mathesar_ui` directory.
 - If you are modifying front end code, read more the [Front end development](./mathesar_ui/README.md) guide.
 
+## End-to-end tests
+
+The tests in the `e2e` directory drive Mathesar in a browser with [Playwright](https://playwright.dev/). They run against the production Docker Compose setup, built from your working tree:
+
+```
+docker compose -f docker-compose.yml -f e2e/docker-compose.yml run --rm --build e2e
+docker compose -f docker-compose.yml -f e2e/docker-compose.yml down --volumes
+```
+
+Read the [End-to-end tests](./e2e/README.md) guide before you change what the UI does.
+
 ## Full-stack linting
 
 To lint the front end and back end code at the same time, run the `lint.sh` script from the root of the repository. The script requires that the Python virtual environment with `flake8` be activated and that Node modules be installed in `mathesar_ui/`. Alternatively, ESLint and Flake8 should be installed globally on the system.
