@@ -59,8 +59,10 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/com
 You're welcome to use AI coding assistants. What matters is the result and the person behind it.
 
 - **You are responsible for your PR.** Read, understand and test every change before you ask for review. You should be able to explain it and answer questions without going back to the tool.
-- **Say how you used AI.** One line in the PR description is enough, for example "Written with Claude Code, reviewed and tested by me."
-- **Talk to us yourself.** Keep PR descriptions, issue comments and review replies short and in your own words. Don't paste generated text or let an agent post for you.
+- **Say how you used AI.** If you open the PR yourself, one line in the description is enough, for example "Written with Claude Code, reviewed and tested by me."
+- **An agent may open your PR, as a draft.** The agent adds a short header that says who drove the PR and which agent raised it. Review the PR and edit the description before you mark it ready for review. The rules here apply from the moment you ask for review.
+- **Talk to us yourself.** Keep PR descriptions, issue comments and review replies short and in your own words. Don't paste generated text or let an agent comment for you. The agent's header is the only exception.
+- **Maintainers** may open PRs through agents, as drafts or ready for review. They review the PR themselves first.
 - **The usual process still applies.** Pick a "help wanted" issue, run Mathesar locally and keep PRs small.
 - **Respect reviewers' time.** A PR should be worth more to the project than the time it takes to review. We may close PRs that look unreviewed or untested without a detailed review. For example: code that doesn't run, changes unrelated to the issue, or review replies that look copied from a tool.
 
