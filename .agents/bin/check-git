@@ -80,14 +80,16 @@ BRANCH_NAME = re.compile(rf"^({'|'.join(BRANCH_TYPES)})/[a-z0-9]+(-[a-z0-9]+)*$"
 LONG_LIVED_BRANCH = re.compile(r"^(develop|master|release-[\d.]+)$")
 
 # Each problem is printed with the way to fix it, so that the docs need not repeat it.
+BASE = "origin/develop"  # main() sets it to the base that was checked
 FIX_IDENTITY = (
     "Fix: set the identity of the person you work for with `git config user.name` and "
-    "`git config user.email`, then run "
-    "`git rebase origin/develop --exec 'git commit --amend --reset-author --no-edit'`."
+    "`git config user.email`. Last commit: `git commit --amend --reset-author --no-edit`. "
+    "Every commit since the base, only when all of them are that person's: "
+    "`git rebase {base} --exec 'git commit --amend --reset-author --no-edit'`."
 )
 FIX_MESSAGE = (
     "Fix: remove the line from the commit message. Last commit: `git commit --amend`. "
-    "Earlier commit: `git rebase -i origin/develop` and reword it. "
+    "Earlier commit: `git rebase -i {base}` and reword it. "
     "Your harness may add the line by default. That default does not apply in this repo."
 )
 FIX_BRANCH = (
@@ -132,11 +134,11 @@ def problems_in_text(text, rules=MESSAGE_RULES):
         co_author = CO_AUTHOR.match(line)
         if co_author and rules is MESSAGE_RULES:
             if names_an_agent(co_author.group(1), co_author.group(2) or ""):
-                yield f"co-author trailer names an agent: {line.strip()}\n  {FIX_MESSAGE}"
+                yield f"co-author trailer names an agent: {line.strip()}\n  {FIX_MESSAGE.format(base=BASE)}"
             continue
         for pattern, problem in rules:
             if pattern.search(line):
-                fix = FIX_MESSAGE if rules is MESSAGE_RULES else FIX_PR_FOOTER
+                fix = FIX_MESSAGE.format(base=BASE) if rules is MESSAGE_RULES else FIX_PR_FOOTER
                 yield f"{problem}: {line.strip()}\n  {fix}"
                 break
 
@@ -166,7 +168,7 @@ def problems_in_commit(author_name, author_email, committer_name, committer_emai
     ]
     for role, name, email in identities:
         if names_an_agent(name, email):
-            yield f"{role} names an agent: {name} <{email}>\n  {FIX_IDENTITY}"
+            yield f"{role} names an agent: {name} <{email}>\n  {FIX_IDENTITY.format(base=BASE)}"
     yield from problems_in_text(message)
 
 
@@ -188,6 +190,8 @@ def main():
     parser.add_argument("--base", default=os.environ.get("MATHESAR_BASE_REF", "origin/develop"))
     parser.add_argument("--text", action="append", default=[], metavar="FILE")
     args = parser.parse_args()
+    global BASE
+    BASE = args.base
 
     problems = []
     branch = git("branch", "--show-current").strip()
