@@ -81,14 +81,20 @@ LONG_LIVED_BRANCH = re.compile(r"^(develop|master|release-[\d.]+)$")
 
 # Each problem is printed with the way to fix it, so that the docs need not repeat it.
 BASE = "origin/develop"  # main() sets it to the base that was checked
-FIX_IDENTITY = (
+# For a wrong committer the author may be another person and correct, so the hint keeps it.
+FIX_IDENTITY_SETUP = (
     "Fix: set the identity of the person you work for with `git config user.name` and "
-    "`git config user.email`. Last commit: `git commit --amend --reset-author --no-edit`. "
+    "`git config user.email`. "
+)
+FIX_IDENTITY_SCOPE = (
+    "Last commit: `{amend}`. "
     "An earlier commit: `git rebase -i {base}`, mark that commit `edit`, amend it the same "
     "way, then `git rebase --continue`. "
     "Every commit since the base, only when all of them are that person's: "
     "`git rebase {base} --exec 'git commit --amend --reset-author --no-edit'`."
 )
+AMEND_AUTHOR = "git commit --amend --only --reset-author --no-edit"
+AMEND_COMMITTER = "git commit --amend --only --no-edit"
 FIX_MESSAGE = (
     "Fix: remove the line from the commit message. Last commit: `git commit --amend`. "
     "Earlier commit: `git rebase -i {base}` and reword it. "
@@ -170,7 +176,9 @@ def problems_in_commit(author_name, author_email, committer_name, committer_emai
     ]
     for role, name, email in identities:
         if names_an_agent(name, email):
-            yield f"{role} names an agent: {name} <{email}>\n  {FIX_IDENTITY.format(base=BASE)}"
+            amend = AMEND_AUTHOR if role == "author" else AMEND_COMMITTER
+            fix = FIX_IDENTITY_SETUP + FIX_IDENTITY_SCOPE.format(amend=amend, base=BASE)
+            yield f"{role} names an agent: {name} <{email}>\n  {fix}"
     yield from problems_in_text(message)
 
 
