@@ -1,0 +1,81 @@
+---
+# Extends the production setup in ../docker-compose.yml for end-to-end tests.
+# It builds the Mathesar images from the working tree, keeps all data in
+# volumes that `down --volumes` removes, and adds the Playwright runner.
+#
+# Run from the repo root. See README.md in this folder.
+#
+#   docker compose -f docker-compose.yml -f e2e/docker-compose.yml run --rm e2e
+#   docker compose -f docker-compose.yml -f e2e/docker-compose.yml down --volumes
+#
+name: mathesar-e2e
+
+services:
+  service:
+    image: mathesar/mathesar:e2e
+    build:
+      context: .
+      target: production
+    # Keeps a test stack from reporting to the project's analytics server.
+    extra_hosts:
+      - 'analytics.mathesar.dev:127.0.0.1'
+    volumes: !override
+      - static:/code/static
+      - media:/code/.media
+      - secrets:/code/.secrets
+
+  db:
+    # Lets tests that run on the host seed and inspect the databases.
+    ports:
+      - '127.0.0.1:5433:5432'
+    volumes: !override
+      - pgdata:/var/lib/postgresql/data
+
+  caddy-reverse-proxy:
+    image: mathesar/mathesar-caddy:e2e
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    # The stack has known credentials, so it is published on loopback only.
+    ports: !override
+      - '127.0.0.1:80:80'
+    volumes: !override
+      - media:/code/.media
+      - static:/code/static
+      - caddy:/data
+    healthcheck:
+      test: curl -f http://localhost/caddy-health-check
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  # The runner shares the network of the reverse proxy. Mathesar is then at
+  # http://localhost for the browser, which the clipboard API requires and
+  # which matches the default DOMAIN_NAME.
+  e2e:
+    profiles: [e2e]
+    image: mathesar/mathesar-e2e
+    build:
+      context: ./e2e
+    network_mode: service:caddy-reverse-proxy
+    environment:
+      CI: ${CI:-}
+      E2E_POSTGRES_HOST: mathesar_db
+      E2E_POSTGRES_PORT: 5432
+    # The working tree is mounted so that reports and screenshot baselines
+    # land in it. The second entry keeps the packages installed in the image.
+    volumes:
+      - ./e2e:/e2e
+      - /e2e/node_modules
+    depends_on:
+      service:
+        condition: service_healthy
+      caddy-reverse-proxy:
+        condition: service_healthy
+
+volumes:
+  static:
+  media:
+  secrets:
+  pgdata:
+  caddy:
