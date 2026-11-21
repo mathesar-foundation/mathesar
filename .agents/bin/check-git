@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+"""
+Check that the branch, its commits and the PR text carry no trace of a coding agent.
+
+Fails on:
+- A branch name that is not `<type>/<short-description>`, or that names an agent.
+- An author or committer name or email that names an agent or a bot.
+- A `Co-authored-by` trailer that names an agent or a bot.
+- A session trailer, a session link or a "Generated with" line added by an agent harness.
+- A PR description without the header that says who drove the PR and which
+  agent raised it, or with a malformed human involvement line. That line is
+  required for external contributors only, which this script cannot tell.
+
+Usage: .agents/bin/check-git [--base <ref>] [--text <file> ...]
+  Checks the current branch name and the commits in base..HEAD. The base
+  defaults to $MATHESAR_BASE_REF, then origin/develop.
+  --text also checks a file that holds a PR description.
+Exits 1 and lists each problem.
+"""
+import argparse
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+AGENT_PRODUCTS = (
+    r"claude|anthropic|copilot|codex|openai|chatgpt|cursor|devin|aider|gemini|jules"
+    r"|windsurf|codeium|amazon q|sourcegraph|cody"
+)
+# People are called Claude, Devin, Jules and Cody too. In a name, these words count
+# only when they are the whole name, alone or with a product word such as "Code".
+AGENT_OR_PERSON = r"claude|cursor|devin|gemini|jules|cody"
+AGENT_NAME = re.compile(
+    r"\[bot\]|\b(bot|agent|anthropic|copilot|codex|openai|chatgpt|aider|windsurf|codeium"
+    r"|amazon q|sourcegraph)\b"
+    rf"|^\s*({AGENT_OR_PERSON})(\s+(code|ai|cli|assistant|opus|sonnet|haiku|pro|flash|\d[\w.]*))*\s*$",
+    re.IGNORECASE,
+)
+AGENT_EMAIL = re.compile(
+    r"\[bot\]@|@([a-z0-9-]+\.)*(anthropic\.com|openai\.com|cursor\.com|cursor\.sh|devin\.ai"
+    r"|cognition\.ai|aider\.chat|codeium\.com|windsurf\.com|sourcegraph\.com)$",
+    re.IGNORECASE,
+)
+CO_AUTHOR = re.compile(r"^\s*co-authored-by:\s*([^<]*)(?:<([^>]*)>)?", re.IGNORECASE)
+# Narrower than AGENT_PRODUCTS: words such as "cursor" are common in branch names here.
+AGENT_IN_BRANCH_NAME = re.compile(r"claude|anthropic|copilot|codex|openai|chatgpt", re.IGNORECASE)
+MESSAGE_RULES = [
+    (
+        re.compile(r"^\s*[a-z]+-session(-id)?:\s*\S+", re.IGNORECASE),
+        "session trailer from an agent harness",
+    ),
+    (
+        re.compile(
+            rf"(generated|created|written|authored)\s+(with|by)\s+\W*({AGENT_PRODUCTS})\b",
+            re.IGNORECASE,
+        ),
+        "line credits an agent",
+    ),
+    (re.compile("\N{ROBOT FACE}"), "line credits an agent"),
+    (
+        re.compile(r"https?://(www\.)?(claude\.ai|chatgpt\.com|chat\.openai\.com)/", re.IGNORECASE),
+        "link to an agent session",
+    ),
+]
+
+# A PR description names the agent in its header. See "The header" in workflow.md.
+PR_TEXT_RULES = [rule for rule in MESSAGE_RULES if rule[1] == "line credits an agent"]
+PR_HEADER_MAX_LINE = 6
+PR_DRIVEN_BY = re.compile(r"^Driven by @[A-Za-z0-9-]+, raised by \S.*$", re.MULTILINE)
+PR_AGENT = re.compile(r"^- \*\*Agent:\*\* \S", re.MULTILINE)
+PR_HEADER_RULE = re.compile(r"How this PR was made</summary>(?:(?!</details>).)*</details>\s*\n---[ \t]*$", re.DOTALL | re.MULTILINE)
+PR_HUMAN_INVOLVEMENT_LABEL = re.compile(r"^\W*human involvement\W*:", re.IGNORECASE)
+PR_HUMAN_INVOLVEMENT = re.compile(r"^- \*\*Human involvement:\*\* [0-5] of 5\. \S", re.MULTILINE)
+
+BRANCH_TYPES = ("fix", "feat", "chore", "docs", "refactor", "test", "perf", "build", "ci")
+BRANCH_NAME = re.compile(rf"^({'|'.join(BRANCH_TYPES)})/[a-z0-9]+(-[a-z0-9]+)*$")
+LONG_LIVED_BRANCH = re.compile(r"^(develop|master|release-[\d.]+)$")
+
+# Each problem is printed with the way to fix it, so that the docs need not repeat it.
+FIX_IDENTITY = (
+    "Fix: set the identity of the person you work for with `git config user.name` and "
+    "`git config user.email`, then run "
+    "`git rebase origin/develop --exec 'git commit --amend --reset-author --no-edit'`."
+)
+FIX_MESSAGE = (
+    "Fix: remove the line from the commit message. Last commit: `git commit --amend`. "
+    "Earlier commit: `git rebase -i origin/develop` and reword it. "
+    "Your harness may add the line by default. That default does not apply in this repo."
+)
+FIX_BRANCH = (
+    "Fix: `git branch -m <type>/<short-description>`, for example "
+    "`git branch -m fix/column-reorder-on-refresh`, and push under that name."
+)
+FIX_PR_HEADER = (
+    "Fix: start the description with the header from 'The header' in "
+    ".agents/docs/00-general/workflow.md."
+)
+FIX_PR_FOOTER = (
+    "Fix: delete the line. The header is the only agent attribution in a PR description."
+)
+
+FIELD_SEPARATOR = "\x1f"
+RECORD_SEPARATOR = "\x1e"
+LOG_FORMAT = FIELD_SEPARATOR.join(["%h", "%an", "%ae", "%cn", "%ce", "%B"]) + RECORD_SEPARATOR
+
+
+def git(*args):
+    result = subprocess.run(
+        ["git", *args], cwd=REPO_ROOT, capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        sys.exit(f"error: git {' '.join(args)}: {result.stderr.strip()}")
+    return result.stdout
+
+
+def commits_since(base):
+    log = git("log", f"--format={LOG_FORMAT}", f"{base}..HEAD")
+    for record in log.split(RECORD_SEPARATOR):
+        if record.strip():
+            yield record.strip("\n").split(FIELD_SEPARATOR)
+
+
+def names_an_agent(name, email):
+    return bool(AGENT_NAME.search(name) or AGENT_EMAIL.search(email.strip()))
+
+
+def problems_in_text(text, rules=MESSAGE_RULES):
+    for line in text.splitlines():
+        co_author = CO_AUTHOR.match(line)
+        if co_author and rules is MESSAGE_RULES:
+            if names_an_agent(co_author.group(1), co_author.group(2) or ""):
+                yield f"co-author trailer names an agent: {line.strip()}\n  {FIX_MESSAGE}"
+            continue
+        for pattern, problem in rules:
+            if pattern.search(line):
+                fix = FIX_MESSAGE if rules is MESSAGE_RULES else FIX_PR_FOOTER
+                yield f"{problem}: {line.strip()}\n  {fix}"
+                break
+
+
+def problems_in_pr_description(text):
+    """The header names the agent, so only harness footers count as stray attribution."""
+    yield from problems_in_text(text, PR_TEXT_RULES)
+    first_lines = "\n".join(text.splitlines()[:PR_HEADER_MAX_LINE])
+    if not PR_DRIVEN_BY.search(first_lines):
+        yield (
+            f"no line 'Driven by @<login>, raised by <agent>.' in the first "
+            f"{PR_HEADER_MAX_LINE} lines\n  {FIX_PR_HEADER}"
+        )
+    if not PR_AGENT.search(text):
+        yield f"no '**Agent:**' line that gives the product and model\n  {FIX_PR_HEADER}"
+    if not PR_HEADER_RULE.search(text):
+        yield f"no '---' line after the 'How this PR was made' section\n  {FIX_PR_HEADER}"
+    for line in text.splitlines():
+        if PR_HUMAN_INVOLVEMENT_LABEL.search(line) and not PR_HUMAN_INVOLVEMENT.search(line):
+            yield f"expected '- **Human involvement:** <0 to 5> of 5. <evidence>': {line.strip()}"
+
+
+def problems_in_commit(author_name, author_email, committer_name, committer_email, message):
+    identities = [
+        ("author", author_name, author_email),
+        ("committer", committer_name, committer_email),
+    ]
+    for role, name, email in identities:
+        if names_an_agent(name, email):
+            yield f"{role} names an agent: {name} <{email}>\n  {FIX_IDENTITY}"
+    yield from problems_in_text(message)
+
+
+def problems_in_branch_name(branch):
+    """The branch name is checked only on a work branch, not on a detached HEAD."""
+    if not branch or LONG_LIVED_BRANCH.match(branch):
+        return
+    if AGENT_IN_BRANCH_NAME.search(branch):
+        yield f"name contains the name of an agent product\n  {FIX_BRANCH}"
+    if not BRANCH_NAME.match(branch):
+        yield (
+            f"name is not <type>/<short-description> in lowercase with hyphens, "
+            f"where type is one of: {', '.join(BRANCH_TYPES)}\n  {FIX_BRANCH}"
+        )
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--base", default=os.environ.get("MATHESAR_BASE_REF", "origin/develop"))
+    parser.add_argument("--text", action="append", default=[], metavar="FILE")
+    args = parser.parse_args()
+
+    problems = []
+    branch = git("branch", "--show-current").strip()
+    problems += [f"branch {branch}: {p}" for p in problems_in_branch_name(branch)]
+    commit_count = 0
+    for short_hash, *fields in commits_since(args.base):
+        commit_count += 1
+        problems += [f"commit {short_hash}: {p}" for p in problems_in_commit(*fields)]
+    for text_file in args.text:
+        text = Path(text_file).read_text(encoding="utf-8")
+        problems += [f"{text_file}: {p}" for p in problems_in_pr_description(text)]
+
+    for problem in problems:
+        print(problem)
+    if problems:
+        sys.exit(
+            f"{len(problems)} problem(s). See 'Your branch', 'Commits' and 'The PR' "
+            "in .agents/docs/00-general/workflow.md"
+        )
+    checked = [f"branch {branch or '(detached)'}", f"{commit_count} commit(s) against {args.base}"]
+    checked += args.text
+    print(f"OK: {', '.join(checked)}")
+
+
+if __name__ == "__main__":
+    main()

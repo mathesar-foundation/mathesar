@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Stop the dev servers started by .agents/bin/start. PostgreSQL keeps running.
+#
+# Usage: .agents/bin/stop
+set -euo pipefail
+
+# shellcheck source=.agents/bin/_common
+source "$(dirname "${BASH_SOURCE[0]}")/_common"
+load_dev_env
+
+stop_server() {
+  local name=$1 pid_file="$RUN_DIR/$1.pid" pid
+  [ -f "$pid_file" ] || return 0
+  pid=$(cat "$pid_file")
+  # The pid is a process group leader when setsid was available at start.
+  if kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null; then
+    # Wait until the port is free again, so that an immediate .agents/bin/start works.
+    for _ in $(seq 1 50); do
+      kill -0 -- "-$pid" 2>/dev/null || kill -0 "$pid" 2>/dev/null || break
+      sleep 0.2
+    done
+    if kill -0 -- "-$pid" 2>/dev/null || kill -0 "$pid" 2>/dev/null; then
+      die "$name (pid $pid) did not stop within 10 seconds"
+    fi
+    log "Stopped $name"
+  fi
+  rm -f "$pid_file"
+}
+
+stop_server django
+stop_server vite
