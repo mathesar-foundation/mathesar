@@ -122,12 +122,12 @@ jobs:
       - name: Get changed files
         id: changed_files
         run: |
+          always=()
           if [[ "${{ github.event_name }}" == "merge_group" ]]; then
-            any_changed=true
-          else
-            any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
-              --build-skip-list .github/build-skip-paths.txt)
+            always=(--always)
           fi
+          any_changed=$(python3 .github/scripts/changed_files.py --base "$BASE_SHA" \
+            --build-skip-list .github/build-skip-paths.txt "${always[@]}")
           echo "any_changed=$any_changed" >> "$GITHUB_OUTPUT"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}

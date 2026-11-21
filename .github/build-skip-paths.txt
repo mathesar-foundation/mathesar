@@ -8,7 +8,8 @@
 # here.
 #
 # CI fails if an entry overlaps a path that build-scripts/package/package.py
-# packages or that a Dockerfile copies.
+# packages or that a Dockerfile copies, or if a listed folder contains a
+# folder named "locale", which compilemessages would compile.
 
 docs/
 agents/

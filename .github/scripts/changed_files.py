@@ -13,6 +13,7 @@ calling job fails instead of skipping checks.
 """
 import argparse
 import ast
+import os
 import re
 import subprocess
 import sys
@@ -33,11 +34,12 @@ def get_changed_files(base):
             ["git", "fetch", "--no-tags", "--depth=1", "origin", base],
             check=True, stdout=subprocess.DEVNULL,
         )
+    # -z keeps paths with unusual characters unquoted.
     diff = subprocess.run(
-        ["git", "diff", "--name-only", "--no-renames", base, "HEAD"],
+        ["git", "diff", "--name-only", "-z", "--no-renames", base, "HEAD"],
         check=True, capture_output=True, text=True,
     )
-    return [line for line in diff.stdout.splitlines() if line]
+    return [path for path in diff.stdout.split("\0") if path]
 
 
 def read_skip_list(path):
@@ -79,13 +81,33 @@ def get_dockerfile_inputs():
             yield from (arg for arg in args if not arg.startswith("--"))
 
 
+def find_locale_dirs(skip_list):
+    """Locale folders in skipped folders.
+
+    compilemessages, which the Docker build and package.py run, compiles every
+    folder named "locale" in the source tree.
+    """
+    found = []
+    for entry in skip_list:
+        folder = REPO_ROOT / entry
+        if not entry.endswith("/") or not folder.is_dir():
+            continue
+        for dirpath, dirnames, _ in os.walk(folder):
+            for dirname in dirnames:
+                if dirname == "locale":
+                    path = Path(dirpath, dirname).relative_to(REPO_ROOT)
+                    found.append(path.as_posix())
+    return found
+
+
 def find_overlaps(skip_list):
-    overlaps = []
+    overlaps = find_locale_dirs(skip_list)
     inputs = set(get_package_inputs()) | set(get_dockerfile_inputs())
     for raw in sorted(inputs):
         path = raw.removeprefix("./").rstrip("/")
-        # The whole build context is copied with "COPY . ."; the build reads
-        # only what package.py and the explicit COPY lines name.
+        # The whole build context is copied with "COPY . .". Apart from the
+        # locale folders checked above, the build reads only what package.py
+        # and the explicit COPY lines name.
         if path in ("", ".") or not (REPO_ROOT / path).exists():
             continue
         contains_skipped = any(
@@ -103,6 +125,10 @@ def main():
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--match")
     mode.add_argument("--build-skip-list")
+    parser.add_argument(
+        "--always", action="store_true",
+        help="Print true after the skip list checks, whatever changed.",
+    )
     args = parser.parse_args()
 
     if args.build_skip_list:
@@ -115,6 +141,9 @@ def main():
                 file=sys.stderr,
             )
             return 1
+        if args.always:
+            print("true")
+            return 0
         changed = get_changed_files(args.base)
         needed = not changed or any(
             not is_skipped(path, skip_list) for path in changed
