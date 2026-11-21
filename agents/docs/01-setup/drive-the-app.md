@@ -135,8 +135,8 @@ Replace the ids and OIDs with the ones your calls return. A new user must change
 
 ```
 source agents/bin/dev-env
-PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -d mathesar_django   # internal database
-PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -d sandbox           # a user database
+PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d mathesar_django   # internal database
+PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d sandbox           # a user database
 ```
 
 In a user database, Mathesar's functions live in the `msar` schema. Call one directly to tell a SQL bug from a Python bug:

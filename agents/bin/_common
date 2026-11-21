@@ -24,12 +24,13 @@ as_root() {
   if [ "$(id -u)" -eq 0 ]; then "$@"; else sudo -n "$@"; fi
 }
 
-# Reads SQL from stdin and runs it as the `postgres` OS user over the local socket.
+# Reads SQL from stdin and runs it as the `postgres` OS user over the local socket
+# of the cluster on $POSTGRES_PORT, so that it never reaches another local cluster.
 psql_as_postgres_os_user() {
   if [ "$(id -u)" -eq 0 ]; then
-    su postgres -c "psql -q -v ON_ERROR_STOP=1 -d postgres"
+    su postgres -c "psql -q -v ON_ERROR_STOP=1 -p '$POSTGRES_PORT' -d postgres"
   else
-    sudo -n -u postgres psql -q -v ON_ERROR_STOP=1 -d postgres
+    sudo -n -u postgres psql -q -v ON_ERROR_STOP=1 -p "$POSTGRES_PORT" -d postgres
   fi
 }
 

@@ -57,6 +57,8 @@ build_images() {
 
 # Production settings hardcode the analytics URLs. The extra_hosts entry keeps a
 # test stack from reporting to the project's real analytics server.
+# The stack has a known admin password, so the ports are published on loopback
+# only. `!override` replaces the list from docker-compose.yml instead of adding to it.
 write_compose_override() {
   local tag=$1 pull_policy=$2
   cat >"$PROD_DIR/override.yml" <<EOF
@@ -69,6 +71,9 @@ services:
   caddy-reverse-proxy:
     image: mathesar/mathesar-caddy:$tag
     pull_policy: $pull_policy
+    ports: !override
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
 EOF
 }
 

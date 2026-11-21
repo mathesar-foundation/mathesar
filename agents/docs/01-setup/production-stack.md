@@ -127,6 +127,7 @@ The images then contain that CA and five variables that point at the system CA s
 | `the service image build failed` | A build step failed. The last lines are printed. | Read `/tmp/mathesar-prod/build-service.log`. A failure here is often the finding you ran the stack for. |
 | `the stack did not become healthy` | The service exits at start, usually a migration or import error. | `agents/bin/prod logs service`. |
 | Port 80 or 443 is in use | Another web server runs on the host. | Stop it. The ports are fixed in `docker-compose.yml`. |
+| `docker compose` rejects `!override` | Docker Compose is older than 2.24. | Upgrade it. The script uses `!override` to publish the ports on `127.0.0.1` only, because the stack has a known admin password. |
 | Changes do not show up | The stack runs the image, not the working tree. | `agents/bin/prod up` again. |
 | Console shows a 403 from `api.github.com` | The admin pages look up the latest release. Sandboxes often block or rate limit that. | Ignore. |
 | `cannot connect to the Docker daemon` and no `dockerd` | Docker is not installed in this sandbox. | Use the native setup. Say in your report that the production stack was not run. |

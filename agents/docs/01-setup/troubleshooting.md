@@ -30,11 +30,11 @@ psycopg.errors.InvalidFunctionDefinition: cannot change name of input parameter 
 HINT:  Use DROP FUNCTION msar.drop_table(oid,boolean,boolean) first.
 ```
 
-The database holds Mathesar functions that this branch does not list in its object registry (`db/sql/00_msar_all_objects_table.sql`), usually installed from another branch. A reinstall drops only registered objects, and PostgreSQL cannot replace a function when parameter names or the return type differ. Drop the Mathesar schemas in the user database and reinstall. User data is not touched.
+The database holds Mathesar functions that this branch does not list in its object registry (`db/sql/00_msar_all_objects_table.sql`), usually installed from another branch. A reinstall drops only registered objects, and PostgreSQL cannot replace a function when parameter names or the return type differ. Drop the Mathesar schemas in the user database and reinstall. Tables and their rows stay. `CASCADE` also drops any object in other schemas that depends on a Mathesar function, for example a view that calls one, and the reinstall does not bring those back. Do this on a sandbox database only.
 
 ```
 source agents/bin/dev-env
-PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -d sandbox -c 'DROP SCHEMA msar, __msar CASCADE;'
+PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d sandbox -c 'DROP SCHEMA msar, __msar CASCADE;'
 agents/bin/rpc databases.upgrade_sql '{"database_id": 1, "username": "mathesar", "password": "mathesar"}'
 ```
 
@@ -61,8 +61,8 @@ If your own change adds a function or changes an argument list, add the new sign
 agents/bin/stop
 source agents/bin/dev-env
 export PGPASSWORD=$POSTGRES_PASSWORD
-psql -h $POSTGRES_HOST -U $POSTGRES_USER -d postgres -c 'DROP DATABASE IF EXISTS sandbox WITH (FORCE);'
-psql -h $POSTGRES_HOST -U $POSTGRES_USER -d postgres -c 'DROP DATABASE IF EXISTS mathesar_django WITH (FORCE);'
+psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d postgres -c 'DROP DATABASE IF EXISTS sandbox WITH (FORCE);'
+psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d postgres -c 'DROP DATABASE IF EXISTS mathesar_django WITH (FORCE);'
 agents/bin/setup && agents/bin/start && agents/bin/seed
 ```
 
