@@ -7,8 +7,9 @@ Fails on:
 - An author or committer name or email that names an agent or a bot.
 - A `Co-authored-by` trailer that names an agent or a bot.
 - A session trailer, a session link or a "Generated with" line added by an agent harness.
-- A PR description without the header that says who drove the PR, which agent
-  raised it and how involved the person was.
+- A PR description without the header that says who drove the PR and which
+  agent raised it, or with a malformed human involvement line. That line is
+  required for external contributors only, which this script cannot tell.
 
 Usage: agents/bin/check-git [--base <ref>] [--text <file> ...]
   Checks the current branch name and the commits in base..HEAD. The base
@@ -61,6 +62,7 @@ PR_TEXT_RULES = [rule for rule in MESSAGE_RULES if rule[1] == "line credits an a
 PR_HEADER_MAX_LINE = 6
 PR_DRIVEN_BY = re.compile(r"^Driven by @[A-Za-z0-9-]+, raised by \S.*$", re.MULTILINE)
 PR_AGENT = re.compile(r"^- \*\*Agent:\*\* \S", re.MULTILINE)
+PR_HUMAN_INVOLVEMENT_LABEL = re.compile(r"human involvement", re.IGNORECASE)
 PR_HUMAN_INVOLVEMENT = re.compile(r"^- \*\*Human involvement:\*\* [0-5] of 5\. \S", re.MULTILINE)
 
 BRANCH_TYPES = ("fix", "feat", "chore", "docs", "refactor", "test", "perf", "build", "ci")
@@ -107,8 +109,9 @@ def problems_in_pr_description(text):
         )
     if not PR_AGENT.search(text):
         yield "no '**Agent:**' line that gives the product and model"
-    if not PR_HUMAN_INVOLVEMENT.search(text):
-        yield "no '**Human involvement:** <0 to 5> of 5. <evidence>' line"
+    for line in text.splitlines():
+        if PR_HUMAN_INVOLVEMENT_LABEL.search(line) and not PR_HUMAN_INVOLVEMENT.search(line):
+            yield f"expected '- **Human involvement:** <0 to 5> of 5. <evidence>': {line.strip()}"
 
 
 def problems_in_commit(author_name, author_email, committer_name, committer_email, message):

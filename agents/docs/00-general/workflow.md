@@ -89,7 +89,7 @@ Use `.github/PULL_REQUEST_TEMPLATE` as it is:
 
 ### The header
 
-Every PR that an agent raises starts with one line and one collapsed section. They tell maintainers who is accountable for the PR and how much care a person gave it. They come before everything else in the description, including the `Fixes #123` line.
+Every PR that an agent raises starts with one line and one collapsed section. They tell maintainers who is accountable for the PR and how it was made. For an external contributor, they also say how much care the person gave it. They come before everything else in the description, including the `Fixes #123` line.
 
 ```
 Driven by @<GitHub login of the person>, raised by <your name>.
@@ -103,9 +103,12 @@ Driven by @<GitHub login of the person>, raised by <your name>.
 </details>
 ```
 
+The **Human involvement** line is for external contributors only. Leave it out when the person you work for is a maintainer.
+
 - The first line names the person you work for by their GitHub login, and you by the name of your product, for example Claude, Copilot or Codex. Use your own name, not the one in this example.
 - **Agent** gives the model as exactly as you know it. Add anything else a maintainer would want to know about how the PR was produced, one item per line, for example that several agents worked on it.
-- **Human involvement** is a level from 0 to 5 that you work out yourself from what happened in the session. It exists so that maintainers can spot PRs that no person looked at.
+- A maintainer is a member of the `mathesar-foundation` organization on GitHub or someone with write access to this repo. Everyone else is an external contributor, including the owner of a fork. When you cannot tell, treat the person as external and add the line.
+- **Human involvement** is a level from 0 to 5 that you work out yourself from what happened in the session. It exists so that maintainers can spot PRs from outside that no person looked at.
 
 | Level | What the person did |
 |---|---|

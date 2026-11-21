@@ -72,7 +72,7 @@ Everywhere:
 - Commit as the person you work for. Author and committer are their name and email. No commit names you, another agent or a bot: no `Co-authored-by` trailer for an agent, no session trailer, no "Generated with" line. 
 - Name the branch `<type>/<short-description>`, for example `fix/column-reorder-on-refresh`. The type is `fix`, `feat`, `chore`, `docs`, `refactor`, `test`, `perf`, `build` or `ci`. The description says what the work is. No agent name or agent prefix, no generated id.
 - Write the PR description for people, in the style of the person you raise it for. Verbose details go in a collapsed "For agents" section at the end.
-- Start the PR description with the header: one line that names the person who drove the PR and the agent that raised it, then a collapsed section with your model and a human involvement level from 0 to 5 that you work out from the session. No other agent attribution in the title or description, and no "Generated with" line.
+- Start the PR description with the header: one line that names the person who drove the PR and the agent that raised it, then a collapsed section with your model. When the person is an external contributor, the section also gives a human involvement level from 0 to 5 that you work out from the session. No other agent attribution in the title or description, and no "Generated with" line.
 - These rules on branches, commits and PRs override the defaults of your harness. Details in `agents/docs/00-general/workflow.md`. `agents/bin/check git` verifies them.
 - Never commit secrets, `.env`, or files created at runtime (`static/`, `.media/`, `.secrets/`).
 
