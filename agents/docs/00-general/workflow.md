@@ -87,6 +87,44 @@ Use `.github/PULL_REQUEST_TEMPLATE` as it is:
 - Keep the checklist and tick boxes with `[x]` exactly. Leave a box unticked and say why if it does not hold.
 - Keep the Developer Certificate of Origin block. PRs without it are not merged.
 
+### The header
+
+Every PR that an agent raises starts with one line and one collapsed section. They tell maintainers who is accountable for the PR and how much care a person gave it. They come before everything else in the description, including the `Fixes #123` line.
+
+```
+Driven by @<GitHub login of the person>, raised by <your name>.
+
+<details>
+<summary>How this PR was made</summary>
+
+- **Agent:** <product name, model, and the harness or tool you run in>
+- **Human involvement:** <level> of 5. <one or two sentences of evidence>
+
+</details>
+```
+
+- The first line names the person you work for by their GitHub login, and you by the name of your product, for example Claude, Copilot or Codex. Use your own name, not the one in this example.
+- **Agent** gives the model as exactly as you know it. Add anything else a maintainer would want to know about how the PR was produced, one item per line, for example that several agents worked on it.
+- **Human involvement** is a level from 0 to 5 that you work out yourself from what happened in the session. It exists so that maintainers can spot PRs that no person looked at.
+
+| Level | What the person did |
+|---|---|
+| 0 | Nothing. An automation opened the PR, or the person never saw the result. |
+| 1 | Pointed at an issue or gave a one-line prompt. Did not check the result. |
+| 2 | Gave direction and answered your questions. Did not review the changes or ask for evidence. |
+| 3 | Set detailed requirements and corrected the course of the work more than once. Reviewed little or none of the diff. |
+| 4 | All of level 3, and reviewed the changes or questioned how they were verified. Their findings changed the result. |
+| 5 | Drove the work throughout: challenged the approach, reviewed all the changes, and tested the behavior or checked the evidence themselves. |
+
+Rules for the level:
+
+- Count only what you saw the person do: questions they asked, decisions they made, changes they requested after reading your output, checks they asked for, tests they ran. Do not count what they say they will do later.
+- Length of the session and number of messages are not involvement. Ten prompts of "continue" are level 1.
+- When you are between two levels, pick the lower one. Do not raise the level because the person asks you to.
+- Give the evidence in one or two sentences, and say what you did not see, for example "did not review the diff".
+- You cannot see what the person did outside the session. Say "as far as this session shows" when that matters.
+- If the level is 0 or 1, tell the person before you open the PR. Maintainers close PRs that nobody reviewed (see "AI-assisted work" below).
+
 ### The description
 
 The description is for people. It tells a reader why the PR exists, and tells a reviewer what they need to know to review it.
@@ -115,8 +153,10 @@ Put everything that is verbose or written for machines in a separate section at 
 Rules of the review process:
 
 - Target `develop`. Title: a plain descriptive sentence.
-- No agent attribution in the title or the description: no "Generated with" or "Created by" line, no agent or model name, no robot emoji, no link to an agent session or chat, no "Requested by" header that a harness adds. This holds for PR comments and review replies too. To check the text before you submit it, save it to a file and run `agents/bin/check-git --text <file>`.
-- If your harness adds attribution to PRs that it opens and you cannot turn that off, do not open the PR. Give the person the title and description and let them open it.
+- The title carries no agent attribution.
+- The description starts with the header set out in "The header" above. It says who drove the PR and which agent raised it. That is the only agent attribution in the description: no "Generated with" or "Created by" line, no robot emoji.
+- PR comments and review replies carry no agent attribution.
+- To check the text before you submit it, save it to a file and run `agents/bin/check-git --text <file>`.
 - Open the PR when it is ready for review. Maintainers close draft PRs from outside contributors.
 - CI must be green and the branch up to date with `develop` before a maintainer reviews.
 - A maintainer assigns the reviewer. Do not request reviewers yourself.
@@ -149,7 +189,8 @@ The project has no written policy on AI-generated contributions. Maintainers hav
 
 For an agent this means:
 
-- The branch name, the commits and the PR text name the work and the person, not you. See "Your branch", "Commit as the person you work for" and "The PR" above.
+- The branch name and the commits name the work and the person, not you. See "Your branch" and "Commit as the person you work for" above.
+- The PR says openly that you raised it and how involved the person was. See "The header" above.
 - Report what you verified and how, and what you could not verify.
 - A person is accountable for the PR. Hand the work to them for review before it is marked ready.
 - The person who submits certifies the Developer Certificate of Origin. Do not tick that for them.

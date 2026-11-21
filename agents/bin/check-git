@@ -7,11 +7,13 @@ Fails on:
 - An author or committer name or email that names an agent or a bot.
 - A `Co-authored-by` trailer that names an agent or a bot.
 - A session trailer, a session link or a "Generated with" line added by an agent harness.
+- A PR description without the header that says who drove the PR, which agent
+  raised it and how involved the person was.
 
 Usage: agents/bin/check-git [--base <ref>] [--text <file> ...]
   Checks the current branch name and the commits in base..HEAD. The base
   defaults to $MATHESAR_BASE_REF, then origin/develop.
-  --text also checks a file that holds a PR title and description.
+  --text also checks a file that holds a PR description.
 Exits 1 and lists each problem.
 """
 import argparse
@@ -54,6 +56,13 @@ MESSAGE_RULES = [
     ),
 ]
 
+# A PR description names the agent in its header. See "The header" in workflow.md.
+PR_TEXT_RULES = [rule for rule in MESSAGE_RULES if rule[1] == "line credits an agent"]
+PR_HEADER_MAX_LINE = 6
+PR_DRIVEN_BY = re.compile(r"^Driven by @[A-Za-z0-9-]+, raised by \S.*$", re.MULTILINE)
+PR_AGENT = re.compile(r"^- \*\*Agent:\*\* \S", re.MULTILINE)
+PR_HUMAN_INVOLVEMENT = re.compile(r"^- \*\*Human involvement:\*\* [0-5] of 5\. \S", re.MULTILINE)
+
 BRANCH_TYPES = ("fix", "feat", "chore", "docs", "refactor", "test", "perf", "build", "ci")
 BRANCH_NAME = re.compile(rf"^({'|'.join(BRANCH_TYPES)})/[a-z0-9]+(-[a-z0-9]+)*$")
 LONG_LIVED_BRANCH = re.compile(r"^(develop|master|release-[\d.]+)$")
@@ -79,12 +88,27 @@ def commits_since(base):
             yield record.strip("\n").split(FIELD_SEPARATOR)
 
 
-def problems_in_text(text):
+def problems_in_text(text, rules=MESSAGE_RULES):
     for line in text.splitlines():
-        for pattern, problem in MESSAGE_RULES:
+        for pattern, problem in rules:
             if pattern.search(line):
                 yield f"{problem}: {line.strip()}"
                 break
+
+
+def problems_in_pr_description(text):
+    """The header names the agent, so only harness footers count as stray attribution."""
+    yield from problems_in_text(text, PR_TEXT_RULES)
+    first_lines = "\n".join(text.splitlines()[:PR_HEADER_MAX_LINE])
+    if not PR_DRIVEN_BY.search(first_lines):
+        yield (
+            f"no line 'Driven by @<login>, raised by <agent>.' in the first "
+            f"{PR_HEADER_MAX_LINE} lines"
+        )
+    if not PR_AGENT.search(text):
+        yield "no '**Agent:**' line that gives the product and model"
+    if not PR_HUMAN_INVOLVEMENT.search(text):
+        yield "no '**Human involvement:** <0 to 5> of 5. <evidence>' line"
 
 
 def problems_in_commit(author_name, author_email, committer_name, committer_email, message):
@@ -126,7 +150,7 @@ def main():
         problems += [f"commit {short_hash}: {p}" for p in problems_in_commit(*fields)]
     for text_file in args.text:
         text = Path(text_file).read_text(encoding="utf-8")
-        problems += [f"{text_file}: {p}" for p in problems_in_text(text)]
+        problems += [f"{text_file}: {p}" for p in problems_in_pr_description(text)]
 
     for problem in problems:
         print(problem)
