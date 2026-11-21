@@ -54,6 +54,16 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/com
     - When making changes to address review critique, feel free to reply to threads within the PR (especially to point to specific commits which you think should address the critique), but do not click the "Resolve conversation" button on threads which other people have started.
     - If you are ready for a subsequent round of review, comment on the PR requesting another review and tagging the original reviewer.
 
+## Using AI tools
+
+You're welcome to use AI coding assistants. What matters is the result and the person behind it.
+
+- **You are responsible for your PR.** Read, understand and test every change before you ask for review. You should be able to explain it and answer questions without going back to the tool.
+- **Say how you used AI.** One line in the PR description is enough, for example "Written with Claude Code, reviewed and tested by me."
+- **Talk to us yourself.** Keep PR descriptions, issue comments and review replies short and in your own words. Don't paste generated text or let an agent post for you.
+- **The usual process still applies.** Pick a "help wanted" issue, run Mathesar locally and keep PRs small.
+- **Respect reviewers' time.** A PR should be worth more to the project than the time it takes to review. We may close PRs that look unreviewed or untested without a detailed review. For example: code that doesn't run, changes unrelated to the issue, or review replies that look copied from a tool.
+
 ## Contributing PR reviews
 
 We encourage and appreciate code review by contributors. Feel free to review any open pull requests. Follow our [code review guidelines](https://wiki.mathesar.org/engineering/code-review).
