@@ -88,16 +88,18 @@ FIX_IDENTITY_SETUP = (
 )
 FIX_IDENTITY_SCOPE = (
     "Last commit: `{amend}`. "
-    "An earlier commit: `git rebase -i {base}`, mark that commit `edit`, amend it the same "
-    "way, then `git rebase --continue`. "
+    "An earlier commit: `{stop_at}`, amend it the same way, then `git rebase --continue`. "
     "Every commit since the base, only when all of them are that person's: "
     "`git rebase {base} --exec 'git commit --amend --reset-author --no-edit'`."
 )
+# Stops a rebase at one commit without opening an editor, which most agent harnesses lack.
+STOP_AT = "GIT_SEQUENCE_EDITOR=\"sed -i '1s/^pick/edit/'\" git rebase -i <hash of that commit>^"
 AMEND_AUTHOR = "git commit --amend --only --reset-author --no-edit"
 AMEND_COMMITTER = "git commit --amend --only --no-edit"
 FIX_MESSAGE = (
-    "Fix: remove the line from the commit message. Last commit: `git commit --amend`. "
-    "Earlier commit: `git rebase -i {base}` and reword it. "
+    "Fix: remove the line from the commit message. Last commit: "
+    "`git commit --amend -m '<message without the line>'`. "
+    "Earlier commit: `{stop_at}`, amend it the same way, then `git rebase --continue`. "
     "Your harness may add the line by default. That default does not apply in this repo."
 )
 FIX_BRANCH = (
@@ -142,11 +144,11 @@ def problems_in_text(text, rules=MESSAGE_RULES):
         co_author = CO_AUTHOR.match(line)
         if co_author and rules is MESSAGE_RULES:
             if names_an_agent(co_author.group(1), co_author.group(2) or ""):
-                yield f"co-author trailer names an agent: {line.strip()}\n  {FIX_MESSAGE.format(base=BASE)}"
+                yield f"co-author trailer names an agent: {line.strip()}\n  {FIX_MESSAGE.format(stop_at=STOP_AT)}"
             continue
         for pattern, problem in rules:
             if pattern.search(line):
-                fix = FIX_MESSAGE.format(base=BASE) if rules is MESSAGE_RULES else FIX_PR_FOOTER
+                fix = FIX_MESSAGE.format(stop_at=STOP_AT) if rules is MESSAGE_RULES else FIX_PR_FOOTER
                 yield f"{problem}: {line.strip()}\n  {fix}"
                 break
 
@@ -177,7 +179,7 @@ def problems_in_commit(author_name, author_email, committer_name, committer_emai
     for role, name, email in identities:
         if names_an_agent(name, email):
             amend = AMEND_AUTHOR if role == "author" else AMEND_COMMITTER
-            fix = FIX_IDENTITY_SETUP + FIX_IDENTITY_SCOPE.format(amend=amend, base=BASE)
+            fix = FIX_IDENTITY_SETUP + FIX_IDENTITY_SCOPE.format(amend=amend, base=BASE, stop_at=STOP_AT)
             yield f"{role} names an agent: {name} <{email}>\n  {fix}"
     yield from problems_in_text(message)
 

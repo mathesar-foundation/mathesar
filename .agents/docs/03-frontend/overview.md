@@ -45,7 +45,7 @@ Versions are the ones locked in `mathesar_ui/package-lock.json`.
 Consequences of Svelte 3:
 
 - There are no runes. Components use `export let`, `$:` statements, slots, and `$store` subscriptions.
-- Where `mathesar_ui/STANDARDS.md` and the code around your change differ, match the code and do not convert old code. Known case: type-only files here are plain `.ts` files named `types.ts`, not `.d.ts`.
+- The code does not follow one rule of `mathesar_ui/STANDARDS.md`: type-only files are plain `.ts` files named `types.ts`, not `.d.ts`. Follow the code for that rule. For every other rule, the lines you add follow the standard, and you do not convert old code.
 - Component generics use `$$Generic`. Prop forwarding uses `$$Props` (see `mathesar_ui/STANDARDS.md`).
 - `mathesar_ui/svelte.config.cjs` sets `compilerOptions.immutable: true`. A component does not update when an object or array it holds is mutated in place. Assign a new reference. Use `ImmutableMap`, `ImmutableSet` and the `with...` methods from `mathesar_ui/src/component-library/common/utils/`.
 
