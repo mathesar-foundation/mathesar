@@ -169,7 +169,7 @@ Verified on Ubuntu 24.04, PostgreSQL 16, Python 3.13. One-time setup: `agents/bi
 |---|---|---|
 | `agents/bin/check` | The suites that match your changed files, by the CI path rules | Varies |
 | `agents/bin/check python-tests` | `pytest db mathesar config/tests setup/tests` (811 tests) | 21 s |
-| `agents/bin/check python-tests -- -k test_name` | pytest with your arguments | Seconds |
+| `agents/bin/check python-tests -- -k test_name` | pytest with your arguments. It then collects from `db` and `mathesar` only (`testpaths` in `setup.cfg`). Name the path for a test under `config/tests` or `setup/tests` | Seconds |
 | `agents/bin/check python-tests -- -n 0 mathesar/tests/rpc/test_records.py` | One file, one process | 1 s |
 | `agents/bin/check sql-tests` | All pgTAP tests (199 test functions) | 5 s |
 | `agents/bin/check sql-tests -- -x foo_bar` | pgTAP tests whose names contain `foo_bar` | 1 s |

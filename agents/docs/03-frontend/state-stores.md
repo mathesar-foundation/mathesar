@@ -26,7 +26,7 @@ Store helpers in `mathesar_ui/src/component-library/common/utils/`: `WritableMap
 `mathesar_ui/src/stores/AsyncStore.ts` wraps a function that returns a promise.
 
 - The store value is an `AsyncStoreValue` with `isLoading`, `resolvedValue`, `error`, `isOk`, `hasSettled`, `isInitializing`, `isReloading`.
-- `run(props)` starts the request and cancels the previous one. `run` never throws. Read the error from the value.
+- `run(props)` starts the request and cancels the previous one. Only a `CancellablePromise` can be cancelled. With a plain promise the earlier request keeps running, and if it settles last it overwrites the newer value. `run` does not throw when the request fails. Read the error from the value.
 - `runConservatively(props)` runs only if the store has never run.
 - `updateResolvedValue(fn)` edits the cached value after a mutation. Route contexts use it to add or remove one item without refetching.
 - `reset()` and `cancel()` exist. `getValueOnceResolved()` waits for a running request.
@@ -126,7 +126,7 @@ Only the table page persists view state.
 4. The component both writes `q` and derives `Meta` and `TabularData` from `q`. When you change this code, watch the network tab: a rebuilt `TabularData` sends the columns, constraints, records and joinable tables requests again.
 5. A serialization that fails to parse yields default `Meta`.
 
-Adding a field to `Meta` that must survive reload means: add a terse form, extend `TerseMetaProps`, `makeMetaProps`, `makeTerseMetaProps` and the `serialization` store. The tuple is positional, so append at the end to keep old links readable.
+Adding a field to `Meta` that must survive reload means: add a terse form, extend `TerseMetaProps`, `makeMetaProps`, `makeTerseMetaProps` and the `serialization` store. The tuple is positional, so append at the end. Old links do not have the new element, so its `fromTerse` must accept `undefined` and return the default. If it throws, `deserializeMetaProps` catches the error and the whole saved view falls back to defaults.
 
 `searchFuzzy`, selection, scroll position and request statuses are not serialized. Widget and record selector sheets keep `Meta` in memory only.
 

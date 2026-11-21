@@ -104,17 +104,17 @@ with psycopg.connect() as conn:
     install(conn)
 ' || return 1
   psql -q -d "$scratch_db" -f db/sql/00_msar_all_objects_table.sql 2>/dev/null || return 1
-  unregistered=$(psql -At -d "$scratch_db" <<'SQL'
+  unregistered=$(psql -At -v ON_ERROR_STOP=1 -d "$scratch_db" <<'SQL'
 WITH installed AS (
   SELECT 'FUNCTION' AS kind, p.oid::regprocedure::text AS name
   FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
-  WHERE n.nspname IN ('msar', '__msar') AND p.prokind = 'f'
+  WHERE n.nspname IN ('msar', '__msar', 'mathesar_types') AND p.prokind = 'f'
   UNION ALL
   SELECT 'AGGREGATE', p.oid::regprocedure::text
   FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
-  WHERE n.nspname IN ('msar', '__msar') AND p.prokind = 'a'
+  WHERE n.nspname IN ('msar', '__msar', 'mathesar_types') AND p.prokind = 'a'
   UNION ALL
   SELECT 'TYPE', t.oid::regtype::text
   FROM pg_catalog.pg_type t
@@ -131,7 +131,12 @@ WHERE (kind, name) NOT IN (SELECT obj_kind, obj_name FROM msar.all_mathesar_obje
 ORDER BY 1;
 SQL
   )
+  local query_status=$?
   psql -q -d postgres -c "DROP DATABASE IF EXISTS $scratch_db WITH (FORCE)"
+  if [ "$query_status" -ne 0 ]; then
+    echo "The registry query failed, so nothing was checked." >&2
+    return 1
+  fi
   if [ -n "$unregistered" ]; then
     printf 'Not registered in db/sql/00_msar_all_objects_table.sql:\n%s\n' "$unregistered" >&2
     return 1

@@ -25,6 +25,8 @@ agents/bin/screenshot /db/1/schemas/ /tmp/prod-schemas.png
 
 It runs next to the native dev servers. They use ports 8000, 3000 and 5432. The stack uses 80 and 443.
 
+The stack has a known admin password, so the script publishes its ports on `127.0.0.1` only. Use Docker Engine 28 or later on a machine that shares a network with others: the Docker documentation says that in older releases, hosts on the same network segment can reach ports published to localhost.
+
 Verified in a sandbox (Ubuntu 24.04, Docker 29, 4 cores): `up` takes 4 to 5 minutes, of which the build is about 3.5 minutes. With `--release` it takes about 40 seconds. Any file change rebuilds most of the image, because `Dockerfile` copies the whole tree before installing dependencies.
 
 ## What `up` does
@@ -85,7 +87,7 @@ The last release is the newest file in `docs/docs/releases/`. Published image ta
 
 ## First-run page
 
-`agents/bin/prod up --no-admin` leaves the stack as a new user finds it: every URL leads to `/complete_installation/`. The form applies Django's password validators, so `password` is rejected there.
+`agents/bin/prod up --no-admin` on a stack with no data leaves it as a new user finds it. `--no-admin` only skips creating the user, so if the stack already has one, run `agents/bin/prod reset` first. That deletes the stack's data. On the fresh stack, every URL leads to `/complete_installation/`. The form applies Django's password validators, so `password` is rejected there.
 
 The form has two boxes that are ticked by default: a one-time installation report and usage data collection. Untick both when you drive this page. The script also maps `analytics.mathesar.dev` to `127.0.0.1` inside the service container, so a test stack cannot report to the project's real analytics server.
 

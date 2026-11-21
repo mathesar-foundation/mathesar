@@ -30,22 +30,31 @@ AGENT_PRODUCTS = (
     r"claude|anthropic|copilot|codex|openai|chatgpt|cursor|devin|aider|gemini|jules"
     r"|windsurf|codeium|amazon q|sourcegraph|cody"
 )
-AGENT_NAMES = AGENT_PRODUCTS + r"|\[bot\]|\bbot\b|\bagent\b"
-AGENT_IDENTITY = re.compile(AGENT_NAMES, re.IGNORECASE)
+# People are called Claude, Devin, Jules and Cody too. In a name, these words count
+# only when they are the whole name, alone or with a product word such as "Code".
+AGENT_OR_PERSON = r"claude|cursor|devin|gemini|jules|cody"
+AGENT_NAME = re.compile(
+    r"\[bot\]|\b(bot|agent|anthropic|copilot|codex|openai|chatgpt|aider|windsurf|codeium"
+    r"|amazon q|sourcegraph)\b"
+    rf"|^\s*({AGENT_OR_PERSON})(\s+(code|ai|cli|assistant|opus|sonnet|haiku|pro|flash|\d[\w.]*))*\s*$",
+    re.IGNORECASE,
+)
+AGENT_EMAIL = re.compile(
+    r"\[bot\]@|@([a-z0-9-]+\.)*(anthropic\.com|openai\.com|cursor\.com|cursor\.sh|devin\.ai"
+    r"|cognition\.ai|aider\.chat|codeium\.com|windsurf\.com|sourcegraph\.com)$",
+    re.IGNORECASE,
+)
+CO_AUTHOR = re.compile(r"^\s*co-authored-by:\s*([^<]*)(?:<([^>]*)>)?", re.IGNORECASE)
 # Narrower than AGENT_PRODUCTS: words such as "cursor" are common in branch names here.
 AGENT_IN_BRANCH_NAME = re.compile(r"claude|anthropic|copilot|codex|openai|chatgpt", re.IGNORECASE)
 MESSAGE_RULES = [
-    (
-        re.compile(rf"^\s*co-authored-by:.*({AGENT_NAMES})", re.IGNORECASE),
-        "co-author trailer names an agent",
-    ),
     (
         re.compile(r"^\s*[a-z]+-session(-id)?:\s*\S+", re.IGNORECASE),
         "session trailer from an agent harness",
     ),
     (
         re.compile(
-            rf"(generated|created|written|authored)\s+(with|by)\s+\W*({AGENT_PRODUCTS})",
+            rf"(generated|created|written|authored)\s+(with|by)\s+\W*({AGENT_PRODUCTS})\b",
             re.IGNORECASE,
         ),
         "line credits an agent",
@@ -90,8 +99,17 @@ def commits_since(base):
             yield record.strip("\n").split(FIELD_SEPARATOR)
 
 
+def names_an_agent(name, email):
+    return bool(AGENT_NAME.search(name) or AGENT_EMAIL.search(email.strip()))
+
+
 def problems_in_text(text, rules=MESSAGE_RULES):
     for line in text.splitlines():
+        co_author = CO_AUTHOR.match(line)
+        if co_author and rules is MESSAGE_RULES:
+            if names_an_agent(co_author.group(1), co_author.group(2) or ""):
+                yield f"co-author trailer names an agent: {line.strip()}"
+            continue
         for pattern, problem in rules:
             if pattern.search(line):
                 yield f"{problem}: {line.strip()}"
@@ -116,12 +134,12 @@ def problems_in_pr_description(text):
 
 def problems_in_commit(author_name, author_email, committer_name, committer_email, message):
     identities = [
-        ("author", f"{author_name} <{author_email}>"),
-        ("committer", f"{committer_name} <{committer_email}>"),
+        ("author", author_name, author_email),
+        ("committer", committer_name, committer_email),
     ]
-    for role, identity in identities:
-        if AGENT_IDENTITY.search(identity):
-            yield f"{role} names an agent: {identity}"
+    for role, name, email in identities:
+        if names_an_agent(name, email):
+            yield f"{role} names an agent: {name} <{email}>"
     yield from problems_in_text(message)
 
 

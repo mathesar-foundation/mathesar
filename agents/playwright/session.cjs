@@ -6,7 +6,11 @@
 //
 // `problems` collects uncaught page errors and console errors seen so far.
 
-const BASE_URL = process.env.MATHESAR_URL || 'http://localhost:8000';
+// Same defaults as agents/bin/dev-env, which the shell scripts use.
+const BASE_URL =
+  process.env.MATHESAR_URL || `http://localhost:${process.env.MATHESAR_PORT || 8000}`;
+const DEFAULT_PASSWORD =
+  process.env.MATHESAR_PASSWORD || process.env.DJANGO_SUPERUSER_PASSWORD || 'password';
 
 function loadPlaywright() {
   try {
@@ -22,7 +26,7 @@ function loadPlaywright() {
 
 async function openMathesar({
   username = process.env.MATHESAR_USER || 'admin',
-  password = process.env.MATHESAR_PASSWORD || 'password',
+  password = DEFAULT_PASSWORD,
   viewport = { width: 1440, height: 900 },
   headless = true,
 } = {}) {
