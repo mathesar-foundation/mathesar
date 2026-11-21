@@ -48,7 +48,7 @@ wait_until_responding() {
 
 ensure_postgres_running
 
-# vite.config.ts fixes the port at 3000. Django reads MATHESAR_CLIENT_DEV_PORT, so pass the same one.
+# vite.config.js fixes the port at 3000. Django reads MATHESAR_CLIENT_DEV_PORT, so pass the same one.
 export MATHESAR_CLIENT_DEV_PORT="$VITE_PORT"
 start_in_background vite bash -c "cd mathesar_ui && exec node_modules/.bin/vite --port $VITE_PORT --strictPort"
 start_in_background django .venv/bin/python manage.py runserver "0.0.0.0:$DJANGO_PORT"

@@ -29,7 +29,7 @@ How Mathesar is built into images and install packages, how a release is cut, an
 
 Run the production file with images built from your working tree: `.agents/bin/prod up` (`.agents/docs/01-setup/production-stack.md`). Do this after any change to the files in this section and the next one.
 
-A new environment variable usually needs four edits: `config/settings/common_settings.py`, `docker-compose.yml`, `docker-compose.dev.yml`, and `docs/docs/administration/environment-variables.md`.
+A new environment variable usually needs four edits: `config/settings/common_settings.py`, `docker-compose.yml`, `docker-compose.dev.yml`, and `docs/docs/administration/environment-variables.md`. To rename one, search the whole repo for the name, including `.env.example`, `docs/docs/administration/`, `setup/` and `.agents/bin/`, and leave `docs/docs/releases/` as it is. Keep the old name of a released variable working as an alias and document both, as `config/settings/common_settings.py` does for `OIDC_CONFIG_DICT`.
 
 ## Non-Docker package
 
@@ -57,6 +57,8 @@ ShellCheck runs on `build-scripts/` and `bin/` in CI (`.github/workflows/line-sh
 - Python: exact pins in `requirements.txt` (runtime) and `requirements-dev.txt` (tests, lint, docs preview). No lock file. Supported Python versions are 3.10 to 3.14, so a new pin must install on all of them.
 - Front end: `mathesar_ui/package.json` with `mathesar_ui/package-lock.json`. Use `npm ci`. Change the lock file only when you add or update a package on purpose.
 - Docs: `docs/requirements.txt`.
+- Some packages are pinned in more than one file: `requests` and `pytest` also in `api_tests/requirements.txt`, the mkdocs packages in both `requirements-dev.txt` and `docs/requirements.txt`. Search all four files when you change a pin.
+- `.agents/bin/check` uses what is installed. After a change to a requirements file or `mathesar_ui/package.json`, run `.agents/bin/setup` again before the checks.
 - Dependabot opens update PRs. Maintainers often bundle them into one PR.
 - A change to a requirements file triggers the full backend CI matrix.
 
@@ -102,11 +104,11 @@ Build check, as CI runs it (`.github/workflows/test-docs.yml`):
 
 ## Translations
 
-Process: `DEVELOPER_GUIDE.md`, sections "Internationalization" and "Translation process". For agents: edit only the English sources (`mathesar_ui/src/i18n/languages/en/dict.json`, and `translations/en/LC_MESSAGES/django.po` through `makemessages`). Transifex opens PRs for the other languages.
+Process: `DEVELOPER_GUIDE.md`, sections "Internationalization" and "Translation process". Do not run the merge conflict script that it names (`.agents/docs/03-frontend/i18n.md` says why). For agents: edit only the English sources (`mathesar_ui/src/i18n/languages/en/dict.json`, and `translations/en/LC_MESSAGES/django.po` through `makemessages`). Transifex opens PRs for the other languages.
 
 ## GitHub workflows
 
-Listed in `.agents/docs/00-general/repo-map.md`. Two rules:
+Listed in `.agents/docs/00-general/repo-map.md`. Rules:
 
 - A new test or lint job in `.github/workflows/test-and-lint-code.yml` must be added to the `needs` list and the checks of the `checkpoint` job. Otherwise branch protection does not require it.
 - Any `.yml` or `.sh` change triggers every backend job. Expect about 100 matrix jobs.

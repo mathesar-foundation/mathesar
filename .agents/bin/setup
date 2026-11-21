@@ -2,7 +2,7 @@
 # Install Mathesar from source for development, without Docker. Safe to re-run.
 #
 # Usage: .agents/bin/setup [--sql-tests]
-#   --sql-tests  Also install pgTAP and pg_prove (needed by `.agents/bin/check sql`).
+#   --sql-tests  Also install pgTAP and pg_prove (needed by `.agents/bin/check sql-tests`).
 #
 # Needs: Python 3.10 to 3.14, Node.js 18+, npm, and either a reachable
 # PostgreSQL 14+ server or apt-get to install one. See

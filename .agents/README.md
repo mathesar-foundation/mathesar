@@ -29,10 +29,10 @@ Conventions for scripts:
 1. Write what is costly to find in the code: how parts connect, conventions, reasons, gotchas, verified commands. Leave out what one `ls` or one config file shows.
 1. State only what you checked in the code or by running it.
 1. Link to the human docs (`DEVELOPER_GUIDE.md`, `mathesar_ui/STANDARDS.md`, `db/sql/STANDARDS.md`, `docs/`). Do not copy them.
-1. Put repo paths in backticks, relative to the repo root. `.agents/bin/check-docs` verifies that each one exists. It checks a path only when its first segment is a file or folder at the repo root, so it misses a path under a folder that was renamed or removed. Search for the old name after a rename.
+1. Put repo paths in backticks, relative to the repo root. `.agents/bin/check-docs` verifies that each one exists. It checks a path only when its first segment is a file or folder at the repo root, so it misses a path under a top-level folder that was renamed or removed. Search for the old name after a rename.
 1. Refer to code by path and symbol name, not by line number.
 1. Start each file with what it covers and when to read it. Keep a file under about 250 lines.
-1. One fact lives in one file. Other files point to it. A rule that an agent's harness works against by default (commit identity, branch name, PR attribution, comments, drafts) lives in `AGENTS.md`, because that file is in context from the start. `.agents/docs/00-general/workflow.md` adds detail and does not restate the rule. The policy for people lives in `CONTRIBUTING.md`.
+1. One fact lives in one file. Other files point to it. A rule that an agent's harness works against by default (commit identity, branch name, PR attribution, comments, drafts) lives in `AGENTS.md`, because that file is in context from the start. `.agents/docs/00-general/workflow.md` adds the detail. The policy for people lives in `CONTRIBUTING.md`.
 1. Where a rule can be checked by a script, check it, and make the script's output say how to fix the problem. The doc then only needs to name the script.
 
 ## Keeping it current
