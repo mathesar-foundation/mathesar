@@ -9,8 +9,12 @@ import type { TableInspector } from './table-page';
 export class TableTab {
   /** The headers of the sections, in order. */
   readonly sectionHeaders: Locator;
+  /** "Table Properties", or "View Properties" for a view. */
+  readonly properties: InspectorSection;
   readonly name: EditableText;
   readonly description: EditableText;
+  /** "Table Permissions", or "View Permissions" for a view. */
+  readonly permissionsButton: Locator;
   /** Collapsed when the page opens. */
   readonly userTracking: InspectorSection;
   /** A custom select of "None" and the User columns. Choose from it with `chooseOption`. */
@@ -22,8 +26,12 @@ export class TableTab {
   constructor(page: Page, inspector: TableInspector) {
     const { panel } = inspector;
     this.sectionHeaders = panel.locator('.collapsible-header-btn');
+    this.properties = new InspectorSection(panel, /(Table|View) Properties/);
     this.name = new EditableText(panel, 'Name');
     this.description = new EditableText(panel, 'Description');
+    this.permissionsButton = this.properties.root.getByRole('button', {
+      name: /^(Table|View) Permissions$/,
+    });
     this.userTracking = new InspectorSection(panel, 'Last Editor Tracking');
     this.trackedColumn = this.userTracking.root.locator(
       '[aria-haspopup="listbox"]',
