@@ -14,6 +14,10 @@ export class ColumnFormatting {
   readonly saveButton: Locator;
   /** Shown instead of options for data types that have none. */
   readonly noOptionsNote: Locator;
+  /** The pattern that the duration options give, for example "Format: mm:ss". */
+  readonly durationFormat: Locator;
+  /** The options of the select that is open. */
+  readonly openOptions: Locator;
 
   constructor(inspector: TableInspector) {
     this.section = inspector.panel.locator('.inspector-section').filter({
@@ -26,14 +30,21 @@ export class ColumnFormatting {
     this.noOptionsNote = this.section.getByText(
       'No formatting option for the column data type',
     );
+    this.durationFormat = this.section.getByText(/^Format: /);
+    this.openOptions = inspector.panel.page().getByRole('listbox');
   }
 
-  /** A text field, checkbox or select of the section, by its label. */
+  /** A text field or checkbox of the section, by its label. */
   field(label: string): Locator {
     return this.section.getByLabel(label, { exact: true });
   }
 
+  /** A select of the section, by its label. It shows the chosen option. */
+  select(label: string): Locator {
+    return this.section.getByRole('button', { name: label, exact: true });
+  }
+
   async choose(label: string, option: string | RegExp): Promise<void> {
-    await chooseOption(this.field(label), option);
+    await chooseOption(this.select(label), option);
   }
 }

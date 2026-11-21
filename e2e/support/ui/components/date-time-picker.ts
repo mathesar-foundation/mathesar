@@ -40,6 +40,8 @@ export class DateTimePicker {
 
   /** The button that sets a relative value, named with that value, for example "05/20/2024 (Today)". */
   preset(name: 'Today' | 'Yesterday' | 'Now'): Locator {
-    return this.root.getByRole('button', { name: new RegExp(`\\(${name}\\)$`) });
+    return this.root.getByRole('button', {
+      name: new RegExp(`\\(${name}\\)$`),
+    });
   }
 }
