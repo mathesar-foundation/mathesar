@@ -79,6 +79,29 @@ BRANCH_TYPES = ("fix", "feat", "chore", "docs", "refactor", "test", "perf", "bui
 BRANCH_NAME = re.compile(rf"^({'|'.join(BRANCH_TYPES)})/[a-z0-9]+(-[a-z0-9]+)*$")
 LONG_LIVED_BRANCH = re.compile(r"^(develop|master|release-[\d.]+)$")
 
+# Each problem is printed with the way to fix it, so that the docs need not repeat it.
+FIX_IDENTITY = (
+    "Fix: set the identity of the person you work for with `git config user.name` and "
+    "`git config user.email`, then run "
+    "`git rebase origin/develop --exec 'git commit --amend --reset-author --no-edit'`."
+)
+FIX_MESSAGE = (
+    "Fix: remove the line from the commit message. Last commit: `git commit --amend`. "
+    "Earlier commit: `git rebase -i origin/develop` and reword it. "
+    "Your harness may add the line by default. That default does not apply in this repo."
+)
+FIX_BRANCH = (
+    "Fix: `git branch -m <type>/<short-description>`, for example "
+    "`git branch -m fix/column-reorder-on-refresh`, and push under that name."
+)
+FIX_PR_HEADER = (
+    "Fix: start the description with the header from 'The header' in "
+    "agents/docs/00-general/workflow.md."
+)
+FIX_PR_FOOTER = (
+    "Fix: delete the line. The header is the only agent attribution in a PR description."
+)
+
 FIELD_SEPARATOR = "\x1f"
 RECORD_SEPARATOR = "\x1e"
 LOG_FORMAT = FIELD_SEPARATOR.join(["%h", "%an", "%ae", "%cn", "%ce", "%B"]) + RECORD_SEPARATOR
@@ -109,11 +132,12 @@ def problems_in_text(text, rules=MESSAGE_RULES):
         co_author = CO_AUTHOR.match(line)
         if co_author and rules is MESSAGE_RULES:
             if names_an_agent(co_author.group(1), co_author.group(2) or ""):
-                yield f"co-author trailer names an agent: {line.strip()}"
+                yield f"co-author trailer names an agent: {line.strip()}\n  {FIX_MESSAGE}"
             continue
         for pattern, problem in rules:
             if pattern.search(line):
-                yield f"{problem}: {line.strip()}"
+                fix = FIX_MESSAGE if rules is MESSAGE_RULES else FIX_PR_FOOTER
+                yield f"{problem}: {line.strip()}\n  {fix}"
                 break
 
 
@@ -124,12 +148,12 @@ def problems_in_pr_description(text):
     if not PR_DRIVEN_BY.search(first_lines):
         yield (
             f"no line 'Driven by @<login>, raised by <agent>.' in the first "
-            f"{PR_HEADER_MAX_LINE} lines"
+            f"{PR_HEADER_MAX_LINE} lines\n  {FIX_PR_HEADER}"
         )
     if not PR_AGENT.search(text):
-        yield "no '**Agent:**' line that gives the product and model"
+        yield f"no '**Agent:**' line that gives the product and model\n  {FIX_PR_HEADER}"
     if not PR_HEADER_RULE.search(text):
-        yield "no '---' line after the 'How this PR was made' section"
+        yield f"no '---' line after the 'How this PR was made' section\n  {FIX_PR_HEADER}"
     for line in text.splitlines():
         if PR_HUMAN_INVOLVEMENT_LABEL.search(line) and not PR_HUMAN_INVOLVEMENT.search(line):
             yield f"expected '- **Human involvement:** <0 to 5> of 5. <evidence>': {line.strip()}"
@@ -142,7 +166,7 @@ def problems_in_commit(author_name, author_email, committer_name, committer_emai
     ]
     for role, name, email in identities:
         if names_an_agent(name, email):
-            yield f"{role} names an agent: {name} <{email}>"
+            yield f"{role} names an agent: {name} <{email}>\n  {FIX_IDENTITY}"
     yield from problems_in_text(message)
 
 
@@ -151,11 +175,11 @@ def problems_in_branch_name(branch):
     if not branch or LONG_LIVED_BRANCH.match(branch):
         return
     if AGENT_IN_BRANCH_NAME.search(branch):
-        yield "name contains the name of an agent product"
+        yield f"name contains the name of an agent product\n  {FIX_BRANCH}"
     if not BRANCH_NAME.match(branch):
         yield (
             f"name is not <type>/<short-description> in lowercase with hyphens, "
-            f"where type is one of: {', '.join(BRANCH_TYPES)}"
+            f"where type is one of: {', '.join(BRANCH_TYPES)}\n  {FIX_BRANCH}"
         )
 
 
