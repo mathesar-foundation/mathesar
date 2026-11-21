@@ -82,10 +82,35 @@ Labels carry the state of an issue:
 Use `.github/PULL_REQUEST_TEMPLATE` as it is:
 
 - Start with `Fixes #123`, or `Related to #123` when the PR does not fully resolve the issue.
-- Describe the change in a few sentences. Add technical details only when a reviewer needs them.
+- Write the description as set out in "The description" below.
 - Add screenshots for UI changes.
 - Keep the checklist and tick boxes with `[x]` exactly. Leave a box unticked and say why if it does not hold.
 - Keep the Developer Certificate of Origin block. PRs without it are not merged.
+
+### The description
+
+The description is for people. It tells a reader why the PR exists, and tells a reviewer what they need to know to review it.
+
+- Say what the PR does and why, in a few plain sentences. For a bug, say what was wrong and what caused it.
+- Then add only what a reviewer needs: what the PR does not do, decisions you want a second opinion on, where to look closely, how to test it locally. Leave out what the diff already shows.
+- Length follows the change. A small fix gets one or two sentences.
+- Write in the style of the person you raise the PR for, as if they wrote it. Read their recent descriptions first and match how they open, how they structure, how long they write and which headings they use: `https://github.com/mathesar-foundation/mathesar/pulls?q=is:pr+author:<login>`. When they have none, follow the recent PRs of the maintainers.
+- What maintainers write here, as a baseline: an opening line such as "This PR adds ...", or "This PR:" followed by a short list. Bold labels on their own line for optional parts, such as `**Technical details**`, `**Notes to reviewers**`, `**Testing locally**` and `**Screenshots**`. A note on what the PR leaves out. No summary of every file, no headings for a one-paragraph change.
+
+Put everything that is verbose or written for machines in a separate section at the end of your text, above the checklist:
+
+```
+<details>
+<summary>For agents</summary>
+
+...
+
+</details>
+```
+
+- It holds what an agent that picks up the PR later can use: the exact commands you ran and their results, test counts, tool versions, what you could not verify, file by file notes.
+- A person must be able to skip it. Anything a reviewer needs to know goes in the part above, in plain words.
+- Leave the section out when you have nothing of that kind.
 
 Rules of the review process:
 
@@ -115,7 +140,7 @@ Taken from maintainer comments on closed and revised PRs:
 | SQL functions that fail silently | Raise an error. |
 | SQL tests in a new style | Match `db/sql/test_sql_functions.sql`: shared `__setup_*` functions, one behavior per test, no manual `DROP`, assert full results. |
 | A description or reply that claims something the diff does not do | Verify each claim against the diff before posting. |
-| Long generated descriptions | Write a few sentences. |
+| Long generated descriptions | Write a few sentences for people. Verbose details go in the "For agents" section. |
 | Red CI, merge conflicts, missing template or DCO | Fix before asking for review. |
 
 ## AI-assisted work
