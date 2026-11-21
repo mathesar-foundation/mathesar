@@ -45,7 +45,7 @@ MESSAGE_RULES = [
     ),
     (
         re.compile(
-            rf"(generated|created|written|authored)\s+(with|by)\b.*({AGENT_NAMES})",
+            rf"(generated|created|written|authored)\s+(with|by)\s+\W*({AGENT_PRODUCTS})",
             re.IGNORECASE,
         ),
         "line credits an agent",
@@ -62,7 +62,7 @@ PR_TEXT_RULES = [rule for rule in MESSAGE_RULES if rule[1] == "line credits an a
 PR_HEADER_MAX_LINE = 6
 PR_DRIVEN_BY = re.compile(r"^Driven by @[A-Za-z0-9-]+, raised by \S.*$", re.MULTILINE)
 PR_AGENT = re.compile(r"^- \*\*Agent:\*\* \S", re.MULTILINE)
-PR_HUMAN_INVOLVEMENT_LABEL = re.compile(r"human involvement", re.IGNORECASE)
+PR_HUMAN_INVOLVEMENT_LABEL = re.compile(r"^\W*human involvement\W*:", re.IGNORECASE)
 PR_HUMAN_INVOLVEMENT = re.compile(r"^- \*\*Human involvement:\*\* [0-5] of 5\. \S", re.MULTILINE)
 
 BRANCH_TYPES = ("fix", "feat", "chore", "docs", "refactor", "test", "perf", "build", "ci")
