@@ -51,3 +51,20 @@ export async function stubGitHubReleases(
     ),
   );
 }
+
+/** Makes GitHub know nothing about the latest release, or about the running version. */
+export async function stubUnknownRelease(
+  context: BrowserContext,
+  release: 'latest' | 'running',
+): Promise<void> {
+  const path = release === 'latest' ? 'latest' : 'tags/*';
+  await context.route(`${RELEASES_API}/${path}`, (route) =>
+    route.fulfill({ status: 404, json: { message: 'Not Found' } }),
+  );
+}
+
+export async function stubUnreachableGitHub(
+  context: BrowserContext,
+): Promise<void> {
+  await context.route(`${RELEASES_API}/**`, (route) => route.abort());
+}
