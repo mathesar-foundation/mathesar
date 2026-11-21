@@ -15,7 +15,7 @@ export class TranslatedApp {
     this.languageSelect = page
       .getByRole('main')
       .getByRole('button')
-      .filter({ hasText: /\((en|es|fr|ja)\)$/ });
+      .filter({ hasText: / \((en|es|fr|ja)\)/ });
   }
 
   heading(name: string): Locator {
