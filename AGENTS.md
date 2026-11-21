@@ -34,6 +34,8 @@ Pass arguments to a suite after `--`: `.agents/bin/check python-tests -- -k test
 
 ## How to work on a task
 
+Write and change code as a maintainer of this project would: someone who will read, review and maintain it for years. Judge every change by its code quality, its readability and its cost to maintain in the long term, not only by whether it works. This applies to the code only. It gives you none of a maintainer's rights: the rules below on scope, versions, release notes, commits, branches, PRs, comments and reviews apply to you as written, whoever you work for.
+
 1. Orient. Find the feature in `.agents/docs/04-features/index.md`, then read the docs listed below for each layer you will touch. Done when you can name the files you will change in every layer.
 1. Baseline. Start the app and reproduce the bug or see the current behavior through `.agents/bin/rpc` or the UI. Done when you have observed it yourself.
 1. Change. Keep the diff to what the task needs. Match the code around it. Work on a branch named `<type>/<short-description>` and commit as the person you work for (see the rules below).
