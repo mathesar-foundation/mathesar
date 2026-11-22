@@ -27,21 +27,21 @@ Once the user column is created, you'll be able to select a user for each cell d
 
 ## Selecting users
 
-To select a user for a user cell, click on the cell and use the user selection dialog:
+To select a user for a user cell, open the cell and use the user selection dialog:
 
 ![Selecting a user from the searchable list](../assets/images/user-type/selecting-user.png)
 /// caption
-Clicking on a user cell opens a searchable dropdown list of the database's collaborators.
+Opening a user cell shows a searchable dropdown list of the database's collaborators.
 ///
 
-1. Click on an empty user cell (or double-click a cell with an existing value).
+1. Double-click a user cell, or select it and press Enter.
 2. A searchable list of the database's collaborators will appear.
 3. Type to search for users by their username, display name, or email.
 4. Click on a user to select them.
 
 Only users who are collaborators on the database that contains the table appear in this list. To make another Mathesar user selectable, add them as a collaborator on the database first.
 
-You can also clear a user value by selecting the cell and removing the selection.
+To clear a user value, right-click the cell and choose **Set to NULL**.
 
 ## Configuring display options
 

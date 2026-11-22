@@ -34,8 +34,8 @@ Each Mathesar data type is described in more detail below.
 ### Date & Time
 
 - **PostgreSQL types**
-    - [`timestamp with time zone`](https://www.postgresql.org/docs/current/datatype-datetime.html) **(default)**
-    - [`timestamp without time zone`](https://www.postgresql.org/docs/current/datatype-datetime.html)
+    - [`timestamp without time zone`](https://www.postgresql.org/docs/current/datatype-datetime.html) **(default)**
+    - [`timestamp with time zone`](https://www.postgresql.org/docs/current/datatype-datetime.html)
 - **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the format of the displayed date and time
 
@@ -57,22 +57,28 @@ Used to store valid email addresses
 
         This is a custom PostgreSQL type implemented by Mathesar. It is a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over `text` with additional logic to validate that the input is a valid email address.
 
+### JSON
+
+- **PostgreSQL types**
+    - [`jsonb`](https://www.postgresql.org/docs/current/datatype-json.html) **(default)**
+    - [`json`](https://www.postgresql.org/docs/current/datatype-json.html)
+
 ### Money
 
 - **PostgreSQL types**
 
-    - `mathesar_types.money` **(default)**
+    - `mathesar_types.mathesar_money` **(default)**
 
         This is a custom PostgreSQL type implemented by Mathesar as a [domain](https://www.postgresql.org/docs/17/sql-createdomain.html) over [`numeric`](https://www.postgresql.org/docs/17/datatype-numeric.html).
 
-        ??? question "`mathesar_types.money` vs `numeric`"
-            Compared with `numeric`, the `mathesar_types.money` type only exists to provide compatibility with our custom casting functions that can import CSV data with currency symbols, and to indicate to the upper layers of the Mathesar application that this column is eligible for an additional "Currency Symbol" metadata field.
+        ??? question "`mathesar_types.mathesar_money` vs `numeric`"
+            Compared with `numeric`, the `mathesar_types.mathesar_money` type only exists to provide compatibility with our custom casting functions that can import CSV data with currency symbols, and to indicate to the upper layers of the Mathesar application that this column is eligible for an additional "Currency Symbol" metadata field.
 
             You are welcome to store money values in Number columns, but you won't be able to display the values with a currency symbol.
 
     - [`money`](https://www.postgresql.org/docs/current/datatype-money.html)
 
-        ??? question "`mathesar_types.money` vs `money`"
+        ??? question "`mathesar_types.mathesar_money` vs `money`"
             Although PostgreSQL _does_ natively have a `money` type, we've chosen to recommend our custom PostgreSQL type for money in order to give you more control over the fractional precision for money columns. The fractional precision of the native `money` type is controlled by the [`LC_MONETARY`](https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-LC-MONETARY) which is set at the database level and thus may not be granular enough or accessible enough for all Mathesar users to configure.
 
 - **Formatting** options _(stored as [metadata](./databases.md#metadata))_
@@ -107,12 +113,12 @@ Used to store valid email addresses
 ### Time
 
 - **PostgreSQL types**
-    - [`time with time zone`](https://www.postgresql.org/docs/17/datatype-datetime.html) **(default)**
-    - [`time without time zone`](https://www.postgresql.org/docs/17/datatype-datetime.html)
+    - [`time without time zone`](https://www.postgresql.org/docs/17/datatype-datetime.html) **(default)**
+    - [`time with time zone`](https://www.postgresql.org/docs/17/datatype-datetime.html)
 - **Formatting** options _(stored as [metadata](./databases.md#metadata))_
     - Customize the format of the displayed time
 
-### URL
+### URI
 
 - **PostgreSQL types**
     - `mathesar_types.uri`
@@ -139,12 +145,13 @@ Learn more about [working with user columns](./user-type.md).
 
 ## Other PostgreSQL types
 
-Mathesar has rudimentary support for other PostgreSQL types such as: `array`, `bytea`, `point`, `line`, `lseg`, `box`, `path`, `path`, `polygon`, `circle`, `cidr`, `inet`, `macaddr`, `macaddr8`, `bit`, `bit varying`, `tsquery`, `tsvector`, `json`, `jsonb`, `xml`, `pg_lsn`, `pg_snapshot`, `txid_snapshot`, `int4range`, `int8range`, `numrange`, `tsrange`, `tstzrange`, `daterange`.
+Mathesar has rudimentary support for other PostgreSQL types such as: `array`, `bytea`, `point`, `line`, `lseg`, `box`, `path`, `polygon`, `circle`, `cidr`, `inet`, `macaddr`, `macaddr8`, `bit`, `bit varying`, `tsquery`, `tsvector`, `xml`, `pg_lsn`, `pg_snapshot`, `txid_snapshot`, `int4range`, `int8range`, `numrange`, `tsrange`, `tstzrange`, `daterange`.
 
 In most cases Mathesar is able to _display_ data from such types, but the following limitations apply:
 
 - Columns of these types cannot be created from within Mathesar
-- Data entry is not yet supported
+- Values are entered as text, which PostgreSQL then checks
+- Arrays cannot be edited
 - Formatting cannot be applied
 
 If you would like to request additional support for a type, please [open an issue](https://github.com/mathesar-foundation/mathesar/issues) requesting the feature. And if you find that an unsupported type is causing _other_ features to break, please note it as a bug.

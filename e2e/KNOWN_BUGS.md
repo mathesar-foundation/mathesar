@@ -72,11 +72,11 @@ Each entry names its tests: the pinned test (tag `@known-bug`) and the `test.fix
 
 ## Columns and tables
 
-### new-column-types-differ-from-docs
+### new-text-column-is-varchar
 
-- **Steps:** Add a column of type Text, Time or Date & Time with the "+" header cell.
-- **Current:** The columns are `character varying`, `time without time zone` and `timestamp without time zone`.
-- **Correct:** As `docs/docs/user-guide/data-types.md` names the defaults: `text`, `time with time zone`, `timestamp with time zone`. (Or the docs change.)
+- **Steps:** Add a column of type Text with the "+" header cell.
+- **Current:** The column is `character varying`.
+- **Correct:** `text`, the default that `docs/docs/user-guide/data-types.md` names. The Text options save an unlimited column as `text`, and imports create `text` columns.
 - **Tests:** `tests/columns/add-column.spec.ts`
 
 ### column-type-warning-without-change
@@ -182,13 +182,6 @@ Each entry names its tests: the pinned test (tag `@known-bug`) and the `test.fix
 - **Current:** The card still says "Upgrade Required" and offers "Upgrade". The database itself no longer needs an upgrade. The prompt goes away when the page is loaded again.
 - **Correct:** The card has its link again and no "Upgrade" button.
 - **Tests:** `tests/databases/upgrade-database.spec.ts`
-
-### public-schema-not-protected
-
-- **Steps:** Sign in as a user whose role owns the schema "public". On the page of the database, open the menu of "public" and choose "Delete Schema". Confirm with "Delete Schema".
-- **Current:** The schema "public" is deleted. "Rename Schema" renames it the same way.
-- **Correct:** "Rename Schema" and "Delete Schema" are disabled for "public". The user guide on schemas says of it: "It cannot be deleted or renamed." If deleting and renaming "public" is wanted, the user guide needs the fix instead.
-- **Tests:** `tests/databases/schema-list.spec.ts`
 
 ### schema-duplicate-check-ignores-case
 

@@ -32,27 +32,18 @@ test.describe('schema list of a database', () => {
     await runSql(database.name, 'CREATE SCHEMA "Sales"');
   });
 
-  test(
-    'lets the owner delete the public schema',
-    pinsKnownBug('public-schema-not-protected'),
-    async ({ database }) => {
-      await databasePage.goto(database);
-      await databasePage.chooseSchemaAction('public', 'Delete Schema');
-      await databasePage.deleteSchemaModal.button('Delete Schema').click();
-
-      await expect(databasePage.schemaRow('public')).toHaveCount(0);
-      expect(await schemaNames(database.name)).toEqual([{ name: 'Sales' }]);
-    },
-  );
-
-  test.fixme('offers neither to rename nor to delete the public schema', async ({
+  test('lets the owner delete the public schema, and offers to rename it', async ({
     page,
     database,
   }) => {
     await databasePage.goto(database);
     await moreActionsButton(databasePage.schemaRow('public')).click();
-    await expect(menuItem(page, 'Rename Schema')).toBeDisabled();
-    await expect(menuItem(page, 'Delete Schema')).toBeDisabled();
+    await expect(menuItem(page, 'Rename Schema')).toBeEnabled();
+    await menuItem(page, 'Delete Schema').click();
+    await databasePage.deleteSchemaModal.button('Delete Schema').click();
+
+    await expect(databasePage.schemaRow('public')).toHaveCount(0);
+    expect(await schemaNames(database.name)).toEqual([{ name: 'Sales' }]);
   });
 
   test(

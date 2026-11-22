@@ -92,11 +92,13 @@ test.describe('adding a column', () => {
     const types: Record<string, string> = {
       Boolean: 'boolean',
       Date: 'date',
+      'Date & Time': 'timestamp without time zone',
       Duration: 'interval',
       Email: 'mathesar_types.email',
       JSON: 'jsonb',
       Money: 'mathesar_types.mathesar_money',
       Number: 'numeric',
+      Time: 'time without time zone',
       URI: 'mathesar_types.uri',
       UUID: 'uuid',
     };
@@ -109,45 +111,29 @@ test.describe('adding a column', () => {
   });
 
   test(
-    'creates Text, Time and Date & Time columns with other types than the documented defaults',
-    pinsKnownBug('new-column-types-differ-from-docs'),
+    'creates a Text column as character varying, not as the documented text',
+    pinsKnownBug('new-text-column-is-varchar'),
     async ({ books, tablePage: { sheet }, newColumn }) => {
-      await addColumnsNamedAfterTypes(sheet, newColumn, [
-        'Text',
-        'Time',
-        'Date & Time',
-      ]);
+      await addColumnsNamedAfterTypes(sheet, newColumn, ['Text']);
 
       const added = (await storedColumns(books.schema, 'Books')).slice(
         BOOKS_COLUMNS.length,
       );
-      expect(namesAndTypes(added)).toEqual([
-        ['Text', 'character varying'],
-        ['Time', 'time without time zone'],
-        ['Date & Time', 'timestamp without time zone'],
-      ]);
+      expect(namesAndTypes(added)).toEqual([['Text', 'character varying']]);
     },
   );
 
-  test.fixme('creates Text, Time and Date & Time columns with the documented default types', async ({
+  test.fixme('creates a Text column as text, the documented default', async ({
     books,
     tablePage: { sheet },
     newColumn,
   }) => {
-    await addColumnsNamedAfterTypes(sheet, newColumn, [
-      'Text',
-      'Time',
-      'Date & Time',
-    ]);
+    await addColumnsNamedAfterTypes(sheet, newColumn, ['Text']);
 
     const added = (await storedColumns(books.schema, 'Books')).slice(
       BOOKS_COLUMNS.length,
     );
-    expect(namesAndTypes(added)).toEqual([
-      ['Text', 'text'],
-      ['Time', 'time with time zone'],
-      ['Date & Time', 'timestamp with time zone'],
-    ]);
+    expect(namesAndTypes(added)).toEqual([['Text', 'text']]);
   });
 
   test('a User column is an integer column that shows users by their username', async ({

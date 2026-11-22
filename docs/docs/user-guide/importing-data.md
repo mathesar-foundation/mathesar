@@ -20,7 +20,10 @@ Fields in the CSV data may be delimited by any of the following characters:
 
 By default, Mathesar will use the first row of CSV data to name the columns.
 
-If you un-check **"Use first row as header"**, then Mathesar will generate default names for the columns which you can edit later.
+To import the first row as data instead:
+
+- When you import into a new table, choose **"Set generic column names, keeping the first row as data"** under **Column Names** in the preview. Mathesar will generate default names for the columns, which you can edit later.
+- When you import into an existing table, set **Content of First Row** to **"Data to be Imported"**.
 
 <!-- TODO: Uncomment the content below when we've fully implemented JSON import across the stack -->
 <!--
