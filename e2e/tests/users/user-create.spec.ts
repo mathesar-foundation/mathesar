@@ -21,8 +21,9 @@ test.describe('new user form of the administration', () => {
     await newUserPage.goto();
   });
 
-  test.afterEach(async ({ api }) => {
-    await api.deleteUserNamed(username);
+  test.afterEach(({ pendingCleanups }) => {
+    const createdUsername = username;
+    pendingCleanups.push((admin) => admin.deleteUserNamed(createdUsername));
   });
 
   test('creates a standard user with all details', async ({ page, api }) => {
