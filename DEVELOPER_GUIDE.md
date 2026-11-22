@@ -358,11 +358,11 @@ To work with this feature in your local development environment, you'll need to 
 
     Notice that we start the `obj-store` service too, in addition to the normal `dev-service`.
 
-1. Log in to the file storage backend UI at http://localhost:9001 with `mathesar`/`mathesar`. Create a new storage bucket in the UI called "mathesar-storages".
+1. Log in to the file storage backend UI at http://localhost:9001/rustfs/console/ with `mathesar`/`mathesar`. Create a new storage bucket in the UI called "mathesar-storages".
 
 At this point you can run Mathesar and create new "File" columns in tables. Those columns will present a UI that allows you to attach files to table cells.
 
-With the `obj-store` service running, you can return to http://localhost:9001 to view and manage your uploaded files.
+With the `obj-store` service running, you can return to http://localhost:9001/rustfs/console/ to view and manage your uploaded files.
 
 ## Troubleshooting
 
