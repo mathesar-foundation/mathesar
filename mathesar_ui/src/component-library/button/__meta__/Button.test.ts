@@ -11,7 +11,7 @@ test('renders button in default appearance and medium size', () => {
 
   const button = getByRole('button');
   expect(button).toBeInTheDocument();
-  expect(button).toHaveClass('btn-default');
+  expect(button).toHaveClass('btn-control');
   expect(button).toHaveClass('size-medium');
 });
 

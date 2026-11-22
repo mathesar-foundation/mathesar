@@ -50,7 +50,7 @@
         {#if dataFormManager instanceof EditableDataFormManager}
           <div>
             <Button
-              appearance="default"
+              appearance="control"
               on:click={() => dataFormField.container.delete(dataFormField)}
             >
               <Icon {...iconDeleteMajor} />

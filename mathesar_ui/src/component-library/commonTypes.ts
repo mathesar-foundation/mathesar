@@ -1,5 +1,12 @@
+/**
+ * Defines the visual appearance of a component.
+ *
+ * - `control`: Used for general UI controls and action buttons.
+ * - `input`: Used for input triggers, mimicking the appearance of form inputs.
+ */
 export type Appearance =
-  | 'default'
+  | 'control'
+  | 'input'
   | 'primary'
   | 'secondary'
   | 'plain'

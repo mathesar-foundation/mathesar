@@ -3,7 +3,7 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 import Select from '../Select.svelte';
 
-test('renders select button in default appearance', () => {
+test('renders select button in input appearance', () => {
   const options = [
     { id: 1, label: 'Option 1' },
     { id: 2, label: 'Option 2' },
@@ -12,14 +12,14 @@ test('renders select button in default appearance', () => {
   const { getByRole } = render(Select, {
     props: {
       options,
-      triggerAppearance: 'default',
+      triggerAppearance: 'input',
     },
   });
 
   // Check if the select button is rendered, along with the correct classes.
   const selectBtn = getByRole('button');
   expect(selectBtn).toBeInTheDocument();
-  expect(selectBtn).toHaveClass('btn-default', 'size-medium');
+  expect(selectBtn).toHaveClass('btn-input', 'size-medium');
 
   // Expect the button to contain the correct label.
   expect(selectBtn).toHaveTextContent('Option 1');
@@ -59,7 +59,7 @@ test('renders select with custom classes and primary appearance', async () => {
   expect(selectUl.parentNode).toHaveClass('content-custom-class');
 });
 
-test('renders select options in default appearance', async () => {
+test('renders select options in input appearance', async () => {
   const options = [
     { id: 1, label: 'Option 1' },
     { id: 2, label: 'Option 2' },
@@ -68,7 +68,7 @@ test('renders select options in default appearance', async () => {
   const { getByRole } = render(Select, {
     props: {
       options,
-      triggerAppearance: 'default',
+      triggerAppearance: 'input',
     },
   });
 
@@ -96,7 +96,7 @@ test('updates currently selected option', async () => {
   const { getByRole, getAllByRole } = render(Select, {
     props: {
       options,
-      triggerAppearance: 'default',
+      triggerAppearance: 'input',
     },
   });
 
@@ -131,7 +131,7 @@ test('select option using keyboard', async () => {
   const { getByRole, getAllByRole } = render(Select, {
     props: {
       options,
-      triggerAppearance: 'default',
+      triggerAppearance: 'input',
     },
   });
 
@@ -166,7 +166,7 @@ test('hide select dropdown by pressing ESC', async () => {
   const { getByRole, queryByRole } = render(Select, {
     props: {
       options,
-      triggerAppearance: 'default',
+      triggerAppearance: 'input',
     },
   });
 
@@ -192,7 +192,7 @@ test('list scrolls automatically to display the currently selected option', asyn
   const { getByRole, getAllByRole } = render(Select, {
     props: {
       options,
-      triggerAppearance: 'default',
+      triggerAppearance: 'input',
     },
   });
 
