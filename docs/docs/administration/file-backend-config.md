@@ -18,12 +18,7 @@ Popular options include:
 - [AWS S3](https://docs.aws.amazon.com/s3/)
 - [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/)
 - [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces)
-- [Self-hosted MinIO](https://www.min.io/)
-
-!!! warning "MinIO license considerations"
-    MinIO is licensed under the [GNU Affero General Public License v3 (AGPLv3)](https://github.com/minio/minio/blob/master/LICENSE). This license requires that if you modify MinIO and make it available over a network, you must also make your modified source code available to users.
-
-    Be sure you understand these obligations before choosing MinIO as your storage backend. See MinIO's documentation on [license compliance](https://github.com/minio/minio/blob/master/COMPLIANCE.md#agplv3-compliance) for details.
+- [Self-hosted RustFS](https://github.com/rustfs/rustfs)
 
 After choosing a backend, you'll need to follow the basic steps for working with S3-comptiable object storage:
 
@@ -35,7 +30,7 @@ After choosing a backend, you'll need to follow the basic steps for working with
     - Generate credentials with **read/write permissions** scoped to your bucket.
 2. **Note the endpoint URL**
     - For example, AWS uses `https://s3.[region].amazonaws.com` by default.
-    - Other providers (Cloudflare R2, DigitalOcean Spaces, MinIO) each provide a specific endpoint.
+    - Other providers (Cloudflare R2, DigitalOcean Spaces, RustFS) each provide a specific endpoint.
 
 ### 2. Enable file storage in Mathesar
 
