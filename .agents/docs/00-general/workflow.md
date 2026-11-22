@@ -69,7 +69,7 @@ Labels carry the state of an issue:
 ## Before you open a PR
 
 1. The change is limited to what the issue asks. No drive-by refactors, reformatting or renames.
-1. `.agents/bin/check` passes. It runs the suites CI would run for your diff.
+1. `.agents/bin/check` passes. It runs the suites CI would run for your diff. Working for a maintainer, you may leave `e2e` to the CI of a draft PR (step 4 of "How to work on a task" in `AGENTS.md`).
 1. Unless the change cannot alter what the app does (docs only), you ran the change in the real app (`.agents/docs/01-setup/drive-the-app.md`). For UI changes you have a screenshot or short recording, and you checked long names and narrow widths.
 1. When the "Verify on the production stack" step of "How to work on a task" in `AGENTS.md` applies, you also ran the change on the production Docker Compose setup (`.agents/docs/01-setup/production-stack.md`).
 1. New behavior has tests where the suite can express it: pgTAP for SQL, pytest for RPC and wrappers, vitest for pure front end logic, the end-to-end tests in `e2e/` for what a user sees and does.
@@ -110,7 +110,7 @@ A horizontal rule (`---`) on its own line separates the header from the descript
 The **Human involvement** line is for external contributors only. Leave it out when the person you work for is a maintainer.
 
 - The first line names the person you work for by their GitHub login, and you by the name of your product, for example Claude, Copilot or Codex. Use your own name, not the one in this example.
-- **Agent** gives the model as exactly as you know it. Add anything else a maintainer would want to know about how the PR was produced, one item per line, for example that several agents worked on it.
+- **Agent** gives the model as exactly as you know it, unless your harness forbids naming it. Add anything else a maintainer would want to know about how the PR was produced, one item per line, for example that several agents worked on it.
 - `AGENTS.md` says who counts as a maintainer. Everyone else is an external contributor, including the owner of a fork. When you cannot tell, add the line.
 - **Human involvement** is a level from 0 to 5 that you work out yourself from what happened in the session. It exists so that maintainers can spot PRs from outside that no person looked at.
 

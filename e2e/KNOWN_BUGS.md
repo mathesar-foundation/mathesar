@@ -2,7 +2,7 @@
 
 Behaviour that is wrong today and that the suite asserts as it is. `README.md` explains why and how to retire an entry.
 
-Each entry names the pinned test (tag `@known-bug`) and the `test.fixme` that asserts the correct behaviour. `(intermittent)` after an id marks a bug that depends on timing, `(Firefox)` or `(WebKit)` a bug of that browser only. A **Browsers** line says where a bug happens when that is not every browser.
+Each entry names its tests: the pinned test (tag `@known-bug`) and the `test.fixme` that asserts the correct behaviour, or none for a race that no test can bring about. `(intermittent)` after an id marks a bug that depends on timing, `(Firefox)` or `(WebKit)` a bug of that browser only. A **Browsers** line says where a bug happens when that is not every browser.
 
 ## Table page
 

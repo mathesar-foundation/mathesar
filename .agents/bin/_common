@@ -81,6 +81,8 @@ ensure_docker_running() {
   command -v dockerd >/dev/null || die "The Docker daemon is not running and dockerd is not installed"
   log "Starting the Docker daemon"
   mkdir -p "$RUN_DIR"
+  # A sandbox restart leaves the pid file, and dockerd refuses to start when that pid is taken.
+  pgrep -x dockerd >/dev/null || as_root rm -f /var/run/docker.pid
   as_root sh -c "nohup dockerd >'$RUN_DIR/dockerd.log' 2>&1 &"
   for _ in $(seq 1 30); do
     docker info >/dev/null 2>&1 && return

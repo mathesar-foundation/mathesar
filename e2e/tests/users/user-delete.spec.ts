@@ -18,8 +18,9 @@ test.describe('deletion of a user in the administration', () => {
     await editUserPage.goto(user);
   });
 
-  test.afterEach(async ({ api }) => {
-    await api.deleteUserNamed(user.username);
+  test.afterEach(({ pendingCleanups }) => {
+    const { username } = user;
+    pendingCleanups.push((admin) => admin.deleteUserNamed(username));
   });
 
   test('deletes the user after confirmation and returns to the list', async ({

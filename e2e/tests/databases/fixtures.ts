@@ -53,17 +53,19 @@ export async function installedSchemas(database: string): Promise<string[]> {
 }
 
 export const test = base.extend<DatabasesFixtures>({
-  newDatabaseName: async ({ api }, use) => {
+  newDatabaseName: async ({ pendingCleanups }, use) => {
     const names: string[] = [];
     await use((prefix = 'e2e_db') => {
       const name = uniqueName(prefix);
       names.push(name);
       return name;
     });
-    for (const name of names) await api.dropDatabaseNamed(name);
+    for (const name of names) {
+      pendingCleanups.push((admin) => admin.dropDatabaseNamed(name));
+    }
   },
 
-  externalDatabase: async ({ api }, use) => {
+  externalDatabase: async ({ pendingCleanups }, use) => {
     const name = uniqueName('e2e_db');
     const role = uniqueRoleName();
     const password = 'e2e-owner-password';
@@ -76,7 +78,7 @@ export const test = base.extend<DatabasesFixtures>({
       `CREATE DATABASE ${quoteIdentifier(name)} OWNER ${quoteIdentifier(role)}`,
     );
     await use({ name, role, password });
-    await api.dropDatabaseNamed(name);
+    pendingCleanups.push((admin) => admin.dropDatabaseNamed(name));
   },
 
   otherHostSpelling: async ({ api, externalDatabase }, use) => {

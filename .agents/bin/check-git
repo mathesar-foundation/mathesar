@@ -163,7 +163,7 @@ def problems_in_pr_description(text):
             f"{PR_HEADER_MAX_LINE} lines\n  {FIX_PR_HEADER}"
         )
     if not PR_AGENT.search(text):
-        yield f"no '**Agent:**' line that gives the product and model\n  {FIX_PR_HEADER}"
+        yield f"no '**Agent:**' line that names the product\n  {FIX_PR_HEADER}"
     if not PR_HEADER_RULE.search(text):
         yield f"no '---' line after the 'How this PR was made' section\n  {FIX_PR_HEADER}"
     for line in text.splitlines():
