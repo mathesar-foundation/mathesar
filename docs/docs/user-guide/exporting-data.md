@@ -3,7 +3,8 @@
 You can use Mathesar to export all the data from one table to a CSV file.
 
 1. Navigate to the table page.
-1. Click on the "Export" button at the top right.
+1. In the table inspector on the right, click on the "Table" tab.
+1. In the "Actions" section, click "Export".
 
 Note:
 

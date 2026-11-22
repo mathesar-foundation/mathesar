@@ -10,13 +10,13 @@ Schemas cannot contain other schemas, so there is a fixed hierarchy of objects..
 
 ## The "public" schema
 
-Every PostgreSQL database has a schema named `public`. It cannot be deleted or renamed. It's also common for PostgreSQL servers to be configured to allow all roles to create tables within the public schema. And it's common for people to use PostgreSQL heavily without ever venturing outside the public schema. If you don't need to separate your data into different schemas, you can put everything in the public schema and more or less forget about schemas altogether.
+Every PostgreSQL database starts with a schema named `public`. Like any other schema, its owner can rename or delete it. It's also common for PostgreSQL servers to be configured to allow all roles to create tables within the public schema. And it's common for people to use PostgreSQL heavily without ever venturing outside the public schema. If you don't need to separate your data into different schemas, you can put everything in the public schema and more or less forget about schemas altogether.
 
 ## Managing schemas within your database
 
 Mathesar lets you add/remove/rename the schemas in your database from within the database page. You can also add descriptions to your schemas which are stored in PostgreSQL as [COMMENTs](https://www.postgresql.org/docs/current/sql-comment.html).
 
-However, your ability to alter schemas may be limited by [access control](./access-control.md) &mdash; and you won't be able to change the public schema.
+However, your ability to alter schemas may be limited by [access control](./access-control.md).
 
 ## Organizing your data &mdash; schemas or databases?
 
