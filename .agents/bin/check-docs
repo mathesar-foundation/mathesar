@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Check that AGENTS.md and the docs under .agents/ only point at things that exist.
+Check that AGENTS.md and the docs under .agents/ only point at things that exist,
+and that none of them is longer than MAX_LINES.
 
 Checks two kinds of references:
 - Repo paths in inline code, for example `mathesar/rpc/records.py`.
 - Relative Markdown links, for example [text](../02-backend/rpc.md).
 
 Usage: .agents/bin/check-docs
-Exits 1 and lists each broken reference as file:line.
+Exits 1 and lists each problem as file:line.
 """
 import re
 import subprocess
@@ -16,6 +17,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOC_GLOBS = ["AGENTS.md", "CLAUDE.md", ".agents/**/*.md"]
+# Agents read a whole file to find one fact in it.
+MAX_LINES = 250
 
 INLINE_CODE = re.compile(r"`([^`\n]+)`")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
@@ -86,8 +89,15 @@ def main():
         for line_number, problem in broken_references(doc, top_level_names):
             print(f"{doc.relative_to(REPO_ROOT)}:{line_number}: {problem}")
             problem_count += 1
+        line_count = doc.read_text(encoding="utf-8").count("\n")
+        if line_count > MAX_LINES:
+            print(
+                f"{doc.relative_to(REPO_ROOT)}:{MAX_LINES + 1}: {line_count} lines, more than {MAX_LINES}. "
+                "Move a section into a doc of its own and add a row to the docs index"
+            )
+            problem_count += 1
     if problem_count:
-        sys.exit(f"{problem_count} broken reference(s) in {len(docs)} file(s)")
+        sys.exit(f"{problem_count} problem(s) in {len(docs)} file(s)")
     print(f"OK: {len(docs)} file(s) checked")
 
 

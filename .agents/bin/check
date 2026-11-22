@@ -17,7 +17,7 @@
 #                  the working tree (skipped without Docker; extra args go to playwright,
 #                  e.g. `-- tests/table --grep paste`)
 #   docs           mkdocs build --strict for the user docs in docs/
-#   agents-docs    path and link check for AGENTS.md and .agents/
+#   agents-docs    path, link and length check for AGENTS.md and .agents/
 #   git            branch name, and no commit names a coding agent as author, committer or co-author
 #   all            every suite above
 set -uo pipefail
