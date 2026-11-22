@@ -12,6 +12,7 @@ Known failures when installing, running and testing Mathesar from source, with t
 | Login redirects to a password change form | New users must change their password at first UI login. | Submit the form, or use RPC with basic auth, which is not affected. |
 | `django did not start` | Port 8000 is taken, or a migration is missing. | Read `/tmp/mathesar-dev/django.log`. Export `MATHESAR_PORT` to use another port. |
 | RPC returns `NoConnectionAvailable` | The calling user is not a collaborator on that database, or the `msar` schema is gone. | Add a collaborator, or reinstall the SQL (below). |
+| `toomanyrequests` or `429 Too Many Requests` from Docker Hub during `.agents/bin/prod up` or `.agents/bin/e2e up` | Docker Hub limits pulls without a login. A build pulls each image that is not in the local image store, such as `python:3.14-bookworm`, which every build of the app starts from. | Wait until the limit resets, or `docker login`. Keep the images: `docker image prune -a` and `docker system prune -a` delete every image that no container uses. |
 
 ## Your SQL change has no effect
 

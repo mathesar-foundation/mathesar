@@ -33,12 +33,14 @@ Conventions for scripts:
 1. Refer to code by path and symbol name, not by line number.
 1. Start each file with what it covers and when to read it. Keep a file at 250 lines or fewer, which `.agents/bin/check-docs` enforces: move a section that only some tasks need into a file of its own.
 1. One fact lives in one file. Other files point to it. A rule that an agent's harness works against by default (commit identity, branch name, PR attribution, comments, drafts) lives in `AGENTS.md`, because that file is in context from the start. `.agents/docs/00-general/workflow.md` adds the detail and does not restate the rule. The policy for people lives in `CONTRIBUTING.md`.
+1. Besides those rules, `AGENTS.md` holds only what every task needs before an agent opens a doc: the system in brief, how to work on a task, the rules whose breach breaks something, the commands and the docs index. It is in the context of every agent on every task, so each of its lines costs on every task. Everything else goes into the doc of its area.
+1. A row of the docs index says when to read the file, so that an agent can decide from the row alone whether to open it.
 1. Where a rule can be checked by a script, check it, and make the script's output say how to fix the problem. The doc then only needs to name the script.
 
 ## Keeping it current
 
 - When a PR moves, renames or restructures code, update the doc that describes it in the same PR.
-- When you learn something that would have saved you time, add it to the doc for that area.
+- When you learn something that would have saved you time, add it to the doc for that area. Write the rule and the fact it rests on, not the story of how you found it. Search the docs first: when the fact is there, sharpen that line instead of adding one.
 - When a doc and the code disagree, the code is right. Fix the doc.
 - Run `.agents/bin/check agents-docs` after editing. It fails on a path or link that no longer exists.
 - A new doc needs a row in the "Docs index" table of `AGENTS.md`.
