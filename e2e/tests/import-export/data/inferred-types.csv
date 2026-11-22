@@ -1,0 +1,4 @@
+Whole,Decimal,Flag,Day,Moment,Email,Website,Price,Note
+1,1.5,true,2024-01-15,2024-01-15 10:30:00,ada@example.com,https://example.com/a,$10.50,first
+2,2.25,false,2023-12-31,2023-12-31 23:59:59,grace@example.org,https://mathesar.org,$2000.00,
+3,-3.75,true,1999-07-04,1999-07-04 00:00:00,alan@example.net,http://example.org/path?q=1,$0.99,third

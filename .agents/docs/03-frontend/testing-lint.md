@@ -49,7 +49,7 @@ Measured on a 4-core sandbox (Ubuntu 24.04, Node 22):
 - `package` runs the same script outside Docker with Node 18.
 - The `checkpoint` job fails the pull request if any required job failed.
 - No CI job runs the scripts in `mathesar_ui/scripts/i18n/`.
-- There are no browser or end-to-end tests of the frontend in this workflow.
+- The browser tests of the frontend run in their own workflow, `.github/workflows/test-e2e.yml`, which is not part of `checkpoint`. See `.agents/docs/03-frontend/end-to-end-tests.md`.
 
 `lint.sh` at the repo root runs `npm run lint` when staged changes touch `mathesar_ui/`. It can serve as a pre-commit hook (see `DEVELOPER_GUIDE.md`, "Full-stack linting").
 

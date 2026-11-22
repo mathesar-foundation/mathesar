@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run the test and lint suites that CI runs. Only api-tests needs Docker.
+# Run the test and lint suites that CI runs. Only api-tests and e2e need Docker.
 #
 # Usage: .agents/bin/check [suite ...] [-- extra args for the suite]
 #   With no suite: runs the suites that match the files changed since
@@ -12,6 +12,10 @@
 #   sql-registry   every object the SQL files create is listed in the object registry
 #   api-tests      scenario tests in api_tests/ against a Docker stack (skipped without Docker)
 #   frontend       prettier check, eslint, svelte-check, vitest
+#   e2e-lint       prettier check, eslint and tsc for the end-to-end tests in e2e/
+#   e2e            end-to-end tests in e2e/ against the production Docker stack, built from
+#                  the working tree (skipped without Docker; extra args go to playwright,
+#                  e.g. `-- tests/table --grep paste`)
 #   docs           mkdocs build --strict for the user docs in docs/
 #   agents-docs    path and link check for AGENTS.md and .agents/
 #   git            branch name, and no commit names a coding agent as author, committer or co-author
@@ -22,14 +26,14 @@ set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/_common"
 load_dev_env
 
-ALL_SUITES=(python-lint python-tests sql-tests sql-registry api-tests frontend docs agents-docs git)
+ALL_SUITES=(python-lint python-tests sql-tests sql-registry api-tests frontend e2e-lint e2e docs agents-docs git)
 SKIPPED=75
 suites=()
 extra_args=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --) shift; extra_args=("$@"); break ;;
-    -h|--help) sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     all) suites=("${ALL_SUITES[@]}") ;;
     *) suites+=("$1") ;;
   esac
@@ -58,6 +62,8 @@ suites_for_changed_files() {
   if $backend_wide || any_match '\.sql$'; then echo sql-tests; fi
   if any_match '^db/sql/.*\.sql$'; then echo sql-registry; fi
   if any_match '^mathesar_ui/'; then echo frontend; fi
+  if any_match '^e2e/'; then echo e2e-lint; fi
+  if any_match '^mathesar_ui/|^e2e/'; then echo e2e; fi
   if any_match '^docs/'; then echo docs; fi
   if any_match '^AGENTS\.md$|^CLAUDE\.md$|^\.agents/'; then echo agents-docs; fi
   if [ -n "$(git rev-list -n 1 "$BASE_REF..HEAD" 2>/dev/null)" ]; then echo git; fi
@@ -171,6 +177,29 @@ frontend() {
   )
 }
 
+e2e_lint() {
+  (
+    cd e2e || exit 1
+    [ -d node_modules ] || npm ci --no-audit || exit 1
+    npm run check-format && npm run lint && npm run typecheck
+  )
+}
+
+# Playwright tests over the browser against the production stack, on a fresh instance.
+e2e() {
+  if ! docker_is_available; then
+    log "Docker is not available, cannot run e2e. CI runs them."
+    return "$SKIPPED"
+  fi
+  local status
+  .agents/bin/e2e down >/dev/null 2>&1
+  .agents/bin/e2e up || return 1
+  .agents/bin/e2e run "$@"
+  status=$?
+  .agents/bin/e2e down >/dev/null 2>&1
+  return "$status"
+}
+
 docs() {
   local python=docs/.venv/bin/python
   if [ ! -x "$python" ]; then
@@ -216,7 +245,7 @@ skipped=()
 failed=()
 for suite in "${suites[@]}"; do
   case "$suite" in
-    python-lint|python-tests|sql-tests|sql-registry|api-tests|frontend|docs|agents-docs|git) ;;
+    python-lint|python-tests|sql-tests|sql-registry|api-tests|frontend|e2e-lint|e2e|docs|agents-docs|git) ;;
     *) die "unknown suite: $suite" ;;
   esac
   log "Running $suite"

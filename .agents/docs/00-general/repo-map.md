@@ -16,6 +16,7 @@ File counts are from November 2026 and show relative size only.
 | `manage.py` | 1 | Django CLI | |
 | `conftest.py` | 1 | Root pytest fixtures (test database with Mathesar SQL installed) | `.agents/docs/02-backend/testing.md` |
 | `api_tests/` | 3 | Scenario tests that run over HTTP against a Docker stack | `.agents/docs/02-backend/testing.md` |
+| `e2e/` | 342 | End-to-end tests: Playwright drives the UI of the production stack. Own packages, nothing shared with `mathesar_ui/` | `.agents/docs/03-frontend/end-to-end-tests.md` |
 | `translations/` | 4 | Django gettext files, one folder per language. Only `translations/en/` is edited by hand | `DEVELOPER_GUIDE.md` |
 
 ## Build, run, deploy
@@ -28,6 +29,7 @@ File counts are from November 2026 and show relative size only.
 | `docker-compose.yml` | Production example stack. Shipped to users |
 | `docker-compose.dev.yml` | Development stack: `dev-service`, `dev-db`, `obj-store`, `test-service` |
 | `docker-compose.test.yml` | Stack for `api_tests/` |
+| `e2e/docker-compose.yml` | Used on top of `docker-compose.yml`: builds its images from the working tree and adds the Playwright runner |
 | `bin/mathesar_dev` | Entry point of the dev and test containers |
 | `build-scripts/` | Packaging script, install script, and the `mathesar` launcher for non-Docker installs |
 | `.env.example` | Example for the `.env` file that `docker compose` reads. Django does not read `.env` |
@@ -61,6 +63,7 @@ Covered in `.agents/docs/05-ops/build-release.md`.
 |---|---|
 | `.github/workflows/test-and-lint-code.yml` | All test, lint and build jobs. Ends in the required `checkpoint` job |
 | `.github/workflows/test-docs.yml` | `mkdocs build --strict` when `docs/` changes |
+| `.github/workflows/test-e2e.yml` | End-to-end tests in `e2e/` against the production stack. Not part of `checkpoint` |
 | `.github/workflows/line-sh-files.yml` | ShellCheck on `build-scripts/` and `bin/` |
 | `.github/workflows/create-draft-release.yml` | On a tag: package and create a draft GitHub release |
 | `.github/workflows/automate-pr-to-develop.yml` | After a push to `master`: open a PR back into `develop` |

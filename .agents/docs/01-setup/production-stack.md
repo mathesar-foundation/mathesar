@@ -102,7 +102,7 @@ docker exec mathesar_service python manage.py shell
 docker exec mathesar_service ls /code                          # what the package contains
 ```
 
-Container names are fixed by `docker-compose.yml`: `mathesar_service`, `mathesar_db`. Only one such stack can run on a machine.
+Container names are fixed by `docker-compose.yml`: `mathesar_service`, `mathesar_db`. Only one such stack can run on a machine. The stack of the end-to-end tests (`.agents/bin/e2e up`) uses the same names: stop one before you start the other.
 
 ## Settings for the stack
 

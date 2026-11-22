@@ -72,7 +72,7 @@ Labels carry the state of an issue:
 1. `.agents/bin/check` passes. It runs the suites CI would run for your diff.
 1. Unless the change cannot alter what the app does (docs only), you ran the change in the real app (`.agents/docs/01-setup/drive-the-app.md`). For UI changes you have a screenshot or short recording, and you checked long names and narrow widths.
 1. When the "Verify on the production stack" step of "How to work on a task" in `AGENTS.md` applies, you also ran the change on the production Docker Compose setup (`.agents/docs/01-setup/production-stack.md`).
-1. New behavior has tests where the suite can express it: pgTAP for SQL, pytest for RPC and wrappers, vitest for pure front end logic.
+1. New behavior has tests where the suite can express it: pgTAP for SQL, pytest for RPC and wrappers, vitest for pure front end logic, the end-to-end tests in `e2e/` for what a user sees and does.
 1. User-visible changes update the user docs in `docs/docs/` in the same PR.
 1. New UI strings are in the English dictionary only. Other languages come from Transifex.
 1. The diff has no stray files, no debug output, and no comments that describe the change itself.
@@ -236,6 +236,7 @@ All jobs are in `.github/workflows/test-and-lint-code.yml`. Path filters decide 
 | `docs/` | `mkdocs build --strict` (separate workflow) |
 | Any `.yml`, `.sh`, `Dockerfile*` | All backend jobs |
 | Anything not listed in `.github/build-skip-paths.txt` | Docker build (development and production), packaging, install script test on Ubuntu and macOS |
+| Anything not listed in `.github/build-skip-paths.txt`, or `e2e/` | End-to-end tests against the production stack (workflow `.github/workflows/test-e2e.yml`, not part of `checkpoint`) |
 
 Gaps to cover by hand:
 

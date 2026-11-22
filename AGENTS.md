@@ -26,7 +26,8 @@ All verified on Ubuntu 24.04. Develop on the native setup, which needs no Docker
 | `.agents/bin/rpc <method> '<json>'` | Calls an RPC method on the running app, prints the result |
 | `.agents/bin/screenshot <path> <file.png>` | Logs in with Playwright and captures a page |
 | `.agents/bin/check` | Runs the test and lint suites that CI would run for your changed files, and checks your branch name and commits |
-| `.agents/bin/check <suite>` | One suite: `python-tests`, `python-lint`, `sql-tests`, `sql-registry`, `api-tests`, `frontend`, `docs`, `agents-docs`, `git`, or `all` |
+| `.agents/bin/check <suite>` | One suite: `python-tests`, `python-lint`, `sql-tests`, `sql-registry`, `api-tests`, `frontend`, `e2e-lint`, `e2e`, `docs`, `agents-docs`, `git`, or `all` |
+| `.agents/bin/e2e up`, `run [args]`, `down` | Runs the end-to-end tests in `e2e/` in a browser against the production stack, built from your working tree. Needs Docker. `.agents/bin/e2e dev [args]` runs them against the dev servers |
 
 Pass arguments to a suite after `--`: `.agents/bin/check python-tests -- -k test_name`, `.agents/bin/check sql-tests -- -x name_part`.
 
@@ -43,7 +44,7 @@ Hold everything you write here (code, SQL, tests, docs) to the standard of a mai
 
 1. Orient. Find the feature in `.agents/docs/04-features/index.md`. For work that is not a feature (build, dependencies, docs), start from the docs index below. Read the sections that match your change in the docs for each layer you will touch. Check that what the task asks for does not exist already. If the task is a GitHub issue, check its labels against "Issues" in `.agents/docs/00-general/workflow.md`. If the work exists already or the issue is not ready, tell the person and wait for their answer before you write code. Done when you can name the files you will change in every layer.
 1. Baseline. Start the app and reproduce the bug or see the current behavior through `.agents/bin/rpc` or the UI. Done when you have observed it yourself. A change that cannot alter what the app does, such as docs, skips this step and the "Verify in the running app" step.
-1. Change. Keep the diff to what the task needs. Match the code around it. Where an old and a new pattern coexist, the lines you add follow the standards and the newer pattern ("Unfinished transitions" in `.agents/docs/00-general/history.md`). Do not convert lines you would not otherwise touch. Add or update tests where the project tests that kind of code (`.agents/docs/02-backend/testing.md`, `.agents/docs/03-frontend/testing-lint.md`). Before your first commit, read "Your branch" and "Commits" in `.agents/docs/00-general/workflow.md`, which say how to find and set the identity of the person you work for.
+1. Change. Keep the diff to what the task needs. Match the code around it. Where an old and a new pattern coexist, the lines you add follow the standards and the newer pattern ("Unfinished transitions" in `.agents/docs/00-general/history.md`). Do not convert lines you would not otherwise touch. Add or update tests where the project tests that kind of code (`.agents/docs/02-backend/testing.md`, `.agents/docs/03-frontend/testing-lint.md`, `.agents/docs/03-frontend/end-to-end-tests.md`). Before your first commit, read "Your branch" and "Commits" in `.agents/docs/00-general/workflow.md`, which say how to find and set the identity of the person you work for.
 1. Check. Run `.agents/bin/check`. After a change to a requirements file or `mathesar_ui/package-lock.json`, run `.agents/bin/setup` first, or the suites test the old versions. Done when every suite it picks passes. A skipped suite is not a pass: name it in your report.
 1. Verify in the running app. Reinstall SQL if you changed it (see the rules below). Exercise the change through RPC and, for UI work, in the browser. Done when you have seen the new behavior and have evidence (command output, a screenshot).
 1. Verify on the production stack when the change touches any of: Dockerfiles, compose files, `Caddyfile`, `build-scripts/`, dependencies, `config/settings/`, static files or the configuration of the front end build, URLs and redirects, file upload or download, Django migrations, or any file under `db/sql/` other than the tests. Run `.agents/bin/prod up` and repeat the check there. For migrations and SQL, run the upgrade test in `.agents/docs/01-setup/production-stack.md`. Done when you have seen the behavior on that stack, or have said in your report why you could not.
@@ -70,7 +71,7 @@ Front end (`mathesar_ui/`):
 - Svelte 3 with `immutable: true`. Replace objects and arrays. In-place mutation does not re-render.
 - All UI text of the Svelte app goes through `mathesar_ui/src/i18n/languages/en/dict.json`. Text in Django templates goes through `translations/en/`. Edit English only. Other languages come from Transifex.
 - `mathesar_ui/STANDARDS.md` binds you. The rules that come up most: `function` declarations instead of arrow constants, `interface` over `type`, `undefined` over `null`, `rem` instead of `px`, `svh` and `svw` instead of `vh` and `vw`, no margin or z-index on a component's root element, an explicit return type on exported functions, "delete" instead of "remove".
-- Pages, systems, stores and the RPC client have no automated tests. Verify those changes in the running app.
+- Pages, systems, stores and the RPC client have no unit tests. The end-to-end tests in `e2e/` cover them through the browser. They assert the behavior the app has today: when one fails after your change, find out whether the task asked for that change before you edit the test. Also verify the change in the running app.
 
 Everywhere:
 
@@ -123,9 +124,10 @@ The docs are a map. The code is the truth: when they disagree, trust the code an
 | `.agents/docs/03-frontend/components.md` | Building UI: existing components, styling, modals, data type cells |
 | `.agents/docs/03-frontend/i18n.md` | Adding or changing any UI text |
 | `.agents/docs/03-frontend/testing-lint.md` | Front end checks and their failure modes |
+| `.agents/docs/03-frontend/end-to-end-tests.md` | Changing what the UI does. Running, reading or adding end-to-end tests. Any change to the front end framework or build |
 | `.agents/docs/04-features/index.md` | An issue names a feature and you need the code locations |
 | `.agents/docs/05-ops/build-release.md` | Docker, packaging, dependencies, CI workflows, docs site, release |
 
-Standards written for humans that also bind you: `mathesar_ui/STANDARDS.md` (front end code), `db/sql/STANDARDS.md` (SQL), `docs/STYLE_GUIDE.md` (user docs).
+Standards written for humans that also bind you: `mathesar_ui/STANDARDS.md` (front end code), `db/sql/STANDARDS.md` (SQL), `docs/STYLE_GUIDE.md` (user docs), `e2e/README.md` (end-to-end tests).
 
 How this folder is organized and kept current: `.agents/README.md`. Read it before you edit `AGENTS.md`, `.agents/docs/` or `.agents/bin/`.

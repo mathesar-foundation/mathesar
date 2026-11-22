@@ -25,6 +25,7 @@ What catches what:
 | Object missing from the SQL registry file | The disconnect step of the scenario tests, and `.agents/bin/check sql-registry`. |
 | Failure only on upgrade from the last release (migrations, SQL reinstall over old functions) | No automated test. Run the upgrade test in `.agents/docs/01-setup/production-stack.md`. |
 | Failure only in the packaged production image | CI job `build_tests` covers the build only. Run `.agents/bin/prod up` and exercise the change. |
+| RPC or SQL change that breaks a page of the UI | The end-to-end tests in `e2e/`, which run the UI against the production stack. See `.agents/docs/03-frontend/end-to-end-tests.md`. |
 | Exploration query building | `db/tests/deprecated/` |
 
 Consequence: a passing `pytest` run says little about SQL behavior. After changing SQL, run the pgTAP suite. After changing a cross-layer contract, also run the scenario tests (`.agents/bin/check api-tests`).
