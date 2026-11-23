@@ -1,5 +1,6 @@
 <script lang="ts">
   import { SheetVirtualRows } from '@mathesar/components/sheet';
+  import { parseCellId } from '@mathesar/components/sheet/cellIds';
   import {
     GROUP_HEADER_ROW_HEIGHT_PX,
     HELP_TEXT_ROW_HEIGHT_PX,
@@ -9,8 +10,10 @@
     type DisplayRowDescriptor,
     type Row as RowType,
     getTabularDataStoreFromContext,
+    isDraftRecordRow,
     isGroupHeaderRow,
     isHelpTextRow,
+    isPersistedRecordRow,
     isPlaceholderRecordRow,
   } from '@mathesar/stores/table-data';
 
@@ -21,11 +24,14 @@
 
   export let usesVirtualList = false;
 
-  $: ({ table, display, canInsertRecords } = $tabularData);
+  $: ({ table, display, canInsertRecords, selection } = $tabularData);
   $: ({ oid } = table);
-  $: ({ displayRowDescriptors } = display);
+  $: ({ displayRowDescriptors, placeholderRowId } = display);
 
-  function getItemSizeFromRow(row: RowType) {
+  const SheetVirtualRowsForTable = SheetVirtualRows<DisplayRowDescriptor>;
+
+  function getRowSize(desc: DisplayRowDescriptor) {
+    const { row } = desc;
     if (isHelpTextRow(row)) {
       return HELP_TEXT_ROW_HEIGHT_PX;
     }
@@ -36,53 +42,73 @@
   }
 
   /** See notes in `records.ts.README.md` about different row identifiers */
-  function getIterationKey(
-    index: number,
-    rowDescriptor: DisplayRowDescriptor | undefined,
-  ): string {
-    if (rowDescriptor) {
-      return rowDescriptor.row.identifier;
+  function getIterationKey(rowDescriptor: DisplayRowDescriptor): string {
+    if (!rowDescriptor) {
+      // Should ideally never happen
+      throw new Error('Row descriptor missing');
     }
-    return `__index_${index}`;
+    return rowDescriptor.row.identifier;
   }
 
-  function getItemSizeFromIndex(index: number) {
-    const row = $displayRowDescriptors?.[index].row;
-    return row ? getItemSizeFromRow(row) : ROW_HEIGHT_PX;
+  function isPoolRow(row: RowType): boolean {
+    return isPersistedRecordRow(row) || isDraftRecordRow(row);
   }
+
+  // The id here is the same as the row identifier, which is used as the iteration key
+  $: activeRowId = $selection.activeCellId
+    ? parseCellId($selection.activeCellId).rowId
+    : undefined;
+
+  $: rowIndexByKey = new Map(
+    $displayRowDescriptors.map((d, i) => [getIterationKey(d), i]),
+  );
+
+  $: alwaysRenderRows = (() => {
+    const keys: string[] = [];
+    if ($canInsertRecords) keys.push($placeholderRowId);
+    if (activeRowId !== undefined) {
+      const idx = rowIndexByKey.get(activeRowId);
+      const row =
+        idx !== undefined ? $displayRowDescriptors[idx]?.row : undefined;
+      if (row && isPoolRow(row)) keys.push(activeRowId);
+    }
+    return keys;
+  })();
 </script>
 
 {#key oid}
   {#if usesVirtualList}
-    <SheetVirtualRows
-      itemCount={$displayRowDescriptors.length}
+    <SheetVirtualRowsForTable
+      rows={$displayRowDescriptors}
       paddingBottom={30}
-      itemSize={getItemSizeFromIndex}
-      itemKey={(index) => getIterationKey(index, $displayRowDescriptors[index])}
+      rowSize={getRowSize}
+      rowKeyForSlotPooling={(desc) => ({
+        key: getIterationKey(desc),
+        recyclable: desc ? isPoolRow(desc.row) : false,
+      })}
+      {alwaysRenderRows}
+      indexByKey={(key) => rowIndexByKey.get(key)}
       let:items
       let:api
     >
       <ScrollAndRowHeightHandler {api} />
       {#each items as item (item.key)}
         {@const shouldRender = !(
-          isPlaceholderRecordRow($displayRowDescriptors[item.index].row) &&
+          item.row &&
+          isPlaceholderRecordRow(item.row.row) &&
           !$canInsertRecords
         )}
-        {#if $displayRowDescriptors[item.index] && shouldRender}
-          <Row
-            style={item.style}
-            row={$displayRowDescriptors[item.index].row}
-            rowDescriptor={$displayRowDescriptors[item.index]}
-          />
+        {#if item.row && shouldRender}
+          <Row style={item.style} row={item.row.row} rowDescriptor={item.row} />
         {/if}
       {/each}
-    </SheetVirtualRows>
+    </SheetVirtualRowsForTable>
   {:else}
     {#each $displayRowDescriptors as displayRowDescriptor (displayRowDescriptor)}
       <Row
         style={{
           position: 'relative',
-          height: getItemSizeFromRow(displayRowDescriptor.row),
+          height: getRowSize(displayRowDescriptor),
         }}
         row={displayRowDescriptor.row}
         rowDescriptor={displayRowDescriptor}
