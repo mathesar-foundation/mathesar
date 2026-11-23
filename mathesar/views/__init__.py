@@ -3,6 +3,7 @@ from functools import wraps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from modernrpc.exceptions import RPCException
@@ -136,6 +137,7 @@ def get_anonymous_common_data(request):
 
 def get_base_common_data(request):
     return {
+        'csrf_token': get_token(request),
         'current_release_tag_name': __version__,
         'is_authenticated': not request.user.is_anonymous,
         'is_sso_login_required': settings.REQUIRE_SSO_LOGIN,

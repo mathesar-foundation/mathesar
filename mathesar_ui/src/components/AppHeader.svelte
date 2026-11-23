@@ -24,6 +24,7 @@
   import Feedback from '@mathesar/systems/feedback/Feedback.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
+    ButtonMenuItem,
     DropdownMenu,
     Icon,
     LinkMenuItem,
@@ -149,9 +150,16 @@
 
           <MenuDivider />
 
-          <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
-            {$_('log_out')}
-          </LinkMenuItem>
+          <form class="logout-form" action={LOGOUT_URL} method="post">
+            <input
+              type="hidden"
+              name="csrfmiddlewaretoken"
+              value={commonData.csrf_token}
+            />
+            <ButtonMenuItem icon={iconLogout} type="submit">
+              {$_('log_out')}
+            </ButtonMenuItem>
+          </form>
         </DropdownMenu>
       {/if}
     </div>
@@ -192,6 +200,10 @@
   .theme-switcher {
     padding: 0.5rem;
     margin-top: -0.5rem;
+  }
+
+  .logout-form {
+    display: contents;
   }
 
   .user-switcher {

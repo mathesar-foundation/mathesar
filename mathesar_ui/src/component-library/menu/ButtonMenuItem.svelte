@@ -15,6 +15,7 @@
   /** Visually indicates that the action is destructive */
   export let danger = false;
   export let hasNotificationDot = false;
+  export let type: 'button' | 'submit' = 'button';
 
   function handleClick() {
     if (disabled) {
@@ -27,6 +28,7 @@
 <button
   on:click={handleClick}
   {disabled}
+  {type}
   role="menuitem"
   class="menu-item menu-item-button"
   class:disabled

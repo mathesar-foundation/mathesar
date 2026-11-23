@@ -56,6 +56,7 @@ def test_get_common_data_dispatches_to_anonymous(rf):
     assert 'internal_db' not in data
     assert 'databases' not in data
     assert 'servers' not in data
+    assert data['csrf_token']
 
 
 @pytest.mark.django_db

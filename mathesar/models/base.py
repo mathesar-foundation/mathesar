@@ -264,7 +264,7 @@ class ColumnMetaData(BaseModel):
                 name="unique_column_metadata"
             ),
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(num_max_frac_digits__lte=20)
                     & models.Q(num_min_frac_digits__lte=20)
                     & models.Q(num_min_frac_digits__lte=models.F("num_max_frac_digits"))
@@ -376,7 +376,7 @@ class FormField(BaseModel):
                 name="form_field_unique_key_per_form"
             ),
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(kind='scalar_column')
                     | models.Q(
                         kind='foreign_key',
