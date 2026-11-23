@@ -8,6 +8,7 @@ Thus, the `disable_analytics` function simply deletes that ID, if it
 exists.
 """
 from functools import wraps
+import os
 import threading
 from uuid import uuid4
 
@@ -34,6 +35,24 @@ CACHE_TIMEOUT = 1800  # seconds
 ACTIVE_USER_DAYS = 14
 ANALYTICS_REPORT_MAX_AGE = 30  # days
 ANALYTICS_FREQUENCY = 1  # a report is saved at most once per day.
+
+
+def _is_dockerized():
+    """
+    Return True if Mathesar is running inside a Docker container.
+
+    Detection strategy (in order):
+    1. The file ``/.dockerenv`` is present — Docker creates this on every
+       container by default.
+    2. The environment variable ``MATHESAR_DOCKER_SIGNAL`` is set to a
+       truthy value — a fallback for non-standard container runtimes or
+       future Docker versions that may drop ``/.dockerenv``.
+    """
+    if os.path.isfile("/.dockerenv"):
+        return True
+    if os.environ.get("MATHESAR_DOCKER_SIGNAL", "").lower() in ("1", "true", "yes"):
+        return True
+    return False
 
 
 def wire_analytics(f):
@@ -110,7 +129,8 @@ def prepare_analytics_report():
         connected_database_record_count=connected_database_record_count,
         exploration_count=Explorations.objects.count(),
         form_count=Form.objects.count(),
-        public_form_count=Form.objects.filter(publish_public=True).count()
+        public_form_count=Form.objects.filter(publish_public=True).count(),
+        is_dockerized=_is_dockerized()
     )
 
 
@@ -133,6 +153,7 @@ def upload_analytics_reports():
             "exploration_count": report.exploration_count,
             "form_count": report.form_count,
             "public_form_count": report.public_form_count,
+            "is_dockerized": report.is_dockerized,
         }
         for report in reports
     ]
