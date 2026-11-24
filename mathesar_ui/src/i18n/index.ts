@@ -8,6 +8,7 @@ const loaders = {
   es: () => import('./languages/es'),
   fr: () => import('./languages/fr'),
   ja: () => import('./languages/ja'),
+  'zh-hans': () => import('./languages/zh-hans')
 };
 
 async function loadDictionaryAsync(
@@ -28,6 +29,7 @@ export async function initI18n(language: LangObject['language']) {
   register('es', () => loadDictionaryAsync('es'));
   register('fr', () => loadDictionaryAsync('fr'));
   register('ja', () => loadDictionaryAsync('ja'));
+  register('zh-hans', () => loadDictionaryAsync('zh-hans'));
 
   const { translations } = window.Mathesar || {};
   const dictionary =

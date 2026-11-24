@@ -18,6 +18,7 @@ interface Window {
           es?: LanguageDictionary;
           fr?: LanguageDictionary;
           ja?: LanguageDictionary;
+          'zh-hans'?: LanguageDictionary;
         };
       }
     | undefined;
