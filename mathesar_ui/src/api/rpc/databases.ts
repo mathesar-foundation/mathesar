@@ -59,10 +59,18 @@ export const databases = {
     },
     RawUnderlyingDatabase
   >(),
-  upgrade_sql: rpcMethodTypeContainer<
+  install_types: rpcMethodTypeContainer<
     {
       database_id: RawDatabase['id'];
-      username?: string;
+    },
+    void
+  >(),
+  remove_mathesar_schemas: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      schemas_to_remove?: SystemSchema[];
+      remove_types?: boolean;
+      role_name?: string;
       password?: string;
     },
     void
@@ -87,15 +95,9 @@ export const databases = {
     disconnect: rpcMethodTypeContainer<
       {
         database_id: RawDatabase['id'];
-        schemas_to_remove?: SystemSchema[];
-        strict?: boolean;
-        role_name?: string;
-        password?: string;
         disconnect_db_server?: boolean;
       },
-      {
-        sql_cleaned: boolean;
-      }
+      void
     >(),
   },
   setup: {
@@ -104,6 +106,7 @@ export const databases = {
         database: RawDatabase['name'];
         sample_data?: SampleDataSchemaIdentifier[];
         nickname: RawDatabase['nickname'];
+        install_types?: boolean;
       },
       DatabaseConnectionResult
     >(),
@@ -117,6 +120,7 @@ export const databases = {
         sample_data?: SampleDataSchemaIdentifier[];
         nickname: RawDatabase['nickname'];
         sslmode?: SslMode;
+        install_types?: boolean;
       },
       DatabaseConnectionResult
     >(),

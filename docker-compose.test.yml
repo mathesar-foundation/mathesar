@@ -18,6 +18,8 @@ services:
       - POSTGRES_DB=my_data
       - POSTGRES_USER=data_admin
       - POSTGRES_PASSWORD=data1234
+    volumes:
+      - ./api_tests/legacy_seed.sql:/docker-entrypoint-initdb.d/01_legacy_seed.sql:ro
   api-test-service:
     container_name: mathesar-api-test-service
     build:

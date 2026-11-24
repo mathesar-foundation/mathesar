@@ -9,6 +9,8 @@ from config.database_config import get_internal_database_config
 from db.databases import create_database
 from db.connection import mathesar_connection
 from db.roles import create_init_login_role
+from db.sql.install import install_mathesar_types
+from mathesar import __version__
 from mathesar.examples.bike_shop_dataset import load_bike_shop_dataset
 from mathesar.examples.hardware_store_dataset import load_hardware_store_dataset
 from mathesar.examples.ice_cream_employees_dataset import (
@@ -29,10 +31,10 @@ class BadInstallationTarget(Exception):
 
 
 @transaction.atomic
-def set_up_home_role_and_db_for_user(user, sample_data=[]):
+def set_up_home_role_and_db_for_user(user, sample_data=[], install_types=True):
     """
     Create a role on the internal server for User.
-    Create a database on the internal server and install Mathesar.
+    Create a database on the internal server for use with Mathesar.
 
     This database will be set up to be accessible for the given user
     using the created role.
@@ -98,21 +100,21 @@ def set_up_home_role_and_db_for_user(user, sample_data=[]):
     ) as root_conn_to_user_db:
         _grant_create_on_public(root_conn_to_user_db, owner=user_database_role.configured_role.name)
 
-    user_database_role.database.install_sql(
-        username=user_database_role.configured_role.name,
-        password=user_database_role.configured_role.password,
-    )
     with user_database_role.connection as conn:
+        if install_types:
+            install_mathesar_types(conn)
         _load_sample_data(conn, sample_data)
+    user_database_role.database.last_confirmed_sql_version = __version__
+    user_database_role.database.save()
     return user_database_role
 
 
 @transaction.atomic
 def set_up_new_database_for_user_on_internal_server(
-    database_name, nickname, user, sample_data=[]
+    database_name, nickname, user, sample_data=[], install_types=True
 ):
     """
-    Create a database on the internal server and install Mathesar.
+    Create a database on the internal server for use with Mathesar.
 
     This database will be set up to be accessible for the given user.
     """
@@ -142,11 +144,12 @@ def set_up_new_database_for_user_on_internal_server(
         application_name="mathesar.utils.permissions.set_up_new_database_for_user_on_internal_server",
     ) as root_conn:
         create_database(database_name, root_conn)
-    user_database_role.database.install_sql(
-        username=conn_info.role, password=conn_info.password
-    )
     with user_database_role.connection as conn:
+        if install_types:
+            install_mathesar_types(conn)
         _load_sample_data(conn, sample_data)
+    user_database_role.database.last_confirmed_sql_version = __version__
+    user_database_role.database.save()
     return user_database_role
 
 
@@ -161,6 +164,7 @@ def set_up_preexisting_database_for_user(
     user,
     sample_data=[],
     sslmode="prefer",
+    install_types=True,
 ):
     internal_conn_info = get_internal_database_config()
     if (
@@ -174,12 +178,13 @@ def set_up_preexisting_database_for_user(
     user_database_role = _setup_connection_models(
         host, port, database_name, nickname, role_name, password, user, sslmode=sslmode
     )
-    user_database_role.database.install_sql(
-        username=user_database_role.configured_role.name,
-        password=user_database_role.configured_role.password,
-    )
     with user_database_role.connection as conn:
+        conn.execute("SELECT 1")  # Validate connection
+        if install_types:
+            install_mathesar_types(conn)
         _load_sample_data(conn, sample_data)
+    user_database_role.database.last_confirmed_sql_version = __version__
+    user_database_role.database.save()
     return user_database_role
 
 

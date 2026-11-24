@@ -71,7 +71,6 @@ import {
   faProjectDiagram,
   faQuestion,
   faRedo,
-  faRotateBack,
   faSave,
   faSearchPlus,
   faShapes,
@@ -89,7 +88,6 @@ import {
   faTags,
   faTimes,
   faTrashAlt,
-  faTriangleExclamation,
   faUndo,
   faUnlink,
   faUpRightFromSquare,
@@ -189,7 +187,6 @@ export const iconRecreate: IconProps = { data: faRedo };
 export const iconDisable: IconProps = { data: faXmark };
 export const iconOpenLinkInNewTab = { data: faExternalLink };
 export const iconGrip = { data: faGrip };
-export const iconReinstall = { data: faRotateBack };
 export const iconAddPrimaryKeyColumn = iconAddNew;
 export const iconPickPrimaryKeyColumn = { data: faHandPointer };
 export const iconDuplicateRecord: IconProps = {
@@ -280,7 +277,6 @@ export const iconFileWord: IconProps = { data: faFileWord };
 export const iconNotEditable: IconProps = { data: faLock };
 export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
 export const iconYes: IconProps = { data: faCheck };
-export const iconRequiresUpgrade: IconProps = { data: faTriangleExclamation };
 export const iconRequiresAttention: IconProps = { data: faCircleExclamation };
 export const iconPubliclyShared: IconProps = { data: faGlobe };
 

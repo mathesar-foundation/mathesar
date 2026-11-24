@@ -99,7 +99,6 @@
       members:
       - get
       - delete
-      - upgrade_sql
       - DatabaseInfo
 
 ## Database Privileges

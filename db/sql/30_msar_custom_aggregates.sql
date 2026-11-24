@@ -2,8 +2,8 @@
 This script defines all the necessary functions to be used for custom aggregates in general.
 
 Currently, we have the following custom aggregate(s):
-  - msar.peak_time(time): Calculate the 'average time' (interpreted as peak time) for a column.
-  - msar.peak_month(date): Calculate the 'average month' (interpreted as peak month) for a column.
+  - pg_temp.peak_time(time): Calculate the 'average time' (interpreted as peak time) for a column.
+  - pg_temp.peak_month(date): Calculate the 'average month' (interpreted as peak month) for a column.
 
 Refer to the official documentation of PostgreSQL custom aggregates to learn more.
 link: https://www.postgresql.org/docs/current/xaggr.html
@@ -13,10 +13,8 @@ conventions.
 */
 
 
-CREATE SCHEMA IF NOT EXISTS msar;
-
 CREATE OR REPLACE FUNCTION 
-msar.time_to_degrees(time_ TIME) RETURNS DOUBLE PRECISION AS $$/*
+pg_temp.time_to_degrees(time_ TIME) RETURNS DOUBLE PRECISION AS $$/*
 Convert the given time to degrees (on a 24 hour clock, indexed from midnight).
 
 To get the fraction of 86400 seconds passed, we divide time_ by 86400 and then 
@@ -34,7 +32,7 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.degrees_to_time(degrees DOUBLE PRECISION) RETURNS TIME AS $$/*
+pg_temp.degrees_to_time(degrees DOUBLE PRECISION) RETURNS TIME AS $$/*
 Convert given degrees to time (on a 24 hour clock, indexed from midnight).
 
 Steps:
@@ -53,14 +51,14 @@ Examples:
   540 => 12:00:00
   -90 => 18:00:00
 
-Inverse of msar.time_to_degrees.
+Inverse of pg_temp.time_to_degrees.
 */
 SELECT MAKE_INTERVAL(secs => ((degrees::numeric % 360 + 360) % 360)::double precision * 240)::time;
 $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.add_time_to_vector(point_ point, time_ TIME) RETURNS point as $$/*
+pg_temp.add_time_to_vector(point_ point, time_ TIME) RETURNS point as $$/*
 Add the given time, converted to a vector on unit circle, to the vector given in first argument.
 
 We add a time to a point by
@@ -74,13 +72,13 @@ Args:
 Returns:
   point that stores the resultant vector after the addition.
 */
-WITH t(degrees) AS (SELECT msar.time_to_degrees(time_))
+WITH t(degrees) AS (SELECT pg_temp.time_to_degrees(time_))
 SELECT point_ + point(sind(degrees), cosd(degrees)) FROM t;
 $$ LANGUAGE SQL STRICT;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.point_to_time(point_ point) RETURNS TIME AS $$/*
+pg_temp.point_to_time(point_ point) RETURNS TIME AS $$/*
 Convert a point to degrees and then to time.
 
 Point is converted to time by:
@@ -104,13 +102,13 @@ SELECT CASE
   a certain epsilon. (Epsilon here is 1e-10)
   */
   WHEN point_ <-> point(0,0) < 1e-10 THEN NULL
-  ELSE msar.degrees_to_time(atan2d(point_[0],point_[1]))
+  ELSE pg_temp.degrees_to_time(atan2d(point_[0],point_[1]))
 END;
 $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE AGGREGATE
-msar.peak_time (TIME)/*
+pg_temp.peak_time (TIME)/*
 Takes a column of type time and calculates the peak time.
 
 State value:
@@ -128,15 +126,15 @@ Refer to the following PR to learn more.
 Link: https://github.com/centerofci/mathesar/pull/2981
 */
 (
-  sfunc = msar.add_time_to_vector,
+  sfunc = pg_temp.add_time_to_vector,
   stype = point,
-  finalfunc = msar.point_to_time,
+  finalfunc = pg_temp.point_to_time,
   initcond = '(0,0)'
 );
 
 
 CREATE OR REPLACE FUNCTION 
-msar.month_to_degrees(date_ DATE) returns DOUBLE PRECISION AS $$/*
+pg_temp.month_to_degrees(date_ DATE) returns DOUBLE PRECISION AS $$/*
 Convert discrete month to degrees.
 
 To get the fraction of 12 months passed, we extract the month from date, subtract 1 from 
@@ -154,7 +152,7 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.degrees_to_month(degrees DOUBLE PRECISION) RETURNS INT AS $$/*
+pg_temp.degrees_to_month(degrees DOUBLE PRECISION) RETURNS INT AS $$/*
 Convert degrees to discrete month.
 
 To get the fraction of 360°, we divide degrees value by 360 and then to get the equivalent 
@@ -172,7 +170,7 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.add_month_to_vector(point_ point, date_ DATE) RETURNS point as $$/*
+pg_temp.add_month_to_vector(point_ point, date_ DATE) RETURNS point as $$/*
 Add the month, converted to a vector on unit circle, to the vector in the first argument.
 
 We add a date to a point by
@@ -187,13 +185,13 @@ Args:
 Returns:
   point that stores the resultant vector after the addition.
 */
-WITH t(degrees) AS (SELECT msar.month_to_degrees(date_))
+WITH t(degrees) AS (SELECT pg_temp.month_to_degrees(date_))
 SELECT point_ + point(sind(degrees), cosd(degrees)) FROM t;
 $$ LANGUAGE SQL STRICT;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.point_to_month(point_ point) RETURNS int AS $$/*
+pg_temp.point_to_month(point_ point) RETURNS int AS $$/*
 Convert a point to degrees and then to discrete month.
 
 Point is converted to month by:
@@ -217,13 +215,13 @@ SELECT CASE
   a certain epsilon. (Epsilon here is 1e-10)
   */
   WHEN point_ <-> point(0,0) < 1e-10 THEN NULL
-  ELSE msar.degrees_to_month(atan2d(point_[0],point_[1]))
+  ELSE pg_temp.degrees_to_month(atan2d(point_[0],point_[1]))
 END;
 $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE AGGREGATE 
-msar.peak_month (DATE)/*
+pg_temp.peak_month (DATE)/*
 Takes a column of type date and calculates the peak month.
 
 State value:
@@ -242,8 +240,8 @@ Refer to the following PR to learn more.
 Link: https://github.com/centerofci/mathesar/pull/3006
 */
 (
-  sfunc = msar.add_month_to_vector,
+  sfunc = pg_temp.add_month_to_vector,
   stype = point,
-  finalfunc = msar.point_to_month,
+  finalfunc = pg_temp.point_to_month,
   initcond = '(0,0)'
 );

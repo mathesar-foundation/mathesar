@@ -29,7 +29,7 @@ whether to travel from referrer to referent (when False) or from referent to ref
 */
 
 
-CREATE TYPE msar.joinable_tables AS (
+CREATE TYPE pg_temp.joinable_tables AS (
   base bigint, -- The OID of the table from which the paths start
   target bigint, -- The OID of the table where the paths end
   join_path jsonb, -- A JSONB array of arrays of arrays
@@ -40,8 +40,8 @@ CREATE TYPE msar.joinable_tables AS (
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_joinable_tables(max_depth integer) RETURNS SETOF msar.joinable_tables AS $$/*
-This function returns a table of msar.joinable_tables objects, giving paths to various
+pg_temp.get_joinable_tables(max_depth integer) RETURNS SETOF pg_temp.joinable_tables AS $$/*
+This function returns a table of pg_temp.joinable_tables objects, giving paths to various
 joinable tables.
 
 Args:
@@ -131,19 +131,19 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_joinable_tables(max_depth integer, table_id oid) RETURNS
+pg_temp.get_joinable_tables(max_depth integer, table_id oid) RETURNS
 jsonb AS $$
   WITH jt_cte AS (
-    SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id
+    SELECT * FROM pg_temp.get_joinable_tables(max_depth) WHERE base=table_id
   ), target_cte AS (
     SELECT pga.attrelid AS tt_oid, 
       jsonb_build_object(
-        'name', msar.get_relation_name(pga.attrelid),
+        'name', pg_temp.get_relation_name(pga.attrelid),
         'columns', jsonb_object_agg(
             pga.attnum, jsonb_build_object(
               'name', pga.attname,
               'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
-              'primary_key', msar.is_pkey_col(pga.attrelid, pga.attnum)
+              'primary_key', pg_temp.is_pkey_col(pga.attrelid, pga.attnum)
             )
           )
       ) AS tt_info

@@ -26,6 +26,19 @@ services:
     container_name: mathesar_dev_db
     extends:
       service: dev-db-base
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - NETEM_DELAY=${NETEM_DELAY-}
+    entrypoint:
+      - bash
+      - -c
+      - |
+        if [ -n "${NETEM_DELAY:-}" ]; then
+          command -v tc &>/dev/null || apt-get update -qq && apt-get install -y -qq iproute2;
+          tc qdisc replace dev eth0 root netem delay "${NETEM_DELAY}ms";
+        fi;
+        exec /usr/local/bin/docker-entrypoint.sh "$$@"
     ports:
       - "5432:5432"
     volumes:

@@ -1,4 +1,4 @@
-CREATE TYPE msar.type_compat_details AS (
+CREATE TYPE pg_temp.type_compat_details AS (
   type_compatible boolean,
   mathesar_casting boolean,
   group_sep "char",
@@ -10,11 +10,11 @@ CREATE TYPE msar.type_compat_details AS (
 );
 
 CREATE OR REPLACE FUNCTION
-msar.find_numeric_separators(
+pg_temp.find_numeric_separators(
   tab_id regclass,
   col_id smallint,
   test_perc numeric,
-  OUT compat_details msar.type_compat_details
+  OUT compat_details pg_temp.type_compat_details
 ) AS $$/*
 Given a table column, find group and decimal separators for number values in the column.
 
@@ -27,14 +27,14 @@ BEGIN
 EXECUTE format(
   $q$
   WITH numarr_cte AS (
-    SELECT msar.get_numeric_array(%1$I) AS n FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L)
+    SELECT pg_temp.get_numeric_array(%1$I) AS n FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L)
   )
   SELECT array_remove(array_agg(DISTINCT n[2]), null), array_remove(array_agg(DISTINCT n[3]),  null)
   FROM numarr_cte;
   $q$,
-  msar.get_column_name(tab_id, col_id),
-  msar.get_relation_schema_name(tab_id),
-  msar.get_relation_name(tab_id),
+  pg_temp.get_column_name(tab_id, col_id),
+  pg_temp.get_relation_schema_name(tab_id),
+  pg_temp.get_relation_name(tab_id),
   test_perc
 ) INTO group_sep, decimal_p;
 IF array_length(group_sep, 1) > 1 THEN RAISE EXCEPTION 'Too many grouping separators found!';
@@ -48,11 +48,11 @@ $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.find_mathesar_money_attrs(
+pg_temp.find_mathesar_money_attrs(
   tab_id regclass,
   col_id smallint,
   test_perc numeric,
-  OUT compat_details msar.type_compat_details
+  OUT compat_details pg_temp.type_compat_details
 ) AS $$/*
 Given a table column, find group separators, decimal separators, currency prefixes & currency suffixes
 for money values in the column.
@@ -68,7 +68,7 @@ BEGIN
 EXECUTE format(
   $q$
   WITH moneyarr_cte AS (
-    SELECT msar.get_mathesar_money_array(%1$I) AS n FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L)
+    SELECT pg_temp.get_mathesar_money_array(%1$I) AS n FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L)
   )
   SELECT
     array_remove(array_agg(DISTINCT n[2]), null),
@@ -77,9 +77,9 @@ EXECUTE format(
     array_remove(array_agg(DISTINCT n[5]), null)
   FROM moneyarr_cte;
   $q$,
-  /* %1 */ msar.get_column_name(tab_id, col_id),
-  /* %2 */ msar.get_relation_schema_name(tab_id),
-  /* %3 */ msar.get_relation_name(tab_id),
+  /* %1 */ pg_temp.get_column_name(tab_id, col_id),
+  /* %2 */ pg_temp.get_relation_schema_name(tab_id),
+  /* %3 */ pg_temp.get_relation_name(tab_id),
   /* %4 */ test_perc
 ) INTO group_sep, decimal_p, curr_pref, curr_suff;
 IF array_length(group_sep, 1) > 1 THEN RAISE EXCEPTION 'Too many grouping separators found!';
@@ -97,17 +97,17 @@ $$ LANGUAGE plpgsql PARALLEL SAFE STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.downsize_table_sample(test_perc numeric) RETURNS numeric AS $$
+pg_temp.downsize_table_sample(test_perc numeric) RETURNS numeric AS $$
   SELECT (test_perc / 100) ^ 2 * 100;
 $$ LANGUAGE SQL PARALLEL SAFE IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.check_column_numeric_compat(
+pg_temp.check_column_numeric_compat(
   tab_id regclass,
   col_id smallint,
   test_perc numeric,
-  OUT compat_details msar.type_compat_details
+  OUT compat_details pg_temp.type_compat_details
 ) AS $$/*
 Determine whether we can cast the given column to numeric.
 
@@ -120,14 +120,14 @@ Returns:
   Information about how to successfully cast the column to numeric.
 */
 BEGIN
-  compat_details = msar.find_numeric_separators(
-    tab_id, col_id, msar.downsize_table_sample(test_perc)
+  compat_details = pg_temp.find_numeric_separators(
+    tab_id, col_id, pg_temp.downsize_table_sample(test_perc)
   );
   EXECUTE format(
-    'SELECT msar.cast_to_numeric(%1$I, %5$L, %6$L) FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
-    msar.get_column_name(tab_id, col_id),
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
+    'SELECT pg_temp.cast_to_numeric(%1$I, %5$L, %6$L) FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
+    pg_temp.get_column_name(tab_id, col_id),
+    pg_temp.get_relation_schema_name(tab_id),
+    pg_temp.get_relation_name(tab_id),
     test_perc,
     compat_details.group_sep,
     compat_details.decimal_p
@@ -139,11 +139,11 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.check_column_mathesar_money_compat(
+pg_temp.check_column_mathesar_money_compat(
   tab_id regclass,
   col_id smallint,
   test_perc numeric,
-  OUT compat_details msar.type_compat_details
+  OUT compat_details pg_temp.type_compat_details
 ) AS $$/*
 Determine whether we can cast the given column to mathesar_money.
 
@@ -156,14 +156,14 @@ Returns:
   Information about how to successfully cast the column to mathesar_money.
 */
 BEGIN
-  compat_details = msar.find_mathesar_money_attrs(
-    tab_id, col_id, msar.downsize_table_sample(test_perc)
+  compat_details = pg_temp.find_mathesar_money_attrs(
+    tab_id, col_id, pg_temp.downsize_table_sample(test_perc)
   );
   EXECUTE format(
-    'SELECT msar.cast_to_mathesar_money(%1$I, %5$L, %6$L, %7$L, %8$L) FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
-    /* %1 */ msar.get_column_name(tab_id, col_id),
-    /* %2 */ msar.get_relation_schema_name(tab_id),
-    /* %3 */ msar.get_relation_name(tab_id),
+    'SELECT pg_temp.cast_to_mathesar_money(%1$I, %5$L, %6$L, %7$L, %8$L) FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
+    /* %1 */ pg_temp.get_column_name(tab_id, col_id),
+    /* %2 */ pg_temp.get_relation_schema_name(tab_id),
+    /* %3 */ pg_temp.get_relation_name(tab_id),
     /* %4 */ test_perc,
     /* %5 */ compat_details.group_sep,
     /* %6 */ compat_details.decimal_p,
@@ -177,12 +177,12 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.check_column_type_compat(
+pg_temp.check_column_type_compat(
   tab_id regclass,
   col_id smallint,
   typ_id regtype,
   test_perc numeric,
-  OUT compat_details msar.type_compat_details
+  OUT compat_details pg_temp.type_compat_details
 ) AS $$/*
 Get info about the compatibility of a given type for a given column.
 
@@ -198,15 +198,15 @@ Returns:
 BEGIN
   CASE typ_id
     WHEN 'numeric'::regtype THEN
-      compat_details = msar.check_column_numeric_compat(tab_id, col_id, test_perc);
-    WHEN 'mathesar_types.mathesar_money'::regtype THEN
-      compat_details = msar.check_column_mathesar_money_compat(tab_id, col_id, test_perc);
+      compat_details = pg_temp.check_column_numeric_compat(tab_id, col_id, test_perc);
+    WHEN to_regtype('mathesar_types.mathesar_money') THEN
+      compat_details = pg_temp.check_column_mathesar_money_compat(tab_id, col_id, test_perc);
     ELSE
       EXECUTE format(
         'SELECT %1$s FROM %2$I.%3$I TABLESAMPLE SYSTEM(%4$L);',
-        msar.build_cast_expr(tab_id, col_id, typ_id),
-        msar.get_relation_schema_name(tab_id),
-        msar.get_relation_name(tab_id),
+        pg_temp.build_cast_expr(tab_id, col_id, typ_id),
+        pg_temp.get_relation_schema_name(tab_id),
+        pg_temp.get_relation_name(tab_id),
         test_perc
       );
       compat_details.mathesar_casting = true;
@@ -217,7 +217,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.infer_column_data_type(
+pg_temp.infer_column_data_type(
   tab_id regclass, col_id smallint, test_perc numeric DEFAULT 100
 ) RETURNS jsonb AS $$/*
 Infer the best type for a given column.
@@ -232,7 +232,7 @@ Args:
 DECLARE
   inferred_type regtype;
   inferred_type_details jsonb;
-  test_type_details msar.type_compat_details;
+  test_type_details pg_temp.type_compat_details;
   infer_sequence_raw text[] := ARRAY[
     'boolean',
     'date',
@@ -257,9 +257,9 @@ BEGIN
     FROM unnest(infer_sequence_raw) AS x(t);
   EXECUTE format(
     'SELECT EXISTS (SELECT 1 FROM %1$I.%2$I WHERE %3$I IS NOT NULL)',
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
-    msar.get_column_name(tab_id, col_id)
+    pg_temp.get_relation_schema_name(tab_id),
+    pg_temp.get_relation_name(tab_id),
+    pg_temp.get_column_name(tab_id, col_id)
   ) INTO column_nonempty;
   inferred_type := atttypid FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
   IF inferred_type <> 'text'::regtype OR NOT column_nonempty THEN
@@ -267,7 +267,7 @@ BEGIN
   END IF;
   FOREACH test_type IN ARRAY infer_sequence
     LOOP
-      test_type_details := msar.check_column_type_compat(tab_id, col_id, test_type, test_perc);
+      test_type_details := pg_temp.check_column_type_compat(tab_id, col_id, test_type, test_perc);
       IF test_type_details.type_compatible THEN
         inferred_type := test_type;
         inferred_type_details := to_jsonb(test_type_details) - 'type_compatible';
@@ -282,7 +282,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.infer_table_column_data_types(tab_id regclass) RETURNS jsonb AS $$/*
+pg_temp.infer_table_column_data_types(tab_id regclass) RETURNS jsonb AS $$/*
 Infer the best type for each column in the table.
 
 Currently we only suggest different types for columns which originate as type `text`.
@@ -312,11 +312,11 @@ BEGIN
 EXECUTE(
   format(
     'SELECT GREATEST(LEAST(10000 / (COUNT(1) + 1), 100), 5) FROM %1$I.%2$I TABLESAMPLE SYSTEM(1)',
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id)
+    pg_temp.get_relation_schema_name(tab_id),
+    pg_temp.get_relation_name(tab_id)
   )
 ) INTO test_perc;
-RETURN jsonb_object_agg(attnum, msar.infer_column_data_type(attrelid, attnum, test_perc))
+RETURN jsonb_object_agg(attnum, pg_temp.infer_column_data_type(attrelid, attnum, test_perc))
 FROM pg_catalog.pg_attribute
 WHERE
   attrelid = tab_id

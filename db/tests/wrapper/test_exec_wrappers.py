@@ -5,6 +5,7 @@ from psycopg import sql
 import pytest
 
 from db.deprecated.utils import engine_to_psycopg_conn
+from db.sql.install import get_jit_functions_sql
 
 
 @pytest.fixture(scope="session")
@@ -17,25 +18,19 @@ def psycopg_connection(engine):
 
 @pytest.fixture(scope="session")
 def get_msar_func_names(psycopg_connection):
-    """
-    Returns a map of all installed msar function names along with the number of input arguments that can be passed to them.
-    The map has the following form:
-    {
-        'name_of_sql_func_on_db': [count_of_args_it_can_take_as_input(s)],
-        [...]
-    }
-    """
     query = sql.SQL(
         """
-        WITH cte AS (
-        SELECT proname AS name, jsonb_agg(pronargs) AS args
-        FROM pg_proc WHERE pronamespace = 'msar'::regnamespace
-        GROUP BY proname
-        ) SELECT jsonb_object_agg(cte.name, cte.args) FROM cte;
+        SELECT jsonb_object_agg(cte.name, cte.args) FROM (
+            SELECT proname AS name, jsonb_agg(pronargs) AS args
+            FROM pg_proc
+            WHERE pronamespace = pg_my_temp_schema()
+            GROUP BY proname
+        ) cte;
         """
     )
     msar_func_args_count_map = {}
     with psycopg_connection as conn:
+        conn.execute(get_jit_functions_sql())
         msar_func_args_count_map = conn.execute(query).fetchone()[0]
     return msar_func_args_count_map
 

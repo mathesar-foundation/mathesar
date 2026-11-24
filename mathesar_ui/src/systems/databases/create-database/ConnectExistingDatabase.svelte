@@ -28,6 +28,7 @@
   import {
     type InstallationSchema,
     getSampleSchemasFromInstallationSchemas,
+    shouldInstallTypes,
   } from './createDatabaseUtils';
   import InstallationSchemaSelector from './InstallationSchemaSelector.svelte';
 
@@ -41,7 +42,9 @@
   const role = requiredField('');
   const password = optionalField('');
   const sslmode = requiredField<SslMode>('prefer');
-  const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
+  const installationSchemas = optionalField<InstallationSchema[]>([
+    'mathesar_types',
+  ]);
   const form = makeForm({
     databaseName,
     nickname,
@@ -64,6 +67,7 @@
       sslmode: $sslmode,
       sample_data:
         getSampleSchemasFromInstallationSchemas($installationSchemas),
+      install_types: shouldInstallTypes($installationSchemas),
     });
     onSuccess(newDatabase);
   }

@@ -131,7 +131,7 @@ def add_pkey_column_to_table(
     """
     Add a primary key column to a table.
 
-    See the `msar.add_pkey_column` function for info on the arguments.
+    See the `pg_temp.add_pkey_column` function for info on the arguments.
     """
     return db_conn.exec_msar_func(
         conn, 'add_pkey_column',
