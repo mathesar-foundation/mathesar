@@ -15,13 +15,12 @@ import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelec
 import type { ImperativeFilterController } from '@mathesar/pages/table/ImperativeFilterController';
 import { type TabularData, isJoinedColumn } from '@mathesar/stores/table-data';
 import type RecordStore from '@mathesar/systems/record-view/RecordStore';
+import { getRowActions } from '@mathesar/systems/table-view/row-actions/getRowActions';
 import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
 import { match } from '@mathesar/utils/patternMatching';
 
 import { copyCells } from './entries/copyCells';
 import { deleteColumn } from './entries/deleteColumn';
-import { deleteRecords } from './entries/deleteRecords';
-import { duplicateRecord } from './entries/duplicateRecord';
 import { modifyFilters } from './entries/modifyFilters';
 import { modifyGrouping } from './entries/modifyGrouping';
 import {
@@ -35,7 +34,6 @@ import { pasteCells } from './entries/pasteCells';
 import { selectCellRange } from './entries/selectCellRange';
 import { setNull } from './entries/setNull';
 import { viewLinkedRecord } from './entries/viewLinkedRecord';
-import { viewRowRecord } from './entries/viewRowRecord';
 
 export function openTableCellContextMenu({
   targetCell,
@@ -58,25 +56,8 @@ export function openTableCellContextMenu({
 }): 'opened' | 'empty' {
   const { selection } = tabularData;
 
-  function* getEntriesForMultipleRows(rowIds: string[]) {
-    yield* deleteRecords({ tabularData, rowIds });
-  }
-
-  function* getEntriesForOneRow(rowId: string) {
-    const recordId = tabularData.getRecordIdFromRowId(rowId);
-    yield* viewRowRecord({ tabularData, recordId, modalRecordView });
-    yield* duplicateRecord({ tabularData, rowId });
-
-    yield* getEntriesForMultipleRows([rowId]);
-  }
-
   function* getEntriesForArbitraryRows(rowIds: Iterable<string>) {
-    const soleRowId = takeFirstAndOnly(rowIds);
-    if (soleRowId) {
-      yield* getEntriesForOneRow(soleRowId);
-    } else {
-      yield* getEntriesForMultipleRows([...rowIds]);
-    }
+    yield* getRowActions({ rowIds, tabularData, modalRecordView });
   }
 
   function* getEntriesForOneColumn(columnId: string) {
