@@ -65,6 +65,7 @@ class Database(BaseModel):
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='databases'
     )
+    postgresql_version = models.IntegerField(null=True)
     last_confirmed_sql_version = models.CharField(default='0.0.0')
 
     class Meta:
@@ -92,16 +93,22 @@ class Database(BaseModel):
     def needs_upgrade_attention(self):
         return self.last_confirmed_sql_version != __version__
 
+    def update_postgresql_version(self, conn):
+        self.postgresql_version = conn.info.server_version
+        self.save(update_fields=['postgresql_version'])
+
     def install_sql(self, username=None, password=None):
         if username is not None:
             with self.connect_manually(username, password) as conn:
+                self.update_postgresql_version(conn)
                 install(conn)
         else:
             with self.connect_admin() as conn:
+                self.update_postgresql_version(conn)
                 install(conn)
 
         self.last_confirmed_sql_version = __version__
-        self.save()
+        self.save(update_fields=['last_confirmed_sql_version'])
 
     def uninstall_sql(
             self,
