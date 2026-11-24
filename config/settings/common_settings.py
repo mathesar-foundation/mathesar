@@ -186,10 +186,8 @@ if POSTGRES_DB and POSTGRES_USER and POSTGRES_HOST:
         role=POSTGRES_USER,
         password=POSTGRES_PASSWORD,
         sslmode=POSTGRES_SSLMODE,
+        options={"application_name": "Mathesar Django"},
     ).to_django_dict()
-    DATABASES['default']['OPTIONS'] = {
-        "application_name": "Mathesar Django"
-    }
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg' for all db(s)
