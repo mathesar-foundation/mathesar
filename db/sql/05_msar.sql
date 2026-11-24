@@ -722,6 +722,20 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_pk_columns(rel_id oid) RETURNS smallint[] AS $$/*
+Return all column attnums in the primary key of a given relation (e.g., table).
+
+Args:
+  rel_id: The OID of the relation.
+*/
+SELECT conkey
+FROM pg_catalog.pg_constraint
+WHERE contype='p'
+AND conrelid=rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_column_type(rel_id oid, col_id smallint) RETURNS text AS $$/*
 Return the type of a given column in a relation.
 
@@ -4432,6 +4446,59 @@ SELECT 'WHERE ' || msar.build_expr(rel_id, tree);
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.build_pk_filter_expr(tab_id oid, rec_id jsonb) RETURNS jsonb AS $$/*
+Build a filter expression matching a record by every column in its primary key.
+
+Args:
+  tab_id: The OID of the table whose record we'll filter.
+  rec_id: A JSON object keyed by primary-key attnum.
+*/
+DECLARE
+  pk_columns smallint[];
+  pk_attnum smallint;
+  filter_expr jsonb;
+  predicate jsonb;
+BEGIN
+  IF jsonb_typeof(rec_id) IS DISTINCT FROM 'object' THEN
+    RAISE EXCEPTION 'Record identifier must be a JSON object keyed by primary-key attnums';
+  END IF;
+
+  SELECT msar.get_pk_columns(tab_id) INTO pk_columns;
+  IF pk_columns IS NULL OR array_length(pk_columns, 1) IS NULL THEN
+    RAISE EXCEPTION 'Table % has no primary key', tab_id::regclass;
+  END IF;
+
+  FOREACH pk_attnum IN ARRAY pk_columns LOOP
+    IF NOT rec_id ? (pk_attnum::text) THEN
+      RAISE EXCEPTION 'Record identifier is missing primary key column %', pk_attnum;
+    END IF;
+    IF rec_id -> (pk_attnum::text) = 'null'::jsonb THEN
+      RAISE EXCEPTION 'Record identifier has null primary key column %', pk_attnum;
+    END IF;
+
+    predicate := jsonb_build_object(
+      'type', 'equal',
+      'args', jsonb_build_array(
+        jsonb_build_object('type', 'attnum', 'value', pk_attnum),
+        jsonb_build_object('type', 'literal', 'value', rec_id -> (pk_attnum::text))
+      )
+    );
+
+    filter_expr := CASE WHEN filter_expr IS NULL THEN
+      predicate
+    ELSE
+      jsonb_build_object(
+        'type', 'and',
+        'args', jsonb_build_array(filter_expr, predicate)
+      )
+    END;
+  END LOOP;
+
+  RETURN filter_expr;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
 CREATE OR REPLACE FUNCTION
 msar.sanitize_direction(direction text) RETURNS text AS $$/*
 */
@@ -5636,6 +5703,39 @@ SELECT msar.list_records_from_table(
 $$ LANGUAGE SQL STABLE;
 
 
+CREATE OR REPLACE FUNCTION msar.get_record_from_table_by_pk(
+  tab_id oid,
+  rec_id jsonb,
+  joined_columns jsonb DEFAULT NULL,
+  return_record_summaries boolean DEFAULT false,
+  table_record_summary_templates jsonb DEFAULT NULL
+) RETURNS jsonb AS $$/*
+Get single record from a table by its full primary key. Only columns to which the user has
+access are returned.
+
+Args:
+  tab_id: The OID of the table whose record we'll get.
+  rec_id: A JSON object keyed by primary-key attnum.
+  joined_columns: (optional) A jsonb list defining columns joined via a simple many-to-many
+    linkage. See msar.get_joined_columns_expr_json for more details.
+  return_record_summaries : Whether to return a summary for the record listed.
+  table_record_summary_templates: A JSON object that maps table OIDs to record summary
+    templates.
+*/
+SELECT msar.list_records_from_table(
+  tab_id,
+  null,
+  null,
+  null,
+  msar.build_pk_filter_expr(tab_id, rec_id),
+  null,
+  joined_columns,
+  return_record_summaries,
+  table_record_summary_templates
+)
+$$ LANGUAGE SQL STABLE;
+
+
 CREATE OR REPLACE FUNCTION
   msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS jsonb AS $$/*
 Delete records from table by id.
@@ -5702,6 +5802,35 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_pk_json_returning_expr(tab_id oid) RETURNS text AS $$/*
+Build a RETURNING expression that captures a full primary-key identity as JSONB.
+
+Args:
+  tab_id: The OID of the table whose primary key we'll return.
+*/
+DECLARE
+  pk_columns smallint[];
+  pk_attnum smallint;
+  expr_parts text[] := ARRAY[]::text[];
+BEGIN
+  SELECT msar.get_pk_columns(tab_id) INTO pk_columns;
+  IF pk_columns IS NULL OR array_length(pk_columns, 1) IS NULL THEN
+    RAISE EXCEPTION 'Table % has no primary key', tab_id::regclass;
+  END IF;
+
+  FOREACH pk_attnum IN ARRAY pk_columns LOOP
+    expr_parts := array_append(
+      expr_parts,
+      format('%L, %I', pk_attnum::text, msar.get_column_name(tab_id, pk_attnum))
+    );
+  END LOOP;
+
+  RETURN format('jsonb_build_object(%s)', array_to_string(expr_parts, ', '));
+END;
+$$ LANGUAGE plpgsql STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.add_record_to_table(
   tab_id oid,
   rec_def jsonb,
@@ -5720,19 +5849,22 @@ insert.
 
 */
 DECLARE
-  rec_created_id text;
+  rec_created_id jsonb;
   rec_created jsonb;
 BEGIN
   EXECUTE format(
     $q$
-    WITH insert_cte AS (%1$s RETURNING %2$I)
-    SELECT *
+    WITH insert_cte AS (
+      %1$s
+      RETURNING %2$s AS rec_created_id
+    )
+    SELECT rec_created_id
     FROM insert_cte
     $q$,
     /* %1 */ msar.build_single_insert_expr(tab_id, rec_def),
-    /* %2 */ msar.get_column_name(tab_id, msar.get_pk_column(tab_id))
+    /* %2 */ msar.build_pk_json_returning_expr(tab_id)
   ) INTO rec_created_id;
-  rec_created := msar.get_record_from_table(
+  rec_created := msar.get_record_from_table_by_pk(
     tab_id,
     rec_created_id,
     null,
@@ -5803,6 +5935,53 @@ BEGIN
     RAISE EXCEPTION 'No rows updated';
   END IF;
   rec_modified := msar.get_record_from_table(
+    tab_id,
+    rec_id,
+    null,
+    return_record_summaries,
+    table_record_summary_templates
+  );
+  RETURN jsonb_build_object(
+    'results', rec_modified -> 'results',
+    'record_summaries', rec_modified -> 'record_summaries',
+    'linked_record_summaries', rec_modified -> 'linked_record_summaries'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.patch_record_in_table_by_pk(
+  tab_id oid,
+  rec_id jsonb,
+  rec_def jsonb,
+  return_record_summaries boolean DEFAULT false,
+  table_record_summary_templates jsonb DEFAULT NULL
+) RETURNS jsonb AS $$/*
+Modify (update/patch) a record in a table by its full primary key.
+
+Args:
+  tab_id: The OID of the table whose record we'll modify.
+  rec_id: A JSON object keyed by primary-key attnum.
+  rec_def: A JSON object defining the parts of the record to patch.
+
+The `rec_def` object's form is defined by the record being updated. It should have keys
+corresponding to the attnums of desired columns and values corresponding to values we should set.
+*/
+DECLARE
+  rec_modified jsonb;
+  num_updated bigint;
+BEGIN
+  EXECUTE format(
+    $p$ %1$s %2$s $p$,
+    msar.build_update_expr(tab_id, rec_def),
+    msar.build_where_clause(tab_id, msar.build_pk_filter_expr(tab_id, rec_id))
+  );
+  GET DIAGNOSTICS num_updated = ROW_COUNT;
+  IF num_updated = 0 THEN
+    RAISE EXCEPTION 'No rows updated';
+  END IF;
+  rec_modified := msar.get_record_from_table_by_pk(
     tab_id,
     rec_id,
     null,

@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 from unittest.mock import MagicMock
 
+from db import connection
 from mathesar.rpc import records
 from mathesar.models.users import User
 
@@ -113,6 +114,60 @@ def test_records_get(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[6] == json.dumps({})  # table_record_summary_templates
 
 
+def test_records_get_composite_primary_key(rf, monkeypatch, mocked_exec_msar_func):
+    username = 'alice'
+    password = 'pass1234'
+    table_oid = 23457
+    database_id = 2
+    record_id = {"1": 3, "2": 103, "3": "2024-01-17"}
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=username, password=password)
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    monkeypatch.setattr(records, 'connect', mock_connect)
+    expect_record = {
+        "count": 1,
+        "results": [{"1": 3, "2": 103, "3": "2024-01-17", "4": 320.6}],
+        "grouping": None,
+        "linked_record_summaries": None,
+        "joined_record_summaries": None,
+        "record_summaries": None,
+    }
+    mocked_exec_msar_func_with_param_types = MagicMock()
+    mocked_exec_msar_func_with_param_types.return_value = mocked_exec_msar_func_with_param_types
+    mocked_exec_msar_func_with_param_types.fetchone.return_value = [expect_record]
+    monkeypatch.setattr(
+        connection,
+        'exec_msar_func_with_param_types',
+        mocked_exec_msar_func_with_param_types
+    )
+    actual_record = records.get(
+        record_id=record_id,
+        table_oid=table_oid,
+        database_id=database_id,
+        return_record_summaries=True,
+        request=request
+    )
+    call_args = mocked_exec_msar_func_with_param_types.call_args_list[0][0]
+    assert actual_record == expect_record
+    assert call_args[1] == 'get_record_from_table_by_pk'
+    assert call_args[2] == ['oid', 'jsonb', 'jsonb', None, 'jsonb']
+    assert call_args[3] == table_oid
+    assert call_args[4] == json.dumps(record_id)
+    assert call_args[5] is None  # joined_columns
+    assert call_args[6] is True  # return_record_summaries
+    assert call_args[7] == json.dumps({})  # table_record_summary_templates
+
+
 def test_records_add(rf, monkeypatch, mocked_exec_msar_func):
     username = 'alice'
     password = 'pass1234'
@@ -203,6 +258,63 @@ def test_records_patch(rf, monkeypatch, mocked_exec_msar_func):
     assert call_args[4] == json.dumps(record_def)
     assert call_args[5] is True  # return_record_summaries
     assert call_args[6] == json.dumps({})  # table_record_summary_templates
+
+
+def test_records_patch_composite_primary_key(rf, monkeypatch, mocked_exec_msar_func):
+    username = 'alice'
+    password = 'pass1234'
+    record_id = {"1": 3, "2": 103, "3": "2024-01-17"}
+    table_oid = 23457
+    database_id = 2
+    record_def = {"4": "320.6"}
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=username, password=password)
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    monkeypatch.setattr(records, 'connect', mock_connect)
+    mock_table_meta = MagicMock()
+    mock_table_meta.user_tracking_attnum = None
+    monkeypatch.setattr(records, 'get_table_meta_data', lambda *_: mock_table_meta)
+    expect_record = {
+        "results": [{"1": 3, "2": 103, "3": "2024-01-17", **record_def}],
+        "linked_record_summaries": None,
+        "record_summaries": None,
+    }
+    mocked_exec_msar_func_with_param_types = MagicMock()
+    mocked_exec_msar_func_with_param_types.return_value = mocked_exec_msar_func_with_param_types
+    mocked_exec_msar_func_with_param_types.fetchone.return_value = [expect_record]
+    monkeypatch.setattr(
+        connection,
+        'exec_msar_func_with_param_types',
+        mocked_exec_msar_func_with_param_types
+    )
+    actual_record = records.patch(
+        record_def=record_def,
+        record_id=record_id,
+        table_oid=table_oid,
+        database_id=database_id,
+        return_record_summaries=True,
+        table_record_summary_templates=None,
+        request=request
+    )
+    call_args = mocked_exec_msar_func_with_param_types.call_args_list[0][0]
+    assert actual_record == expect_record
+    assert call_args[1] == 'patch_record_in_table_by_pk'
+    assert call_args[2] == ['oid', 'jsonb', 'jsonb', None, 'jsonb']
+    assert call_args[3] == table_oid
+    assert call_args[4] == json.dumps(record_id)
+    assert call_args[5] == json.dumps(record_def)
+    assert call_args[6] is True  # return_record_summaries
+    assert call_args[7] == json.dumps({})  # table_record_summary_templates
 
 
 def test_records_delete(rf, monkeypatch, mocked_exec_msar_func):

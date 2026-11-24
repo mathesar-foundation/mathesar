@@ -18,6 +18,25 @@ def exec_msar_func(conn, func_name, *args):
     )
 
 
+def exec_msar_func_with_param_types(conn, func_name, param_types, *args):
+    """
+    Execute an msar function using explicit PostgreSQL casts for parameters.
+
+    Args:
+        conn: a psycopg connection or cursor
+        func_name: The unqualified msar_function name (danger; not sanitized)
+        param_types: The list of PostgreSQL type names used to cast each parameter.
+        *args: The list of parameters to pass
+    """
+    placeholders = [
+        f"%s::{param_type}" if param_type else "%s"
+        for param_type in param_types
+    ]
+    return conn.execute(
+        f"SELECT msar.{func_name}({','.join(placeholders)})", args
+    )
+
+
 def exec_msar_func_server_cursor(conn, func_name, *args):
     """
     Execute an msar function using a psycopg (3) connection and a server cursor.
