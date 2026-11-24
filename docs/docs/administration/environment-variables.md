@@ -35,7 +35,11 @@ This page contains all available environment variables supported by Mathesar. Se
 
 !!! note "Default values below are from our [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file, used if installing via [Docker Compose](./install-via-docker-compose.md)."
 
-The database specified in this section is used to store Mathesar's internal data. If desired, it can also be [connected to Mathesar's UI](http://localhost:9000/user-guide/databases/#connection) to store user data.
+The database configured using these environment variables is used to store Mathesar's internal metadata.
+
+Additionally, if the [`POSTGRES_USER`](#postgres_user) configured here has the permissions to create new databases,  Mathesar admins are allowed to create new databases within the same database server via the Mathesar UI using **"Connect Database" → "Create a New Database"**.
+
+See also: [Connecting a database](../user-guide/databases.md#connection).
 
 
 ### `POSTGRES_DB`

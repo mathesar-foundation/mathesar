@@ -1,0 +1,266 @@
+#!/usr/bin/env bash
+# Run the test and lint suites that CI runs. Only api-tests and e2e need Docker.
+#
+# Usage: .agents/bin/check [suite ...] [-- extra args for the suite]
+#   With no suite: runs the suites that match the files changed since
+#   origin/develop, using the path rules of .github/workflows/test-and-lint-code.yml.
+#
+# Suites:
+#   python-lint    flake8 and vulture
+#   python-tests   pytest (extra args go to pytest, e.g. `-- -k test_name`)
+#   sql-tests      pgTAP tests in db/sql (extra args go to pg_prove, e.g. `-- -x name`)
+#   sql-registry   every object the SQL files create is listed in the object registry
+#   api-tests      scenario tests in api_tests/ against a Docker stack (skipped without Docker)
+#   frontend       prettier check, eslint, svelte-check, vitest
+#   e2e-lint       prettier check, eslint and tsc for the end-to-end tests in e2e/
+#   e2e            end-to-end tests in e2e/ against the production Docker stack, built from
+#                  the working tree (skipped without Docker; extra args go to playwright,
+#                  e.g. `-- tests/table --grep paste`)
+#   docs           mkdocs build --strict for the user docs in docs/
+#   agents-docs    path and link check for AGENTS.md and .agents/
+#   git            branch name, and no commit names a coding agent as author, committer or co-author
+#   all            every suite above
+set -uo pipefail
+
+# shellcheck source=.agents/bin/_common
+source "$(dirname "${BASH_SOURCE[0]}")/_common"
+load_dev_env
+
+ALL_SUITES=(python-lint python-tests sql-tests sql-registry api-tests frontend e2e-lint e2e docs agents-docs git)
+SKIPPED=75
+suites=()
+extra_args=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --) shift; extra_args=("$@"); break ;;
+    -h|--help) sed -n '2,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    all) suites=("${ALL_SUITES[@]}") ;;
+    *) suites+=("$1") ;;
+  esac
+  shift
+done
+
+BASE_REF="${MATHESAR_BASE_REF:-origin/develop}"
+
+changed_files() {
+  local base
+  base=$(git merge-base HEAD "$BASE_REF")
+  { git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u
+}
+
+suites_for_changed_files() {
+  local files
+  files=$(changed_files)
+  any_match() { grep -qE "$1" <<<"$files"; }
+  local backend_wide=false
+  if any_match '\.(yml|sh)$|^Dockerfile'; then backend_wide=true; fi
+  if $backend_wide || any_match '\.py$|^requirements(-dev)?\.txt$'; then echo python-lint; fi
+  if $backend_wide || any_match '^[^/]+\.py$|^mathesar/|^db/|^config/|^setup/|^requirements(-dev)?\.txt$'; then
+    echo python-tests
+    echo api-tests
+  fi
+  if $backend_wide || any_match '\.sql$'; then echo sql-tests; fi
+  if any_match '^db/sql/.*\.sql$'; then echo sql-registry; fi
+  if any_match '^mathesar_ui/'; then echo frontend; fi
+  if any_match '^e2e/'; then echo e2e-lint; fi
+  if any_match '^mathesar_ui/|^e2e/'; then echo e2e; fi
+  if any_match '^docs/'; then echo docs; fi
+  if any_match '^AGENTS\.md$|^CLAUDE\.md$|^\.agents/'; then echo agents-docs; fi
+  if [ -n "$(git rev-list -n 1 "$BASE_REF..HEAD" 2>/dev/null)" ]; then echo git; fi
+}
+
+python_lint() {
+  .venv/bin/flake8 --extend-exclude .venv,node_modules . || return 1
+  if [ -x .venv/bin/vulture ]; then
+    .venv/bin/vulture . --exclude .venv,node_modules,mathesar/migrations
+  else
+    log "vulture is not installed, skipping it. CI runs it. Re-run .agents/bin/setup to install."
+  fi
+}
+
+# config/tests and setup/tests are outside the testpaths in setup.cfg, so CI never runs them.
+python_tests() {
+  ensure_postgres_running
+  if [ $# -gt 0 ]; then
+    .venv/bin/pytest "$@"
+  else
+    .venv/bin/pytest db mathesar config/tests setup/tests
+  fi
+}
+
+sql_tests() {
+  command -v pg_prove >/dev/null || die "pg_prove not found. Run: .agents/bin/setup --sql-tests"
+  ensure_postgres_running
+  PGHOST="$POSTGRES_HOST" PGPORT="$POSTGRES_PORT" PGPASSWORD="$POSTGRES_PASSWORD" \
+    bash db/sql/run_tests.sh "$@"
+}
+
+# Fails when the SQL files create a function, type or table that is missing from
+# db/sql/00_msar_all_objects_table.sql. Such objects break reinstall, upgrade and disconnect.
+sql_registry() {
+  ensure_postgres_running
+  local scratch_db=mathesar_registry_check unregistered
+  export PGHOST="$POSTGRES_HOST" PGPORT="$POSTGRES_PORT" PGUSER="$POSTGRES_USER" PGPASSWORD="$POSTGRES_PASSWORD"
+  export PGOPTIONS='-c client_min_messages=warning'
+  psql -q -d postgres -c "DROP DATABASE IF EXISTS $scratch_db WITH (FORCE)" -c "CREATE DATABASE $scratch_db" || return 1
+  PGDATABASE=$scratch_db .venv/bin/python -c '
+import psycopg
+from db.sql.install import install
+with psycopg.connect() as conn:
+    install(conn)
+' || return 1
+  psql -q -d "$scratch_db" -f db/sql/00_msar_all_objects_table.sql 2>/dev/null || return 1
+  unregistered=$(psql -At -v ON_ERROR_STOP=1 -d "$scratch_db" <<'SQL'
+WITH installed AS (
+  SELECT 'FUNCTION' AS kind, p.oid::regprocedure::text AS name
+  FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname IN ('msar', '__msar', 'mathesar_types') AND p.prokind = 'f'
+  UNION ALL
+  SELECT 'AGGREGATE', p.oid::regprocedure::text
+  FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname IN ('msar', '__msar', 'mathesar_types') AND p.prokind = 'a'
+  UNION ALL
+  SELECT 'TYPE', t.oid::regtype::text
+  FROM pg_catalog.pg_type t
+    JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+  WHERE n.nspname IN ('msar', '__msar', 'mathesar_types') AND t.typtype IN ('c', 'd', 'e')
+  UNION ALL
+  SELECT 'TABLE', c.oid::regclass::text
+  FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname IN ('msar', '__msar') AND c.relkind = 'r'
+)
+SELECT kind || ' ' || name FROM installed
+WHERE (kind, name) NOT IN (SELECT obj_kind, obj_name FROM msar.all_mathesar_objects)
+ORDER BY 1;
+SQL
+  )
+  local query_status=$?
+  psql -q -d postgres -c "DROP DATABASE IF EXISTS $scratch_db WITH (FORCE)"
+  if [ "$query_status" -ne 0 ]; then
+    echo "The registry query failed, so nothing was checked." >&2
+    return 1
+  fi
+  if [ -n "$unregistered" ]; then
+    printf 'Not registered in db/sql/00_msar_all_objects_table.sql:\n%s\n' "$unregistered" >&2
+    return 1
+  fi
+}
+
+# Scenario tests over HTTP against the stack in docker-compose.test.yml. The two
+# images that install packages are built here, under the names compose expects,
+# so that the build also works behind a proxy that re-signs TLS.
+api_tests() {
+  if ! docker_is_available; then
+    log "Docker is not available, cannot run api-tests. CI runs them."
+    return "$SKIPPED"
+  fi
+  ensure_docker_running
+  prepare_docker_build
+  local project=mathesar-api-tests context_tar="$RUN_DIR/api-tests-context.tar"
+  mkdir -p "$RUN_DIR"
+  write_build_context "$context_tar"
+  docker build -q "${DOCKER_BUILD_FLAGS[@]}" --build-arg "PYTHON_VERSION=$PYTHON_BASE_TAG" \
+    --target testing -t "$project-api-test-service" - <"$context_tar" >/dev/null || return 1
+  docker build -q "${DOCKER_BUILD_FLAGS[@]}" --build-arg "PYTHON_VERSION=$PYTHON_BASE_TAG" \
+    -t "$project-test-runner" api_tests >/dev/null || return 1
+  rm -f "$context_tar"
+  COMPOSE_PROJECT_NAME=$project without_dev_env sh run_api_tests.sh
+}
+
+frontend() {
+  (
+    cd mathesar_ui || exit 1
+    npm run check-format && npm run lint && npm run typecheck && npx vitest run
+  )
+}
+
+e2e_lint() {
+  (
+    cd e2e || exit 1
+    [ -d node_modules ] || npm ci --no-audit || exit 1
+    npm run check-format && npm run lint && npm run typecheck
+  )
+}
+
+# Playwright tests over the browser against the production stack, on a fresh instance.
+e2e() {
+  if ! docker_is_available; then
+    log "Docker is not available, cannot run e2e. CI runs them."
+    return "$SKIPPED"
+  fi
+  local status
+  .agents/bin/e2e down >/dev/null 2>&1
+  .agents/bin/e2e up || return 1
+  .agents/bin/e2e run "$@"
+  status=$?
+  .agents/bin/e2e down >/dev/null 2>&1
+  return "$status"
+}
+
+docs() {
+  local python=docs/.venv/bin/python
+  if [ ! -x "$python" ]; then
+    if command -v uv >/dev/null; then uv venv -q docs/.venv; else python3 -m venv docs/.venv; fi
+  fi
+  if command -v uv >/dev/null; then
+    uv pip install -q --python "$python" -r docs/requirements.txt || return 1
+  else
+    "$python" -m pip install -q -r docs/requirements.txt || return 1
+  fi
+  mkdir -p "$RUN_DIR"
+  (cd docs && .venv/bin/mkdocs build --strict -d "$RUN_DIR/docs-site")
+}
+
+agents_docs() {
+  .agents/bin/check-docs
+}
+
+git_suite() {
+  .agents/bin/check-git --base "$BASE_REF"
+}
+
+if [ ${#suites[@]} -eq 0 ]; then
+  # Without the base there is no diff to pick suites from, and the run would pass with nothing checked.
+  case "$BASE_REF" in
+    origin/*) fetch_hint="git fetch origin ${BASE_REF#origin/}:refs/remotes/$BASE_REF" ;;
+    *) fetch_hint="from the remote it lives on" ;;
+  esac
+  git merge-base HEAD "$BASE_REF" >/dev/null 2>&1 \
+    || die "cannot compare with $BASE_REF. Fetch it ($fetch_hint; in a shallow clone add --unshallow), or set MATHESAR_BASE_REF, or name a suite."
+  mapfile -t suites < <(suites_for_changed_files)
+  if [ ${#suites[@]} -eq 0 ]; then
+    log "No changed files map to a suite. Name one, or use: .agents/bin/check all"
+    exit 0
+  fi
+fi
+if [ ${#extra_args[@]} -gt 0 ] && [ ${#suites[@]} -ne 1 ]; then
+  die "extra args after -- need exactly one suite"
+fi
+
+passed=()
+skipped=()
+failed=()
+for suite in "${suites[@]}"; do
+  case "$suite" in
+    python-lint|python-tests|sql-tests|sql-registry|api-tests|frontend|e2e-lint|e2e|docs|agents-docs|git) ;;
+    *) die "unknown suite: $suite" ;;
+  esac
+  log "Running $suite"
+  suite_function="${suite//-/_}"
+  if [ "$suite" = git ]; then suite_function=git_suite; fi
+  "$suite_function" "${extra_args[@]}"
+  case $? in
+    0) passed+=("$suite") ;;
+    "$SKIPPED") skipped+=("$suite") ;;
+    *) failed+=("$suite") ;;
+  esac
+done
+
+if [ ${#skipped[@]} -gt 0 ]; then log "Skipped: ${skipped[*]}"; fi
+if [ ${#failed[@]} -gt 0 ]; then
+  die "failed: ${failed[*]}"
+fi
+log "Passed: ${passed[*]}"

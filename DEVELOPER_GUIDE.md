@@ -55,7 +55,7 @@ For more example datasets, see the [mathesar-data-playground](https://github.com
 
 ## API
 
-See our [API guide](./mathesar/api/README.md) for more information on API usage and development.
+See our [API documentation](https://docs.mathesar.org/latest/api/) for more information on API usage and development.
 
 ## Back end development
 
@@ -96,6 +96,17 @@ We use [pytest](https://docs.pytest.org) for our backend tests.
 
 - All the front end code is in the `mathesar_ui` directory.
 - If you are modifying front end code, read more the [Front end development](./mathesar_ui/README.md) guide.
+
+## End-to-end tests
+
+The tests in the `e2e` directory drive Mathesar in a browser with [Playwright](https://playwright.dev/). They run against the production Docker Compose setup, built from your working tree:
+
+```
+docker compose -f docker-compose.yml -f e2e/docker-compose.yml run --rm --build e2e
+docker compose -f docker-compose.yml -f e2e/docker-compose.yml down --volumes
+```
+
+Read the [End-to-end tests](./e2e/README.md) guide before you change what the UI does.
 
 ## Full-stack linting
 

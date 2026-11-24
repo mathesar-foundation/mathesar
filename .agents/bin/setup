@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# Install Mathesar from source for development, without Docker. Safe to re-run.
+#
+# Usage: .agents/bin/setup [--sql-tests]
+#   --sql-tests  Also install pgTAP and pg_prove (needed by `.agents/bin/check sql-tests`).
+#
+# Needs: Python 3.10 to 3.14, Node.js 18+, npm, and either a reachable
+# PostgreSQL 14+ server or apt-get to install one. See
+# .agents/docs/01-setup/install-sandbox.md.
+set -euo pipefail
+
+# shellcheck source=.agents/bin/_common
+source "$(dirname "${BASH_SOURCE[0]}")/_common"
+load_dev_env
+
+INSTALL_SQL_TEST_TOOLS=false
+for arg in "$@"; do
+  case "$arg" in
+    --sql-tests) INSTALL_SQL_TEST_TOOLS=true ;;
+    -h|--help) sed -n '2,9p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) die "unknown option: $arg" ;;
+  esac
+done
+
+apt_install() {
+  command -v apt-get >/dev/null || die "apt-get not found. Install manually: $*"
+  as_root apt-get update -qq
+  as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "$@"
+}
+
+require_commands() {
+  for cmd in python3 node npm curl; do
+    command -v "$cmd" >/dev/null || die "$cmd is required but not installed"
+  done
+  python3 -c 'import sys; sys.exit(0 if (3, 10) <= sys.version_info[:2] <= (3, 14) else 1)' \
+    || die "Python 3.10 to 3.14 is required, found $(python3 --version)"
+}
+
+ensure_postgres_installed() {
+  command -v psql >/dev/null && command -v pg_isready >/dev/null && return
+  log "Installing PostgreSQL"
+  apt_install postgresql postgresql-contrib
+}
+
+ensure_role_and_database() {
+  if ! can_log_in_to postgres; then
+    log "Creating PostgreSQL superuser role '$POSTGRES_USER'"
+    psql_as_postgres_os_user <<SQL
+\set role '$POSTGRES_USER'
+\set password '$POSTGRES_PASSWORD'
+SELECT format('CREATE ROLE %I', :'role')
+  WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'role') \gexec
+ALTER ROLE :"role" WITH LOGIN SUPERUSER PASSWORD :'password';
+SQL
+  fi
+  if ! can_log_in_to "$POSTGRES_DB"; then
+    log "Creating database '$POSTGRES_DB'"
+    PGPASSWORD="$POSTGRES_PASSWORD" createdb -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" \
+      -U "$POSTGRES_USER" "$POSTGRES_DB"
+  fi
+}
+
+# vulture is not in requirements-dev.txt. CI installs it unpinned for its unused code check.
+install_python_dependencies() {
+  log "Installing Python dependencies into .venv"
+  if command -v uv >/dev/null; then
+    [ -x .venv/bin/python ] || uv venv -q .venv
+    uv pip install -q --python .venv/bin/python -r requirements-dev.txt vulture
+  else
+    [ -x .venv/bin/python ] || python3 -m venv .venv
+    .venv/bin/python -m pip install -q -r requirements-dev.txt vulture
+  fi
+}
+
+install_node_dependencies() {
+  local installed_lock=mathesar_ui/node_modules/.package-lock.json
+  if [ -f "$installed_lock" ] && [ ! mathesar_ui/package-lock.json -nt "$installed_lock" ]; then
+    return
+  fi
+  log "Installing front end dependencies"
+  (cd mathesar_ui && npm ci --no-audit --no-fund)
+}
+
+migrate_internal_database() {
+  log "Running Django migrations"
+  .venv/bin/python -m mathesar.install
+}
+
+create_admin_user() {
+  local output
+  if output=$(.venv/bin/python manage.py createsuperuser --no-input \
+      --username admin --email admin@example.com 2>&1); then
+    log "Created Mathesar user 'admin' (password: $DJANGO_SUPERUSER_PASSWORD)"
+  elif [[ "$output" != *"already taken"* ]]; then
+    die "could not create the admin user: $output"
+  fi
+}
+
+install_sql_test_tools() {
+  command -v pg_prove >/dev/null && return
+  local server_major
+  server_major=$(PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" \
+    -U "$POSTGRES_USER" -d postgres -Atc 'show server_version' | cut -d. -f1)
+  log "Installing pgTAP for PostgreSQL $server_major"
+  apt_install "postgresql-$server_major-pgtap" libtap-parser-sourcehandler-pgtap-perl
+}
+
+require_commands
+ensure_postgres_installed
+ensure_postgres_running
+ensure_role_and_database
+install_python_dependencies
+install_node_dependencies
+migrate_internal_database
+create_admin_user
+if [ "$INSTALL_SQL_TEST_TOOLS" = true ]; then install_sql_test_tools; fi
+
+log "Done. Start the app with: .agents/bin/start"

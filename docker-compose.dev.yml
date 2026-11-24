@@ -9,15 +9,15 @@ services:
       context: .
       dockerfile: Dockerfile.devdb
       args:
-        PG_VERSION: ${PG_VERSION-17}
+        PG_VERSION: ${PG_VERSION:-17}
     environment:
-      - PG_VERSION=${PG_VERSION-17}
+      - PG_VERSION=${PG_VERSION:-17}
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
       - PGDATA=/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB:-mathesar_django} -U $${POSTGRES_USER:-mathesar}"]
       interval: 5s
       timeout: 1s
       retries: 30
@@ -57,35 +57,35 @@ services:
       target: development
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.14-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.14-bookworm}
     environment:
-      - MODE=${MODE-DEVELOPMENT}
+      - MODE=${MODE:-DEVELOPMENT}
       - SKIP_STATIC_COLLECTION=true
-      - DEBUG=${DEBUG-True}
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
-      - SECRET_KEY=${SECRET_KEY-}
-      - SSO_CONFIG_DICT=${SSO_CONFIG_DICT-{}}
-      - REQUIRE_SSO_LOGIN=${REQUIRE_SSO_LOGIN-false}
-      - MATHESAR_DJANGO_ADMIN_ENABLED=${MATHESAR_DJANGO_ADMIN_ENABLED-false}
-      - FILE_STORAGE_DICT=${FILE_STORAGE_DICT-{}}
-      - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
-      - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
-      - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
-      - MATHESAR_TERMS_OF_SERVICE_URL=${MATHESAR_TERMS_OF_SERVICE_URL-}
-      - MATHESAR_PRIVACY_POLICY_URL=${MATHESAR_PRIVACY_POLICY_URL-}
-      - MATHESAR_LANDING_PAGE_URL=${MATHESAR_LANDING_PAGE_URL-}
-      - MATHESAR_INSTANCE_NAME=${MATHESAR_INSTANCE_NAME-Mathesar}
-      - MATHESAR_AUTH_LOGO_URL=${MATHESAR_AUTH_LOGO_URL-}
-      - MATHESAR_LOGIN_PAGE_TEXT_DICT=${MATHESAR_LOGIN_PAGE_TEXT_DICT-{}}
-      - MATHESAR_LOGIN_PAGE_BACKGROUND=${MATHESAR_LOGIN_PAGE_BACKGROUND-}
+      - DEBUG=${DEBUG:-True}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-config.settings.development}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - SECRET_KEY=${SECRET_KEY:-}
+      - SSO_CONFIG_DICT=${SSO_CONFIG_DICT:-{}}
+      - REQUIRE_SSO_LOGIN=${REQUIRE_SSO_LOGIN:-false}
+      - MATHESAR_DJANGO_ADMIN_ENABLED=${MATHESAR_DJANGO_ADMIN_ENABLED:-false}
+      - FILE_STORAGE_DICT=${FILE_STORAGE_DICT:-{}}
+      - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL:-https://example.com/collector}
+      - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL:-https://example.com/hello}
+      - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL:-https://example.com/feedback}
+      - MATHESAR_TERMS_OF_SERVICE_URL=${MATHESAR_TERMS_OF_SERVICE_URL:-}
+      - MATHESAR_PRIVACY_POLICY_URL=${MATHESAR_PRIVACY_POLICY_URL:-}
+      - MATHESAR_LANDING_PAGE_URL=${MATHESAR_LANDING_PAGE_URL:-}
+      - MATHESAR_INSTANCE_NAME=${MATHESAR_INSTANCE_NAME:-Mathesar}
+      - MATHESAR_AUTH_LOGO_URL=${MATHESAR_AUTH_LOGO_URL:-}
+      - MATHESAR_LOGIN_PAGE_TEXT_DICT=${MATHESAR_LOGIN_PAGE_TEXT_DICT:-{}}
+      - MATHESAR_LOGIN_PAGE_BACKGROUND=${MATHESAR_LOGIN_PAGE_BACKGROUND:-}
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
+      - POSTGRES_HOST=${POSTGRES_HOST:-mathesar_dev_db} # replace mathesar_dev_db with /var/dev_postgres_socket for connecting to mathesar_dev_db via unix socket instead
       - POSTGRES_PORT=5432
-      - PER_USER_DATABASES_ENABLED=${PER_USER_DATABASES_ENABLED-}
+      - PER_USER_DATABASES_ENABLED=${PER_USER_DATABASES_ENABLED:-}
     volumes:
       - .:/code/
       - dev_postgres_socket:/var/dev_postgres_socket
@@ -106,15 +106,15 @@ services:
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
-      - POSTGRES_HOST=${POSTGRES_HOST-mathesar_dev_db}
+      - POSTGRES_HOST=${POSTGRES_HOST:-mathesar_dev_db}
       - POSTGRES_PORT=5432
     pull_policy: never
     build:
       context: .
-      target: ${TARGET-testing}
+      target: ${TARGET:-testing}
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.14-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.14-bookworm}
     volumes:
       - dev_postgres_socket:/var/dev_postgres_socket
     depends_on:

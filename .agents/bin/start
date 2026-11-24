@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Start the Vite and Django dev servers in the background. Safe to re-run.
+#
+# Usage: .agents/bin/start
+# Logs and PID files go to $MATHESAR_RUN_DIR (default: /tmp/mathesar-dev).
+# Stop with .agents/bin/stop.
+set -euo pipefail
+
+# shellcheck source=.agents/bin/_common
+source "$(dirname "${BASH_SOURCE[0]}")/_common"
+load_dev_env
+
+[ -x .venv/bin/python ] || die "No .venv found. Run .agents/bin/setup first."
+[ -d mathesar_ui/node_modules ] || die "No node_modules found. Run .agents/bin/setup first."
+mkdir -p "$RUN_DIR"
+
+is_running() {
+  local pid_file="$RUN_DIR/$1.pid"
+  [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null
+}
+
+# Each server gets its own process group so .agents/bin/stop can end its children too.
+start_in_background() {
+  local name=$1
+  shift
+  if is_running "$name"; then
+    log "$name is already running (pid $(cat "$RUN_DIR/$name.pid"))"
+    return
+  fi
+  if command -v setsid >/dev/null; then
+    setsid nohup "$@" >"$RUN_DIR/$name.log" 2>&1 &
+  else
+    nohup "$@" >"$RUN_DIR/$name.log" 2>&1 &
+  fi
+  echo $! >"$RUN_DIR/$name.pid"
+}
+
+wait_until_responding() {
+  local name=$1 url=$2
+  for _ in $(seq 1 60); do
+    curl -fsS -o /dev/null "$url" 2>/dev/null && return
+    is_running "$name" || break
+    sleep 1
+  done
+  tail -n 30 "$RUN_DIR/$name.log" >&2
+  die "$name did not start. Full log: $RUN_DIR/$name.log"
+}
+
+ensure_postgres_running
+
+# vite.config.js fixes the port at 3000. Django reads MATHESAR_CLIENT_DEV_PORT, so pass the same one.
+export MATHESAR_CLIENT_DEV_PORT="$VITE_PORT"
+start_in_background vite bash -c "cd mathesar_ui && exec node_modules/.bin/vite --port $VITE_PORT --strictPort"
+start_in_background django .venv/bin/python manage.py runserver "0.0.0.0:$DJANGO_PORT"
+
+wait_until_responding vite "http://localhost:$VITE_PORT/static/@vite/client"
+wait_until_responding django "http://localhost:$DJANGO_PORT/healthz/ready/"
+
+log "Mathesar is running at http://localhost:$DJANGO_PORT (user: admin, password: $DJANGO_SUPERUSER_PASSWORD)"
+log "Logs: $RUN_DIR/django.log and $RUN_DIR/vite.log"

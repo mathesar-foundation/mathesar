@@ -1,0 +1,24 @@
+# Paths that cannot affect the Docker images, the package or the install
+# script. When a pull request changes only these paths, CI skips the build,
+# package and install jobs. The merge queue always runs them.
+#
+# One entry per line. An entry ending in "/" matches everything under that
+# folder. Any other entry matches that one file exactly. There are no
+# wildcards or file type patterns: a new file is built unless it is listed
+# here.
+#
+# CI fails if an entry overlaps a path that build-scripts/package/package.py
+# packages or that a Dockerfile copies, or if a listed folder contains a
+# folder named "locale", which compilemessages would compile.
+
+docs/
+e2e/
+.agents/
+.github/ISSUE_TEMPLATE/
+.github/PULL_REQUEST_TEMPLATE/
+AGENTS.md
+CLAUDE.md
+CONTRIBUTING.md
+DEVELOPER_GUIDE.md
+SECURITY.md
+TROUBLESHOOTING.md
